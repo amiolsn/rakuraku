@@ -9,9 +9,15 @@ unset($_SESSION['user']);
     $pdo=new PDO('mysql:host=localhost;dbname=attendance_db;charset=utf8', 'staff', 'password');
 
     $sql=$pdo->prepare('
-     SELECT users.*, usertype.usertype_name 
-     FROM users JOIN usertype 
+     SELECT 
+        users.*, 
+        usertype.usertype_name, 
+        department.department_id
+     FROM users 
+     JOIN usertype 
         ON users.usertype_id = usertype.usertype_id
+     JOIN department
+        ON users.user_id = department.user_id
      WHERE users.login_id = ? AND users.password = ?
      ');
 
@@ -28,7 +34,8 @@ unset($_SESSION['user']);
             'user_id' => $row['user_id'],
             'usertype_id' => $row['usertype_id'],
             'usertype_name' => $row['usertype_name'],
-            'login_id' => $row['login_id']
+            'login_id' => $row['login_id'],
+            'department_id' => $row['department_id']
     ];
 
     if ($row['usertype_id'] == 1) {

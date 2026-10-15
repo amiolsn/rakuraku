@@ -1,6 +1,7 @@
 <?php
 // データベース接続
 require_once 'db.php';
+require_once 'auth.php';
 
 // 対象日付の決定
 // URLから日付を取り出し、日付の形式が正しいかチェック
@@ -17,8 +18,10 @@ $week_days = ['日', '月', '火', '水', '木', '金', '土'];
 $target_w = $week_days[date('w', strtotime($target_date))];
 
 try {
-    // 生徒一覧の取得（学科名も結合して取得)
-    $stmtStudents = $pdo->query("
+    $departmentId = $_SESSION['user']['department_id'];
+
+    // 生徒一覧の取得（学科名も結合して取得）
+    $stmtStudents = $pdo->prepare("
         SELECT
             s.student_id,
             s.student_name,
@@ -26,26 +29,41 @@ try {
             s.student_group,
             d.department_name
         FROM students s
-        JOIN department d ON s.department_id = d.department_id
+        JOIN department d
+            ON s.department_id = d.department_id
         WHERE s.status = 1
+        AND d.department_id = ?
         ORDER BY s.student_id ASC
     ");
+
+    $stmtStudents->execute([$departmentId]);
+
     $students = $stmtStudents->fetchAll();
 
     // 科目一覧の取得
-    $stmtSubjects = $pdo->query("
+    $stmtSubjects = $pdo->prepare("
         SELECT subject_id, subject_name
-        FROM subjects
+        FROM subjects s
+        JOIN department d ON s.department_id = d.department_id
+        WHERE d.department_id = ?
         ORDER BY subject_id ASC
     ");
+
+    $stmtSubjects->execute([$departmentId]);
+
     $subjects = $stmtSubjects->fetchAll();
 
     // 教員一覧の取得
-    $stmtTeachers = $pdo->query("
+    $stmtTeachers = $pdo->prepare("
         SELECT teacher_id, teacher_name
-        FROM teachers
+        FROM teachers t
+        JOIN department d ON t.department_id = d.department_id
+        WHERE d.department_id = ?
         ORDER BY teacher_id ASC
     ");
+    
+    $stmtTeachers->execute([$departmentId]);
+
     $teachers = $stmtTeachers->fetchAll();
 
     // その日の出欠データDBから探す
@@ -117,6 +135,7 @@ $max_period = 7;
                     <div class="logo-text-subtitle">Smart Attendance System</div>
                  </div>
             </div>
+            <a href="login-input.php">ログイン</a>
         </header>
 
         <!-- 日付選択コントローラー -->
