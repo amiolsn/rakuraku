@@ -182,6 +182,10 @@ $max_period = 7;
                                     </option>
                                 <?php endforeach; ?>
                               </select>
+
+                            <!-- 時限ごとの一括出席ボタン -->
+                            <button type="button" class="btn-all-present" onclick="setAllPresent(<?= $p ?>)">全員出席</button>
+
                         </th>
                     <?php endfor ?>
                 </tr>
@@ -233,6 +237,7 @@ $max_period = 7;
 
         <!-- PHPデータをJavaScriptで使えるように定義 -->
         <script>
+            const targetDate = <?= json_encode($target_date) ?>;
             const students = <?= json_encode($students) ?>;
             const max_period = <?= $max_period ?>;
         </script>

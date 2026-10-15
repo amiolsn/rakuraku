@@ -102,7 +102,7 @@ function submitAttendance() {
 
   alert(
     `【保存準備OK】\n` +
-      `・対象日時: ${targetDate}` +
+      `・対象日時: ${targetDate}\n` +
       `・対象時限: ${Array.from(affectedPeriods).join(", ")} 限\n` +
       `・更新件数: ${sendData.length} 件\n\n` +
       `変更したデータのみを抽出しました。`,
@@ -126,4 +126,21 @@ function changeDate(newDate) {
     // 選ばれた日付のURLへジャンプする
     location.href = `input.php?date=${newDate}`;
   }
+}
+
+// 対象時限の生徒全員を出席(1)にする
+function setAllPresent(period) {
+  students.forEach(st => {
+    const studentId = st.student_id;
+    const key = `${studentId}_${period}`;
+
+    // マス目の「出(value=1)」のラジオボタンを探す
+    const presentRadio = document.querySelector(
+      `input[name="att_${key}"][value="1"]`
+    );
+    if (presentRadio) {
+      presentRadio.checked = true; // チェックを入れる
+      markAsChanged(studentId, period); // 変更検知して色を変化させる
+    }
+  });
 }
