@@ -1,0 +1,68 @@
+/*  初期化用CSS  */
+/*  ※任意のリセットCSSをお使いください  */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+li {
+  list-style: none;
+}
+/* ------------------------------------------- */
+
+#tab-h {
+    /* タブの上下左右に余白を設けるためだけのCSS */
+    margin: 1em;
+}
+
+#tab-h .tab-contena{
+    width: 100%;
+    height: auto;
+    display: flex;
+    column-gap: 0.5em; /* タブの隙間 */
+    justify-content: space-around;
+    border-bottom: solid 2px #656766;
+}
+
+#tab-h .tab-elem {
+    width: 100%; 
+    padding: 7px 0 7px 0;
+    text-align: center;
+    border-top: solid 2px #656766;
+    border-right: solid 2px #656766;
+    border-left: solid 2px #656766;
+    color: #ffffff;
+    border-radius: 10px 10px 0 0;
+    background-color: #656766;
+}
+
+#tab-h .tab-elem:hover {
+  cursor: pointer;
+}
+
+/* 表示中のタブのCSS */
+#tab-h .tab-elem.active {
+    color: #656766;
+    background-color: #ffffff;
+    position: relative;
+}
+
+#tab-h .tab-elem.active::after {
+    content: "";
+    display: inline-block;
+    width: 100%;
+    height: 0.1em;
+    background-color: #fff;
+    position: absolute;
+    right: 0;
+    bottom: -0.1em; /* 疑似要素の高さ（height）分だけ下に下げる */
+}
+
+#tab-h .tabbody-elem {
+    margin: 0 auto 0 auto;
+    padding: 3.75% 1% 3.75% 1%;
+    width: auto;
+    border: solid 2px #656766;
+    border-top: none;
+    background-color: #FFFFFF;
+}
