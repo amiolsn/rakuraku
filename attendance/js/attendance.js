@@ -86,33 +86,30 @@ function submitAttendance() {
 
   // 未入力が一件でもあれば保存を中断して警告
   if (missingList.length > 0) {
-    // 警告メッセージ作成（先頭3名程度を表示）
-    let alertMsg = `【入力漏れ警告】\n入力中の時限に未入力の生徒が ${missingList.length}件あります。\n赤枠のマス目を入力してください。\n\n【未入力例】\n`;
-    missingList.slice(0, 5).forEach((m) => {
-      alertMsg += `.${m.period}限: ${m.studentName}\n`;
-    });
-    if (missingList.length > 5) {
-      alertMsg += `...　他　${missingList.length - 5} 件\n`;
-    }
-
-    alert(alertMsg);
+    // 警告メッセージ作成
+    alert(
+      `【入力漏れ警告】\n入力中の時限に未入力の生徒が ${missingList.length}件あります。\n赤枠のマス目を入力してください。`,
+    );
     return; // 保存処理はストップ
   }
 
   // 送信するデータ（変更分のみ）を配列にまとめる
   const sendData = Array.from(changedItems.values());
 
-  console.log("今回保存対象の時限設定:", periodSetting);
-  console.log("今回保存するレコード（差分のみ）:", sendData);
+  console.log("対象日時:", targetDate);
+  console.log("時限設定:", periodSetting);
+  console.log("送信データ:", sendData);
 
   alert(
     `【保存準備OK】\n` +
+      `・対象日時: ${targetDate}` +
       `・対象時限: ${Array.from(affectedPeriods).join(", ")} 限\n` +
       `・更新件数: ${sendData.length} 件\n\n` +
-      `未入力者なし、変更されたデータのみを抽出しました。`,
+      `変更したデータのみを抽出しました。`,
   );
 }
 
+// 日付切り替え関数
 function changeDate(newDate) {
   if (newDate) {
     // 未保存のマス目があれば確認を出す
