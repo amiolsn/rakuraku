@@ -130,6 +130,26 @@ th {
   box-shadow: 0 0 0 2px rgba(247, 202, 208, 0.5);
 }
 
+/* 時限ヘッダー内の一括出席ボタン */
+.btn-all-present {
+  margin-top: 6px;
+  width: 100%;
+  padding: 3px 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-primary, #343a40);
+  background-color: var(--color-bg-card, #ffffff);
+  border: 1px dashed var(--color-accent-text, #d88a99); /* ピンクの点線枠 */
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-all-present:hover {
+  background-color: var(--color-bg-changed, #fdedf0);
+  border-style: solid;
+}
+
 /* --- ラジオボタン群 --- */
 .radio-group {
   display: inline-flex;
