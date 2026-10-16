@@ -302,3 +302,39 @@ th {
   border-radius: 12px;
   font-weight: bold;
 }
+
+
+/* 日付・学年・班のコントローラー*/
+.filter-controller {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+/* 日付コントローラーの下余白をなくす */
+.filter-controller .date-controller {
+  margin-bottom: 0;
+}
+
+/* 学年・班のプルダウンを横並びにする */
+.filter-controller .period-header.select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  background-color: transparent;
+}
+
+/* プルダウンの幅を調整 */
+.filter-controller .period-header.select select {
+  width: auto;
+  min-width: 110px;
+  margin-top: 0;
+  margin-left: 10px;
+  padding: 6px 8px;
+  font-size: 0.85rem;
+}

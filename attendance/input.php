@@ -20,8 +20,22 @@ $target_w = $week_days[date('w', strtotime($target_date))];
 try {
     $departmentId = $_SESSION['user']['department_id'];
 
+    // 班一覧の取得（重複なし）
+    $stmtGroups = $pdo->prepare("
+        SELECT DISTINCT student_group
+        FROM students
+        WHERE department_id = ?
+        AND status = 1
+        AND student_group IS NOT NULL
+        AND student_group <> ''
+        ORDER BY student_group ASC
+    ");
+
+    $stmtGroups->execute([$departmentId]);
+    $groups = $stmtGroups->fetchAll();
+
     // 生徒一覧の取得（学科名も結合して取得）
-    $stmtStudents = $pdo->prepare("
+    $sql = "
         SELECT
             s.student_id,
             s.student_name,
@@ -33,12 +47,29 @@ try {
             ON s.department_id = d.department_id
         WHERE s.status = 1
         AND d.department_id = ?
-        ORDER BY s.student_id ASC
-    ");
+    ";
 
-    $stmtStudents->execute([$departmentId]);
+    $params = [$departmentId];
 
-    $students = $stmtStudents->fetchAll();
+    // 学年が選択されている場合だけ条件を追加
+    if (isset($_GET['grade']) && $_GET['grade'] !== '') {
+        $sql .= " AND grade = ?";
+        $params[] = (int)$_GET['grade'];
+    }
+
+    // 班が選択されている場合だけ条件を追加
+    if (isset($_GET['student_group']) && $_GET['student_group'] !== '') {
+        $sql .= " AND s.student_group = ?";
+        $params[] = $_GET['student_group'];
+    }
+
+    $sql .= " ORDER BY s.student_id ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    $students = $stmt->fetchAll();
+
 
     // 科目一覧の取得
     $stmtSubjects = $pdo->prepare("
@@ -65,6 +96,20 @@ try {
     $stmtTeachers->execute([$departmentId]);
 
     $teachers = $stmtTeachers->fetchAll();
+
+    // 修業年限の取得
+    $stmtRequirement = $pdo->prepare("
+        SELECT MAX(grade) AS term
+        FROM course_requirements
+        WHERE department_id = ?
+    ");
+
+    $stmtRequirement->execute([$departmentId]);
+
+    $requirement = $stmtRequirement->fetch();
+
+
+    $years = (int)($requirement['term'] ?? 0);
 
     // その日の出欠データDBから探す
     $stmtAttendance = $pdo->prepare("
@@ -111,54 +156,65 @@ $max_period = 7;
     </head>
 
     <body>
-        <!-- アプリヘッダー＆ロゴマーク -->
-         <header class="app-header">
-            <div class="logo-wrapper">
-                <!-- SVGロゴ：チャコールグレーのバインダー + 淡いピンクのチェックマーク -->
-                <svg width="44" height="44" viewBox="0 0 48 48" fill="none" xmls="http://www.w3.org/2000/svg">
-                    <!-- バインダークリップ -->
-                    <rect x="18" y="4" width="12" height="6" rx="2" fill="#343a40"/>
-                    <!-- バインダー本体（チャコールグレー） -->
-                    <rect x="8" y="8" width="32" height="36" rx="5" fill="#343a40"/>
-                    <!-- 中の用紙（白） -->
-                    <rect x="12" y="14" width="24" height="26" rx="2" fill="#ffffff"/>
-                    <!-- ノートの罫線 -->
-                    <line x1="16" y1="20" x2="24" y2="20" stroke="#dee2e6" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="16" y1="26" x2="28" y2="26" stroke="#dee2e6" stroke-width="2" stroke-linecap="round"/>
-                    <!-- スムースチェックマーク（淡いピンク #F7CAD0、バインダーから心地よく飛び出す躍動感） -->
-                    <path d="M16 29L24 37L41 15" stroke="#F7CAD0" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-
-                <!-- ロゴタイプ -->
-                 <div>
-                    <div class="logo-text-title"><span>らくらく</span>出席簿</div>
-                    <div class="logo-text-subtitle">Smart Attendance System</div>
-                 </div>
-            </div>
-            <a href="login-input.php">ログイン</a>
-        </header>
-
-        <!-- 日付選択コントローラー -->
-        <div class="date-controller">
-            <span class="data-display-label">対象日</span>
-            <div class="date-picker-box" onclick="document.getElementById('targetDateInput').showPicker()">
-                <span class="date-text"><?= date('Y/m/d', strtotime($target_date)) ?> (<?= $target_w ?>)</span>
+        <!-- ヘッダー -->
+        <?php require_once 'header-top.php'; ?>
+            <!-- 仮ナビゲーション -->
+            <nav><a href="#">欠席登録・届け出管理</a></nav>
+            <nav><a href="#">集計</a></nav>
+            <nav><a href="manage.php">登録情報編集</a></nav>
             
-                <!-- カレンダーSVGアイコン -->
-                <svg class="calendar-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>
+            <a href="login-input.php">ログイン</a>
+        <?php require_once 'header-bottom.php'; ?>
 
-                <!-- 日付入力欄/非表示 -->
-                <input type="date" id="targetDateInput" class="hidden-date-input" value="<?= htmlspecialchars($target_date) ?>" onchange="changeDate(this.value)">
+
+        <div class="filter-controller">
+            <!-- 日付選択コントローラー -->
+            <div class="date-controller">
+                <span class="data-display-label">対象日</span>
+                <div class="date-picker-box" onclick="document.getElementById('targetDateInput').showPicker()">
+                    <span class="date-text"><?= date('Y/m/d', strtotime($target_date)) ?> (<?= $target_w ?>)</span>
+                
+                    <!-- カレンダーSVGアイコン -->
+                    <svg class="calendar-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                    </svg>
+
+                    <!-- 日付入力欄/非表示 -->
+                    <input type="date" id="targetDateInput" class="hidden-date-input" value="<?= htmlspecialchars($target_date) ?>" onchange="changeDate(this.value)">
+                </div>
+
+                <?php if($is_today): ?>
+                    <span class="today-badge">本日</span>
+                <?php endif; ?>
             </div>
 
-            <?php if($is_today): ?>
-                <span class="today-badge">本日</span>
-            <?php endif; ?>
+            <!-- 学年選択プルダウン -->
+            <form action="" method="GET" class="period-header select">
+            <select id="grade" name="grade" onchange="this.form.submit()">
+                    <option value="">- 学年選択 -</option>
+                    <?php for ($i = 1; $i <= $years; $i++): ?>
+                    <option value="<?= $i ?>"
+                        <?= (isset($_GET['grade']) && $_GET['grade'] == $i) ? 'selected' : '' ?>>
+                        <?= $i ?>年生
+                    </option>
+                    <?php endfor; ?>
+
+                </select>
+
+            <select id="student_group" name="student_group" onchange="this.form.submit()">
+                    <option value="">- 班選択 -</option>
+                    <?php foreach ($groups as $group): ?>
+                <option value="<?= htmlspecialchars($group['student_group'], ENT_QUOTES, 'UTF-8') ?>"
+                    <?= (isset($_GET['student_group']) && $_GET['student_group'] === $group['student_group']) ? 'selected' : '' ?>>
+                    <?= htmlspecialchars($group['student_group'], ENT_QUOTES, 'UTF-8') ?>班
+                </option>
+                    <?php endforeach; ?>
+
+                </select>
+            </form>
         </div>
 
          <p class="header-lead">入力または変更を行った時限の出欠のみが、右下の「確定して保存」で送信されます。</p>
