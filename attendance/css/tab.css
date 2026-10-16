@@ -66,3 +66,90 @@ li {
     border-top: none;
     background-color: #FFFFFF;
 }
+
+/* テーブルの外側 */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+}
+
+/* テーブル本体 */
+.management-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: var(--color-primary);
+    background-color: var(--colorr-bg-card);
+    font-size: 14px;
+}
+
+/* 見出し */
+.management-table th {
+    padding: 14px 12px;
+    background-color: #f1f3f5; /* チャコールグレー */
+    color: var(--color-primary);
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+}
+
+/* データ部分 */
+.management-table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--color-border);
+    text-align: center;
+    vertical-align: middle;/* 文字を縦方向の中央に配置 */
+}
+
+/* 交互の背景色 */
+.management-table tbody tr:nth-child(even) {
+    background-color: var(--color-header-bg);
+}
+
+/* マウスを乗せた行 */
+/* .management-table tbody tr:hover {
+    background-color: var(--color-bg-changed);
+} */
+
+/* 操作ボタンのセル */
+.management-table .table-actions {
+    white-space: nowrap;
+}
+
+
+/* 編集ボタン */
+.management-table .edit-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--color-accent-text);
+    border-radius: 5px;
+    background-color: #ffffff;
+    color: var(--color-accent-text);
+    cursor: pointer;
+}
+
+/* 削除ボタン */
+.management-table .delete-btn {
+    margin-left: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--color-primary);
+    border-radius: 5px;
+    background-color: var(--color-primary);
+    color: #ffffff;
+    cursor: pointer;
+}
+
+.table-actions-top {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 10px;
+    margin-right: 5px;
+}
+
+/* 新規追加ボタン */
+.add-btn {
+    padding: 6px 12px;
+    border: 1px solid var(--color-primary);
+    border-radius: 5px;
+    background-color: var(--color-primary);
+    color: #ffffff;
+    cursor: pointer;
+}
