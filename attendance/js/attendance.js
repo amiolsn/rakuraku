@@ -4,9 +4,7 @@ const changedItems = new Map();
 // ラジオボタンがクリック（変更）されたときに動く処理
 function markAsChanged(studentId, period) {
   const key = `${studentId}_${period}`;
-  const checkedRadio = document.querySelector(
-    `input[name="att_${key}"]:checked`,
-  );
+  const checkedRadio = document.querySelector(`input[name="att_${key}"]:checked`);
 
   if (checkedRadio) {
     // 変更リストに記録する
@@ -46,9 +44,7 @@ function submitAttendance() {
     const teachVal = document.getElementById(`teacher_${p}`).value;
 
     if (!subjVal || !teachVal) {
-      alert(
-        `【未選択エラー】入力があった${p}限の科目と担当教員をプルダウンから選択してください。`,
-      );
+      alert(`【未選択エラー】入力があった${p}限の科目と担当教員をプルダウンから選択してください。`);
       return;
     }
 
@@ -65,9 +61,7 @@ function submitAttendance() {
   for (const p of affectedPeriods) {
     students.forEach((st) => {
       const key = `${st.student_id}_${p}`;
-      const checkedRadio = document.querySelector(
-        `input[name="att_${key}"]:checked`,
-      );
+      const checkedRadio = document.querySelector(`input[name="att_${key}"]:checked`);
       const cell = document.getElementById(`cell_${key}`);
 
       if (!checkedRadio) {
@@ -87,26 +81,76 @@ function submitAttendance() {
   // 未入力が一件でもあれば保存を中断して警告
   if (missingList.length > 0) {
     // 警告メッセージ作成
-    alert(
-      `【入力漏れ警告】\n入力中の時限に未入力の生徒が ${missingList.length}件あります。\n赤枠のマス目を入力してください。`,
-    );
+    alert(`【入力漏れ警告】\n入力中の時限に未入力の生徒が ${missingList.length}件あります。\n赤枠のマス目を入力してください。`);
     return; // 保存処理はストップ
   }
 
-  // 送信するデータ（変更分のみ）を配列にまとめる
-  const sendData = Array.from(changedItems.values());
+  // 送信データオブジェクトの作成
+  const payload = {
+    target_date: targetDate,
+    periods: periodSetting,
+    records: Array.from(changedItems.values()),
+  };
 
-  console.log("対象日時:", targetDate);
-  console.log("時限設定:", periodSetting);
-  console.log("送信データ:", sendData);
+  // ボタンを一時的に無効化（二重送信防止）
+  const submitBtn = document.querySelector(".submit-btn");
+  submitBtn.disabled = true;
+  submitBtn.textContent = "保存中...";
 
-  alert(
-    `【保存準備OK】\n` +
-      `・対象日時: ${targetDate}\n` +
-      `・対象時限: ${Array.from(affectedPeriods).join(", ")} 限\n` +
-      `・更新件数: ${sendData.length} 件\n\n` +
-      `変更したデータのみを抽出しました。`,
-  );
+  // サーバーへの非同期POST送信
+  fetch("save_attendance.php", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload),
+  })
+    // サーバーから返答が届いた時の処理
+    .then((response) => {
+      if (!response.ok) {
+        // 通信ステータスが200番台以外(404や500)ならエラーを投げる
+        throw new Error(`HTTPエラー: ${response.status}`);
+      }
+      // 届いたJSONを解凍
+      return response.json();
+    })
+
+    // 解凍されたデータを受け取った時の処理
+    .then((data) => {
+      if (data.success) {
+        // PHP側からsuccess: trueが返ってきたら成功通知
+        alert(`【保存完了】\n${data.count}件の出欠データを正常に登録・更新しました。`);
+        // 変更マップをクリア
+        changedItems.clear();
+        // 画面を再読み込みして最新のDB状態を反映
+        location.reload();
+      } else {
+        // PHP側でエラー(バリデーション失敗など）になった場合
+        alert(`保存に失敗しました: ${data.message}`);
+      }
+    })
+
+    // どこかでエラーが発生した時の処理
+    .catch((error) => {
+      console.error("通信エラー: ", error);
+      alert("保存通信中にエラーが発生しました。コンソールログを確認してください。");
+    })
+
+    .finally(() => {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "確定して保存";
+    });
+
+  // // 送信するデータ（変更分のみ）を配列にまとめる
+  // const sendData = Array.from(changedItems.values());
+
+  // console.log("対象日時:", targetDate);
+  // console.log("時限設定:", periodSetting);
+  // console.log("送信データ:", sendData);
+
+  // alert(
+  //   `【保存準備OK】\n` + `・対象日時: ${targetDate}\n` + `・対象時限: ${Array.from(affectedPeriods).join(", ")} 限\n` + `・更新件数: ${sendData.length} 件\n\n` + `変更したデータのみを抽出しました。`,
+  // );
 }
 
 // 日付切り替え関数
@@ -114,11 +158,7 @@ function changeDate(newDate) {
   if (newDate) {
     // 未保存のマス目があれば確認を出す
     if (changedItems.size > 0) {
-      if (
-        !confirm(
-          "保存されていない変更があります。破棄して別の日付へ移動しますか？",
-        )
-      ) {
+      if (!confirm("保存されていない変更があります。破棄して別の日付へ移動しますか？")) {
         location.reload();
         return;
       }
@@ -130,14 +170,12 @@ function changeDate(newDate) {
 
 // 対象時限の生徒全員を出席(1)にする
 function setAllPresent(period) {
-  students.forEach(st => {
+  students.forEach((st) => {
     const studentId = st.student_id;
     const key = `${studentId}_${period}`;
 
     // マス目の「出(value=1)」のラジオボタンを探す
-    const presentRadio = document.querySelector(
-      `input[name="att_${key}"][value="1"]`
-    );
+    const presentRadio = document.querySelector(`input[name="att_${key}"][value="1"]`);
     if (presentRadio) {
       presentRadio.checked = true; // チェックを入れる
       markAsChanged(studentId, period); // 変更検知して色を変化させる

@@ -3,6 +3,9 @@
 require_once 'db.php';
 require_once 'auth.php';
 
+// 最大時間数（通常7限）
+$max_period = 7;
+
 // 対象日付の決定
 // URLから日付を取り出し、日付の形式が正しいかチェック
 $target_date = isset($_GET['date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['date'])
@@ -92,7 +95,7 @@ try {
         WHERE d.department_id = ?
         ORDER BY teacher_id ASC
     ");
-    
+
     $stmtTeachers->execute([$departmentId]);
 
     $teachers = $stmtTeachers->fetchAll();
@@ -117,43 +120,69 @@ try {
         FROM attendance
         WHERE attendance_date = :att_date
     ");
-    $stmtAttendance -> execute(['att_date' => $target_date]);
+    $stmtAttendance->execute(['att_date' => $target_date]);
     $saved_records = $stmtAttendance->fetchAll();
 
     // 整理用の箱を用意
     $existing_attendance = [];  // 生徒の出欠を入れる箱
-    $existing_periods = [];      // 時限の科目・教員を入れる箱
+    $period_subjects = [];      // 時限ごとの科目IDを追跡する箱
+    $period_teachers = [];      // 時限ごとの教員IDを追跡する箱
 
     // DBからとれたデータを箱に入れる
-    foreach($saved_records as $rec) {
+    foreach ($saved_records as $rec) {
         // ”学籍番号_時限”をキーにして、ステータスを記憶
-        $key = "{$rec['student_id']}_{$rec['period']}";
+        $p = $rec['period'];
+        $key = "{$rec['student_id']}_{$p}";
         $existing_attendance[$key] = $rec['attendance_status_id'];
 
-        // その時の科目と教員を記録
-        if (!isset($existing_periods[$rec['period']])) {
-            $existing_periods[$rec['period']] = [
-                'subject_id' => $rec['subject_id'],
-                'teacher_id' => $rec['teacher_id']
-            ];  
+        // 科目IDと教員IDを時限ごとに集める：連想配列のキーにして重複を削除
+        if (!empty($rec['subject_id'])) {
+            $period_subjects[$p][$rec['subject_id']] = true;
         }
+        if (!empty($rec['teacher_id'])) {
+            $period_teachers[$p][$rec['teacher_id']] = true;
+        }
+
+        // // その時の科目と教員を記録
+        // if (!isset($existing_periods[$rec['period']])) {
+        //     $existing_periods[$rec['period']] = [
+        //         'subject_id' => $rec['subject_id'],
+        //         'teacher_id' => $rec['teacher_id']
+        //     ];  
+        // }
     }
 
+    // 時限ごとに全員一致しているかを確認
+    $existing_periods = [];
+    for ($p = 1; $p <= $max_period; $p++) {
+        // 科目の判定
+        // 登録されている科目が1つだけなら採用
+        $subj_keys = isset($period_subjects[$p]) ? array_keys($period_subjects[$p]) : [];
+        $match_subj = (count($subj_keys) === 1) ? $subj_keys[0] : "";
+
+        // 教員の判定
+        $teach_keys = isset($period_teachers[$p]) ? array_keys($period_teachers[$p]) : [];
+        $match_teach = (count($teach_keys) === 1) ? $teach_keys[0] : "";
+
+        $existing_periods[$p] = [
+            'subject_id' => $match_subj,
+            'teacher_id' => $match_teach
+        ];
+    }
 } catch (PDOException $e) {
-    die('データ取得エラー: ' .htmlspecialchars($e->getMessage(), ENT_QUOTES,'UTF-8')) ;
+    die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
 }
 
-// 最大時間数（通常7限）
-$max_period = 7;
 ?>
 
 <!DOCTYPE html>
 <html lang="ja">
-    <head>
-        <meta charset="UTF-8">
-        <title>らくらく出席簿 - 出欠入力</title>
-        <link rel="stylesheet" href="css/style.css">
-    </head>
+
+<head>
+    <meta charset="UTF-8">
+    <title>らくらく出席簿 - 出欠入力</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
 
     <body>
         <!-- ヘッダー -->
@@ -168,19 +197,19 @@ $max_period = 7;
 
 
         <div class="filter-controller">
-            <!-- 日付選択コントローラー -->
-            <div class="date-controller">
-                <span class="data-display-label">対象日</span>
-                <div class="date-picker-box" onclick="document.getElementById('targetDateInput').showPicker()">
-                    <span class="date-text"><?= date('Y/m/d', strtotime($target_date)) ?> (<?= $target_w ?>)</span>
-                
-                    <!-- カレンダーSVGアイコン -->
-                    <svg class="calendar-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
+        <!-- 日付選択コントローラー -->
+        <div class="date-controller">
+            <span class="data-display-label">対象日</span>
+            <div class="date-picker-box" onclick="document.getElementById('targetDateInput').showPicker()">
+                <span class="date-text"><?= date('Y/m/d', strtotime($target_date)) ?> (<?= $target_w ?>)</span>
+    
+                <!-- カレンダーSVGアイコン -->
+                <svg class="calendar-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>
 
                     <!-- 日付入力欄/非表示 -->
                     <input type="date" id="targetDateInput" class="hidden-date-input" value="<?= htmlspecialchars($target_date) ?>" onchange="changeDate(this.value)">
@@ -217,108 +246,109 @@ $max_period = 7;
             </form>
         </div>
 
-         <p class="header-lead">入力または変更を行った時限の出欠のみが、右下の「確定して保存」で送信されます。</p>
+    <p class="header-lead">入力または変更を行った時限の出欠のみが、右下の「確定して保存」で送信されます。</p>
 
-        <!-- 出欠入力テーブル -->
-        <table>
-            <thead>
+    <!-- 出欠入力テーブル -->
+    <table>
+        <thead>
+            <tr>
+                <th>学籍番号</th>
+                <th>氏名</th>
+                <th>班</th>
+                <!-- 1～7限のヘッダーをループで生成 -->
+                <?php for ($p = 1; $p <= $max_period; $p++): ?>
+
+                    <?php
+                    // 既存の科目。教員選択があれば初期値にする
+                    $saved_subj = $existing_periods[$p]['subject_id'] ?? '';
+                    $saved_teach = $existing_periods[$p]['teacher_id'] ?? '';
+                    ?>
+
+                    <th class="period-header">
+                        <div><?= $p ?>限</div>
+
+                        <!-- 科目選択プルダウン -->
+                        <select id="subject_<?= $p ?>" name="subject_<?= $p ?>">
+                            <option value="">- 科目選択 -</option>
+                            <?php foreach ($subjects as $sb): ?>
+                                <option value="<?= $sb['subject_id'] ?>" <?= $saved_subj == $sb['subject_id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($sb['subject_name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <!-- 教員選択プルダウン -->
+                        <select id="teacher_<?= $p ?>" name="teacher_<?= $p ?>">
+                            <option value="">- 教員選択 -</option>
+                            <?php foreach ($teachers as $tc): ?>
+                                <option value="<?= $tc['teacher_id'] ?>" <?= $saved_teach == $tc['teacher_id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($tc['teacher_name']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+
+                        <!-- 時限ごとの一括出席ボタン -->
+                        <button type="button" class="btn-all-present" onclick="setAllPresent(<?= $p ?>)">全員出席</button>
+
+                    </th>
+                <?php endfor ?>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($students as $st): ?>
                 <tr>
-                    <th>学籍番号</th>
-                    <th>氏名</th>
-                    <th>班</th>
-                    <!-- 1～7限のヘッダーをループで生成 -->
+                    <td><?= htmlspecialchars($st['student_id']) ?></td>
+                    <td class="name-col"><?= htmlspecialchars($st['student_name']) ?></td>
+                    <td><?= !empty($st['student_group']) ?  htmlspecialchars($st['student_group']) : "-" ?></td>
+
+                    <!-- 生徒ごとに各時限のマス目を作成 -->
                     <?php for ($p = 1; $p <= $max_period; $p++): ?>
-                        
                         <?php
-                        // 既存の科目。教員選択があれば初期値にする
-                        $saved_subj = $existing_periods[$p]['subject_id'] ?? '';
-                        $saved_teach = $existing_periods[$p]['teacher_id'] ?? '';
+                        $key = "{$st['student_id']}_{$p}";
+                        // 既存レコードがあればそのステータス、なければnull
+                        $curr_status = $existing_attendance[$key] ?? null;
+
                         ?>
-
-                        <th class="period-header">
-                            <div><?= $p ?>限</div>
-
-                            <!-- 科目選択プルダウン -->
-                             <select id="subject_<?= $p ?>" name="subject_<?= $p ?>">
-                                <option value="">- 科目選択 -</option>
-                                <?php foreach ($subjects as $sb): ?>
-                                    <option value="<?= $sb['subject_id'] ?>">
-                                        <?= htmlspecialchars($sb['subject_name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                             </select>
-
-                             <!-- 教員選択プルダウン -->
-                              <select id="teacher_<?= $p ?>" name="teacher_<?= $p ?>">
-                                <option value="">- 教員選択 -</option>
-                                <?php foreach($teachers as $tc): ?>
-                                    <option value="<?= $tc['teacher_id'] ?>">
-                                        <?= htmlspecialchars($tc['teacher_name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                              </select>
-
-                            <!-- 時限ごとの一括出席ボタン -->
-                            <button type="button" class="btn-all-present" onclick="setAllPresent(<?= $p ?>)">全員出席</button>
-
-                        </th>
-                    <?php endfor ?>
+                        <!-- セル自体にも目印IDを付与 -->
+                        <td id="cell_<?= $key ?>">
+                            <div class="radio-group">
+                                <!-- name属性を「att_学籍番号_時限」にすることでマス目ごとに独立した1つの選択肢グループになる -->
+                                <!-- クリックされたらmarkAsChanged()を呼び出す -->
+                                <label>
+                                    <input type="radio" name="att_<?= $key ?>" value="1" <?= $curr_status == 1 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">出
+                                </label>
+                                <label>
+                                    <input type="radio" name="att_<?= $key ?>" value="2" <?= $curr_status == 2 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">欠
+                                </label>
+                                <label>
+                                    <input type="radio" name="att_<?= $key ?>" value="3" <?= $curr_status == 3 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">遅
+                                </label>
+                                <label>
+                                    <input type="radio" name="att_<?= $key ?>" value="4" <?= $curr_status == 4 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">公
+                                </label>
+                            </div>
+                        </td>
+                    <?php endfor; ?>
                 </tr>
-            </thead>
-            <tbody>
-                <?php foreach($students as $st): ?>
-                    <tr>
-                        <td><?= htmlspecialchars($st['student_id']) ?></td>
-                        <td class="name-col"><?= htmlspecialchars($st['student_name']) ?></td>
-                        <td><?= !empty($st['student_group']) ?  htmlspecialchars($st['student_group']) : "-" ?></td>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
 
-                        <!-- 生徒ごとに各時限のマス目を作成 -->
-                         <?php for ($p = 1; $p <= $max_period; $p++): ?>
-                            <?php
-                                $key = "{$st['student_id']}_{$p}" ;
-                                // 既存レコードがあればそのステータス、なければnull
-                                $curr_status = $existing_attendance[$key] ?? null;
+    <!-- 画面右下に固定配置された確定ボタン -->
+    <div class="floating-footer">
+        <button type="button" class="submit-btn" onclick="submitAttendance()">確定して保存</button>
+    </div>
 
-                            ?>
-                            <!-- セル自体にも目印IDを付与 -->
-                            <td id="cell_<?= $key ?>">
-                                <div class="radio-group">
-                                    <!-- name属性を「att_学籍番号_時限」にすることでマス目ごとに独立した1つの選択肢グループになる -->
-                                    <!-- クリックされたらmarkAsChanged()を呼び出す -->
-                                     <label>
-                                        <input type="radio" name="att_<?= $key ?>" value="1" <?= $curr_status == 1 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">出
-                                     </label>
-                                     <label>
-                                        <input type="radio" name="att_<?= $key ?>" value="2" <?= $curr_status == 2 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">欠
-                                     </label> 
-                                     <label>
-                                        <input type="radio" name="att_<?= $key ?>" value="3" <?= $curr_status == 3 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">遅
-                                     </label>
-                                     <label>
-                                        <input type="radio" name="att_<?= $key ?>" value="4" <?= $curr_status == 4 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">公
-                                     </label>
-                                </div>
-                            </td>
-                        <?php endfor; ?>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+    <!-- PHPデータをJavaScriptで使えるように定義 -->
+    <script>
+        const targetDate = <?= json_encode($target_date) ?>;
+        const students = <?= json_encode($students) ?>;
+        const max_period = <?= $max_period ?>;
+    </script>
 
-        <!-- 画面右下に固定配置された確定ボタン -->
-        <div class="floating-footer">
-            <button type="button" class="submit-btn" onclick="submitAttendance()">確定して保存</button>
-        </div>
+    <!-- 分割したJSファイルの読込 -->
+    <script src="js/attendance.js"></script>
 
-        <!-- PHPデータをJavaScriptで使えるように定義 -->
-        <script>
-            const targetDate = <?= json_encode($target_date) ?>;
-            const students = <?= json_encode($students) ?>;
-            const max_period = <?= $max_period ?>;
-        </script>
+</body>
 
-        <!-- 分割したJSファイルの読込 -->
-         <script src="js/attendance.js"></script>
-
-    </body>
 </html>
