@@ -100,6 +100,33 @@ try {
 
     $teachers = $stmtTeachers->fetchAll();
 
+    // カレンダーテーブルから対象日の情報を取得
+    $stmtCalendar = $pdo->prepare("
+        SELECT
+            calendar_date,
+            is_holiday,
+            max_period,
+            description
+        FROM school_calendar
+        WHERE calendar_date = :att_date
+    ");
+    $stmtCalendar->execute(['att_date' => $target_date]);
+    $calendar_info = $stmtCalendar->fetch();
+
+    // 休校フラグと休校理由の判定
+    $is_holiday = false;
+    $description = '';
+    if ($calendar_info && !empty($calendar_info['is_holiday'])) {
+        $is_holiday = true;
+        $description = $calendar_info['description'] ?? '休校日';
+    }
+
+    // 時限数の動的決定
+    $default_max_period = 7;
+    $max_period = (!empty($calendar_info['periods']) && $calendar_info['periods'] > 0)
+        ? (int)$calendar_info['period']
+        : $default_max_period;
+
     // 修業年限の取得
     $stmtRequirement = $pdo->prepare("
         SELECT MAX(grade) AS term
@@ -210,6 +237,10 @@ try {
             <?php if ($is_today): ?>
                 <span class="today-badge">本日</span>
             <?php endif; ?>
+
+            <?php if ($is_holiday): ?>
+                <span class="holiday-badge">休校日(<?= htmlspecialchars($description) ?>)</span>
+            <?php endif; ?>
         </div>
 
         <!-- 学年選択プルダウン -->
@@ -238,93 +269,101 @@ try {
         </form>
     </div>
 
-    <p class="header-lead">入力または変更を行った時限の出欠のみが、右下の「確定して保存」で送信されます。</p>
+    <?php if ($is_holiday): ?>
+        <div class="holiday-alert-banner">
+            本日は「<?= $description ?>」のため休校日です。出欠の新規入力。保存はできません。
+        </div>
+    <?php else: ?>
+        <p class="header-lead">入力または変更を行った時限の出欠のみが、右下の「確定して保存」で送信されます。</p>
+    <?php endif; ?>
 
     <!-- 出欠入力テーブル -->
-    <table>
-        <thead>
-            <tr>
-                <th>学籍番号</th>
-                <th>氏名</th>
-                <th>班</th>
-                <!-- 1～7限のヘッダーをループで生成 -->
-                <?php for ($p = 1; $p <= $max_period; $p++): ?>
-
-                    <?php
-                    // 既存の科目。教員選択があれば初期値にする
-                    $saved_subj = $existing_periods[$p]['subject_id'] ?? '';
-                    $saved_teach = $existing_periods[$p]['teacher_id'] ?? '';
-                    ?>
-
-                    <th class="period-header">
-                        <div><?= $p ?>限</div>
-
-                        <!-- 科目選択プルダウン -->
-                        <select id="subject_<?= $p ?>" name="subject_<?= $p ?>">
-                            <option value="">- 科目選択 -</option>
-                            <?php foreach ($subjects as $sb): ?>
-                                <option value="<?= $sb['subject_id'] ?>" <?= $saved_subj == $sb['subject_id'] ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($sb['subject_name']) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-
-                        <!-- 教員選択プルダウン -->
-                        <select id="teacher_<?= $p ?>" name="teacher_<?= $p ?>">
-                            <option value="">- 教員選択 -</option>
-                            <?php foreach ($teachers as $tc): ?>
-                                <option value="<?= $tc['teacher_id'] ?>" <?= $saved_teach == $tc['teacher_id'] ? 'selected' : '' ?>>
-                                    <?= htmlspecialchars($tc['teacher_name']) ?>
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-
-                        <!-- 時限ごとの一括出席ボタン -->
-                        <button type="button" class="btn-all-present" onclick="setAllPresent(<?= $p ?>)">全員出席</button>
-
-                    </th>
-                <?php endfor ?>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($students as $st): ?>
+    <fieldset <?= $is_holiday ? 'disabled' : '' ?> class="attendance-fieldset">
+        <table>
+            <thead>
                 <tr>
-                    <td><?= htmlspecialchars($st['student_id']) ?></td>
-                    <td class="name-col"><?= htmlspecialchars($st['student_name']) ?></td>
-                    <td><?= !empty($st['student_group']) ?  htmlspecialchars($st['student_group']) : "-" ?></td>
-
-                    <!-- 生徒ごとに各時限のマス目を作成 -->
+                    <th>学籍番号</th>
+                    <th>氏名</th>
+                    <th>班</th>
+                    <!-- 1～7限のヘッダーをループで生成 -->
                     <?php for ($p = 1; $p <= $max_period; $p++): ?>
-                        <?php
-                        $key = "{$st['student_id']}_{$p}";
-                        // 既存レコードがあればそのステータス、なければnull
-                        $curr_status = $existing_attendance[$key] ?? null;
 
+                        <?php
+                        // 既存の科目。教員選択があれば初期値にする
+                        $saved_subj = $existing_periods[$p]['subject_id'] ?? '';
+                        $saved_teach = $existing_periods[$p]['teacher_id'] ?? '';
                         ?>
-                        <!-- セル自体にも目印IDを付与 -->
-                        <td id="cell_<?= $key ?>">
-                            <div class="radio-group">
-                                <!-- name属性を「att_学籍番号_時限」にすることでマス目ごとに独立した1つの選択肢グループになる -->
-                                <!-- クリックされたらmarkAsChanged()を呼び出す -->
-                                <label>
-                                    <input type="radio" name="att_<?= $key ?>" value="1" <?= $curr_status == 1 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">出
-                                </label>
-                                <label>
-                                    <input type="radio" name="att_<?= $key ?>" value="2" <?= $curr_status == 2 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">欠
-                                </label>
-                                <label>
-                                    <input type="radio" name="att_<?= $key ?>" value="3" <?= $curr_status == 3 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">遅
-                                </label>
-                                <label>
-                                    <input type="radio" name="att_<?= $key ?>" value="4" <?= $curr_status == 4 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">公
-                                </label>
-                            </div>
-                        </td>
-                    <?php endfor; ?>
+
+                        <th class=" period-header">
+                            <div><?= $p ?>限</div>
+
+                            <!-- 科目選択プルダウン -->
+                            <select id="subject_<?= $p ?>" name="subject_<?= $p ?>">
+                                <option value="">- 科目選択 -</option>
+                                <?php foreach ($subjects as $sb): ?>
+                                    <option value="<?= $sb['subject_id'] ?>" <?= $saved_subj == $sb['subject_id'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($sb['subject_name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+
+                            <!-- 教員選択プルダウン -->
+                            <select id="teacher_<?= $p ?>" name="teacher_<?= $p ?>">
+                                <option value="">- 教員選択 -</option>
+                                <?php foreach ($teachers as $tc): ?>
+                                    <option value="<?= $tc['teacher_id'] ?>" <?= $saved_teach == $tc['teacher_id'] ? 'selected' : '' ?>>
+                                        <?= htmlspecialchars($tc['teacher_name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+
+                            <!-- 時限ごとの一括出席ボタン -->
+                            <button type="button" class="btn-all-present" onclick="setAllPresent(<?= $p ?>)">全員出席</button>
+
+                        </th>
+                    <?php endfor ?>
                 </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php foreach ($students as $st): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($st['student_id']) ?></td>
+                        <td class="name-col"><?= htmlspecialchars($st['student_name']) ?></td>
+                        <td><?= !empty($st['student_group']) ?  htmlspecialchars($st['student_group']) : "-" ?></td>
+
+                        <!-- 生徒ごとに各時限のマス目を作成 -->
+                        <?php for ($p = 1; $p <= $max_period; $p++): ?>
+                            <?php
+                            $key = "{$st['student_id']}_{$p}";
+                            // 既存レコードがあればそのステータス、なければnull
+                            $curr_status = $existing_attendance[$key] ?? null;
+
+                            ?>
+                            <!-- セル自体にも目印IDを付与 -->
+                            <td id="cell_<?= $key ?>">
+                                <div class="radio-group">
+                                    <!-- name属性を「att_学籍番号_時限」にすることでマス目ごとに独立した1つの選択肢グループになる -->
+                                    <!-- クリックされたらmarkAsChanged()を呼び出す -->
+                                    <label>
+                                        <input type="radio" name="att_<?= $key ?>" value="1" <?= $curr_status == 1 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">出
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="att_<?= $key ?>" value="2" <?= $curr_status == 2 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">欠
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="att_<?= $key ?>" value="3" <?= $curr_status == 3 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">遅
+                                    </label>
+                                    <label>
+                                        <input type="radio" name="att_<?= $key ?>" value="4" <?= $curr_status == 4 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">公
+                                    </label>
+                                </div>
+                            </td>
+                        <?php endfor; ?>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </fieldset>
 
     <!-- 画面右下に固定配置された確定ボタン -->
     <div class="floating-footer">
