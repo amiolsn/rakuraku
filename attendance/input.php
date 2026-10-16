@@ -142,14 +142,6 @@ try {
         if (!empty($rec['teacher_id'])) {
             $period_teachers[$p][$rec['teacher_id']] = true;
         }
-
-        // // その時の科目と教員を記録
-        // if (!isset($existing_periods[$rec['period']])) {
-        //     $existing_periods[$rec['period']] = [
-        //         'subject_id' => $rec['subject_id'],
-        //         'teacher_id' => $rec['teacher_id']
-        //     ];  
-        // }
     }
 
     // 時限ごとに全員一致しているかを確認
@@ -184,25 +176,25 @@ try {
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-    <body>
-        <!-- ヘッダー -->
-        <?php require_once 'header-top.php'; ?>
-            <!-- 仮ナビゲーション -->
-            <nav><a href="#">欠席登録・届け出管理</a></nav>
-            <nav><a href="#">集計</a></nav>
-            <nav><a href="manage.php">登録情報編集</a></nav>
-            
-            <a href="login-input.php">ログイン</a>
-        <?php require_once 'header-bottom.php'; ?>
+<body>
+    <!-- ヘッダー -->
+    <?php require_once 'header-top.php'; ?>
+    <!-- 仮ナビゲーション -->
+    <nav><a href="#">欠席登録・届け出管理</a></nav>
+    <nav><a href="#">集計</a></nav>
+    <nav><a href="manage.php">登録情報編集</a></nav>
+
+    <a href="login-input.php">ログイン</a>
+    <?php require_once 'header-bottom.php'; ?>
 
 
-        <div class="filter-controller">
+    <div class="filter-controller">
         <!-- 日付選択コントローラー -->
         <div class="date-controller">
             <span class="data-display-label">対象日</span>
             <div class="date-picker-box" onclick="document.getElementById('targetDateInput').showPicker()">
                 <span class="date-text"><?= date('Y/m/d', strtotime($target_date)) ?> (<?= $target_w ?>)</span>
-    
+
                 <!-- カレンダーSVGアイコン -->
                 <svg class="calendar-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
                     <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -211,40 +203,40 @@ try {
                     <line x1="3" y1="10" x2="21" y2="10"></line>
                 </svg>
 
-                    <!-- 日付入力欄/非表示 -->
-                    <input type="date" id="targetDateInput" class="hidden-date-input" value="<?= htmlspecialchars($target_date) ?>" onchange="changeDate(this.value)">
-                </div>
-
-                <?php if($is_today): ?>
-                    <span class="today-badge">本日</span>
-                <?php endif; ?>
+                <!-- 日付入力欄/非表示 -->
+                <input type="date" id="targetDateInput" class="hidden-date-input" value="<?= htmlspecialchars($target_date) ?>" onchange="changeDate(this.value)">
             </div>
 
-            <!-- 学年選択プルダウン -->
-            <form action="" method="GET" class="period-header select">
+            <?php if ($is_today): ?>
+                <span class="today-badge">本日</span>
+            <?php endif; ?>
+        </div>
+
+        <!-- 学年選択プルダウン -->
+        <form action="" method="GET" class="period-header select">
             <select id="grade" name="grade" onchange="this.form.submit()">
-                    <option value="">- 学年選択 -</option>
-                    <?php for ($i = 1; $i <= $years; $i++): ?>
+                <option value="">- 学年選択 -</option>
+                <?php for ($i = 1; $i <= $years; $i++): ?>
                     <option value="<?= $i ?>"
                         <?= (isset($_GET['grade']) && $_GET['grade'] == $i) ? 'selected' : '' ?>>
                         <?= $i ?>年生
                     </option>
-                    <?php endfor; ?>
+                <?php endfor; ?>
 
-                </select>
+            </select>
 
             <select id="student_group" name="student_group" onchange="this.form.submit()">
-                    <option value="">- 班選択 -</option>
-                    <?php foreach ($groups as $group): ?>
-                <option value="<?= htmlspecialchars($group['student_group'], ENT_QUOTES, 'UTF-8') ?>"
-                    <?= (isset($_GET['student_group']) && $_GET['student_group'] === $group['student_group']) ? 'selected' : '' ?>>
-                    <?= htmlspecialchars($group['student_group'], ENT_QUOTES, 'UTF-8') ?>班
-                </option>
-                    <?php endforeach; ?>
+                <option value="">- 班選択 -</option>
+                <?php foreach ($groups as $group): ?>
+                    <option value="<?= htmlspecialchars($group['student_group'], ENT_QUOTES, 'UTF-8') ?>"
+                        <?= (isset($_GET['student_group']) && $_GET['student_group'] === $group['student_group']) ? 'selected' : '' ?>>
+                        <?= htmlspecialchars($group['student_group'], ENT_QUOTES, 'UTF-8') ?>班
+                    </option>
+                <?php endforeach; ?>
 
-                </select>
-            </form>
-        </div>
+            </select>
+        </form>
+    </div>
 
     <p class="header-lead">入力または変更を行った時限の出欠のみが、右下の「確定して保存」で送信されます。</p>
 
