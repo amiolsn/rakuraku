@@ -76,6 +76,7 @@ li {
 /* テーブル本体 */
 .management-table {
     width: 100%;
+    table-layout: fixed;
     border-collapse: collapse;
     color: var(--color-primary);
     background-color: var(--colorr-bg-card);
@@ -98,6 +99,8 @@ li {
     border-bottom: 1px solid var(--color-border);
     text-align: center;
     vertical-align: middle;/* 文字を縦方向の中央に配置 */
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 /* 交互の背景色 */
@@ -152,4 +155,24 @@ li {
     background-color: var(--color-primary);
     color: #ffffff;
     cursor: pointer;
+}
+
+.management-table .edit-input {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px 12px;
+    border: 1px solid #CED4DA;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    font-size: 1rem;
+    color: #343A40;
+}
+
+
+.management-table .edit-input {
+outline: 2px solid #F7CAD0;
+outline-offset: 1px;
+border-color: #D88A99;
 }

@@ -163,7 +163,7 @@ try {
                                 // それ以外はテキスト入力
                                 const currentText = cell.textContent.trim();
                                 cell.innerHTML =
-                                    `<input type="text" value="${currentText}">`;
+                                     `<input type="text" class="edit-input" value="${currentText}">`;
                             }
                         });
 
