@@ -3,9 +3,6 @@
 require_once 'db.php';
 require_once 'auth.php';
 
-// 最大時間数（通常7限）
-$max_period = 7;
-
 // 対象日付の決定
 // URLから日付を取り出し、日付の形式が正しいかチェック
 $target_date = isset($_GET['date']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['date'])
@@ -123,8 +120,8 @@ try {
 
     // 時限数の動的決定
     $default_max_period = 7;
-    $max_period = (!empty($calendar_info['periods']) && $calendar_info['periods'] > 0)
-        ? (int)$calendar_info['period']
+    $max_period = (!empty($calendar_info['max_period']) && $calendar_info['max_period'] > 0)
+        ? (int)$calendar_info['max_period']
         : $default_max_period;
 
     // 修業年限の取得
@@ -363,12 +360,14 @@ try {
                 <?php endforeach; ?>
             </tbody>
         </table>
+
+        <!-- 画面右下に固定配置された確定ボタン -->
+        <div class="floating-footer">
+            <button type="button" class="submit-btn" onclick="submitAttendance()">確定して保存</button>
+        </div>
     </fieldset>
 
-    <!-- 画面右下に固定配置された確定ボタン -->
-    <div class="floating-footer">
-        <button type="button" class="submit-btn" onclick="submitAttendance()">確定して保存</button>
-    </div>
+
 
     <!-- PHPデータをJavaScriptで使えるように定義 -->
     <script>
