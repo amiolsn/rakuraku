@@ -68,6 +68,7 @@ try {
     <title>らくらく出席簿 - 出欠入力</title>
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/tab.css">
+    <link rel="stylesheet" href="css/popup.css">
     
 </head>
 
@@ -94,7 +95,53 @@ try {
         <div class="table-container">
             <div class="tabbody-elem" id="tab-page1">
             <div class="table-actions-top">
-                <button class="add-btn">新規追加</button>
+
+                <!-- 新規追加 -->
+                <button id="click-btn" class="add-btn" onclick="toggleAdd(this)">新規追加</button>
+                <div id="popup-wrapper">
+                    <div id="popup-inside">
+                        <div id="close">x</div>
+                        <div id="message">
+                         <table  class="management-table">
+                    <thead>
+                        <tr>
+                            <th>学籍番号</th>
+                            <th>生徒氏名</th>
+                            <th>学科名</th>
+                            <th>学年</th>
+                            <th>班</th>
+                            <th>在校状況</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td><input type="text" id="student_id" name="student_id" required></td>
+                            <td><input type="text" id="name"student_name="student_name" required></td>
+                            <!-- 学科名プルダウン -->
+
+                            <!-- 学年プルダウン -->
+                             <td><select id="grade" name="grade" onchange="this.form.submit()">
+                                <option value="">- 学年選択 -</option>
+                                <?php for ($i = 1; $i <= $years; $i++): ?>
+                                    <option value="<?= $i ?>"
+                                        <?= (isset($_GET['grade']) && $_GET['grade'] == $i) ? 'selected' : '' ?>>
+                                        <?= $i ?>年生
+                                    </option>
+                                <?php endfor; ?>
+
+                            </select></td>
+                            <td><input type="text" id="student_group" name="student_group"></td>
+                            <!-- 在校状況ラジオボタン -->
+                        </tr>
+                    </tbody>
+</table>
+                        <a href="#">ゲットする</a>
+                        </div>
+                    </div>
+                </div>
+
+
             </div>
                 <table  class="management-table">
                     <thead>
@@ -112,20 +159,20 @@ try {
                     <tbody>
                         <?php $i = 1; ?>
                         <?php foreach($students as $st): ?>
-                        <tr>
+                        <tr data-student-id="<?= htmlspecialchars($st['student_id'])?>">
                             <td><?= $i++ ?></td>
                             <!-- 学籍番号 -->
                             <td><?= htmlspecialchars($st['student_id']) ?></td>
                             <!-- 生徒氏名 -->
-                            <td class="editable" ><?= htmlspecialchars($st['student_name']) ?></td>
+                            <td class="editable" data-field="student_name"><?= htmlspecialchars($st['student_name']) ?></td>
                             <!-- 学科名 -->
                             <td><?= htmlspecialchars($st['department_name']) ?></td>
                             <!-- 学年 -->
                             <td><?= htmlspecialchars($st['grade']) ?></td>
                             <!-- 班 -->
-                            <td class="editable"><?= !empty($st['student_group']) ?  htmlspecialchars($st['student_group']) : "-" ?></td>
+                            <td class="editable" data-field="student_group"><?= !empty($st['student_group']) ?  htmlspecialchars($st['student_group']) : "-" ?></td>
                             <!-- 在校状況 -->
-                            <td class="editable" data-status="<?= (int)$st['status'] ?>"><?= $st['status'] == 1 ? '在校' : '退校・卒業' ?></td>
+                            <td class="editable" data-field="status" data-status="<?= (int)$st['status'] ?>"><?= $st['status'] == 1 ? '在校' : '退校・卒業' ?></td>
                             <!-- 編集・削除ボタン -->
                             <td class="table-actions"><button class="edit-btn" onclick="toggleEdit(this)">編集</button><button class="delete-btn" onclick="toggledelete(this)">削除</button></td>
                             
@@ -135,71 +182,7 @@ try {
                 </table>
             </div>
             <script>
-                function toggleEdit(button) {
-                    const row = button.closest('tr');
-                    const editableCells = row.querySelectorAll('.editable');
-                    const isEditing = button.textContent === '保存';
-
-                    if (!isEditing) {
-                       // 編集モードにする
-                        editableCells.forEach(cell => {
-                            // 在校状況のセルの場合
-                            if (cell.hasAttribute('data-status')) {
-                                const status = cell.dataset.status;
-
-                                cell.innerHTML = `
-                                    <label>
-                                        <input type="radio" name="status" value="1"
-                                            ${status === '1' ? 'checked' : ''}>
-                                        在校
-                                    </label>
-                                    <label>
-                                        <input type="radio" name="status" value="0"
-                                            ${status === '0' ? 'checked' : ''}>
-                                        退校・卒業
-                                    </label>
-                                `;
-                            } else {
-                                // それ以外はテキスト入力
-                                const currentText = cell.textContent.trim();
-                                cell.innerHTML =
-                                     `<input type="text" class="edit-input" value="${currentText}">`;
-                            }
-                        });
-
-                        button.textContent = '保存';
-                    } else {
-                        editableCells.forEach(cell => {
-                            // 在校状況のセルの場合
-                            if (cell.hasAttribute('data-status')) {
-                                const selectedRadio = cell.querySelector(
-                                    'input[type="radio"]:checked'
-                                );
-
-                                if (selectedRadio) {
-                                    const status = selectedRadio.value;
-
-                                    // 状態の値を更新
-                                    cell.dataset.status = status;
-
-                                    // 値ではなく表示用の文字列にする
-                                    cell.textContent =
-                                        status === '1' ? '在校' : '退校・卒業';
-                                }
-                            } else {
-                                // それ以外は入力値を表示に戻す
-                                const input = cell.querySelector('input[type="text"]');
-                                cell.textContent = input.value;
-                            }
-                        });
-
-                        button.textContent = '編集';
-                    }
-
-
-変更したポイント
-                    
-                }
+            
 
                 function toggledelete(button) {
                     const row = button.closest('tr');
@@ -217,5 +200,7 @@ try {
     </div>
 </div>
 <script src="js/tab.js"></script>
+<script src="js/manage.js"></script>
+<script src="js/popup.js"></script>
 </body>
 </html>
