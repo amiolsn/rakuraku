@@ -8,6 +8,10 @@ require_once 'db.php';
 
 // JavaScriptから送られてきたJSONデータを受信
 $rawInput = file_get_contents('php://input');
+
+error_log('update_student.php に到達しました');
+error_log('受信データ: ' . $rawInput);
+
 $data = json_decode($rawInput, true);
 
 // データの存在チェック
@@ -84,6 +88,10 @@ foreach($changes as $field => $value) {
     $updateData[$field] = $value;
 }
 
+error_log(
+    'updateData: ' . var_export($updateData, true)
+);
+
 try {
     //更新する項目と値を組み立てる
     $setParts = [];
@@ -101,7 +109,12 @@ try {
 
     //更新する項目の値を設定
     foreach($updateData as $field => $value) {
-        $stmt->bindValue(":$field", $value);
+        if ($value === null) {
+        $stmt->bindValue(":$field", null, PDO::PARAM_NULL);
+    } else {
+        $stmt->bindValue(":$field", $value, PDO::PARAM_STR);
+    }
+    
     }
 
     $stmt->bindValue(':student_id', $student_id);
