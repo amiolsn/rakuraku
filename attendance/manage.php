@@ -121,24 +121,23 @@ try {
                                                             </option>
                                                         <?php endfor; ?>
 
-                                                    </select></td>
-                                                <td><input type="text" id="student_group" name="student_group"></td>
-                                                <!-- 在校状況ラジオボタン -->
-                                                <td><label>在校</label>
-                                                    <input type="radio" name="zaikou" value="1">
-                                                    <label>退校・卒業</label>
-                                                    <input type="radio" name="taikou" value="0">
-                                                </td>
+                            </select></td>
+                            <td><input type="text" id="student_group" name="student_group"></td>
+                            <!-- 在校状況ラジオボタン -->
+                             <td><label>在校</label>
+                                        <input type="radio" name="zaikou" value="1">
+                                    <label>退校・卒業</label>
+                                        <input type="radio" name="taikou" value="0"></td>
 
-                                                <td><button>登録</button></td>
-
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                    <a href="#">ゲットする</a>
-                                </div>
-                            </div>
+                            <td><button>登録</button></td>
+                                    
+                        </tr>
+                    </tbody>
+</table>
+                        <a href="#">ゲットする</a>
                         </div>
+                    </div>
+                </div>
 
 
                     </div>

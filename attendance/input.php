@@ -43,7 +43,7 @@ try {
             s.student_group,
             d.department_name
         FROM students s
-        JOIN department d
+        LEFT OUTER JOIN department d
             ON s.department_id = d.department_id
         WHERE s.status = 1
         AND d.department_id = ?
