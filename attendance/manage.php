@@ -52,6 +52,20 @@ try {
     $stmtTeachers->execute([$departmentId]);
 
     $teachers = $stmtTeachers->fetchAll();
+
+    // 修業年限の取得
+    $stmtRequirement = $pdo->prepare("
+        SELECT MAX(grade) AS term
+        FROM course_requirements
+        WHERE department_id = ?
+    ");
+
+    $stmtRequirement->execute([$departmentId]);
+
+    $requirement = $stmtRequirement->fetch();
+
+
+    $years = (int)($requirement['term'] ?? 0);
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
 }
@@ -109,35 +123,34 @@ try {
                                         <tbody>
                                             <tr>
                                                 <td><input type="text" id="student_id" name="student_id" required></td>
-                                                <td><input type="text" id="name" student_name="student_name" required></td>
+                                                <td><input type="text" id="name" name="student_name" required></td>
                                                 <td>情報システム科</td>
                                                 <!-- 学年プルダウン -->
-                                                <td><select id="grade" name="grade" onchange="this.form.submit()">
-                                                        <option value="">- 学年選択 -</option>
-                                                        <?php for ($i = 1; $i <= $years; $i++): ?>
-                                                            <option value="<?= $i ?>"
-                                                                <?= (isset($_GET['grade']) && $_GET['grade'] == $i) ? 'selected' : '' ?>>
-                                                                <?= $i ?>年生
-                                                            </option>
-                                                        <?php endfor; ?>
+                                                <td><select id="grade" name="grade">
+                                                        <?php
+                                                        $selected_grade = "";
+                                                        include 'components/_grade_options.php';
+                                                        ?>
 
-                            </select></td>
-                            <td><input type="text" id="student_group" name="student_group"></td>
-                            <!-- 在校状況ラジオボタン -->
-                             <td><label>在校</label>
-                                        <input type="radio" name="zaikou" value="1">
-                                    <label>退校・卒業</label>
-                                        <input type="radio" name="taikou" value="0"></td>
 
-                            <td><button>登録</button></td>
-                                    
-                        </tr>
-                    </tbody>
-</table>
-                        <a href="#">ゲットする</a>
+                                                    </select></td>
+                                                <td><input type="text" id="student_group" name="student_group"></td>
+                                                <!-- 在校状況ラジオボタン -->
+                                                <td><label>在校</label>
+                                                    <input type="radio" name="status" value="1">
+                                                    <label>退校・卒業</label>
+                                                    <input type="radio" name="status" value="0">
+                                                </td>
+
+                                                <td><button>登録</button></td>
+
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                    <a href="#">ゲットする</a>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
 
                     </div>
