@@ -53,7 +53,20 @@ try {
 
     $teachers = $stmtTeachers->fetchAll();
 
-        // ログイン中の教員の学科名を取得
+    // 修業年限の取得
+    $stmtRequirement = $pdo->prepare("
+        SELECT MAX(grade) AS term
+        FROM course_requirements
+        WHERE department_id = ?
+    ");
+
+    $stmtRequirement->execute([$departmentId]);
+
+    $requirement = $stmtRequirement->fetch();
+
+    $years = (int)($requirement['term'] ?? 0);
+
+    // ログイン中の教員の学科名を取得
     $stmtDepartment = $pdo->prepare("
         SELECT department_name
         FROM department
@@ -132,43 +145,39 @@ try {
                                                 </tr>
                                             </thead>
 
-                                            <tbody>
-                                                <tr>
-                                                    <td><input type="text" id="student_id" name="student_id" required></td>
-                                                    <td><input type="text" id="student_name" name="student_name" required></td>
-                                                    <td><span id="department_name">
-                                                        <?= htmlspecialchars($departmentName, ENT_QUOTES, 'UTF-8') ?>
-                                                    </span></td>
-                                                    <!-- 学年プルダウン -->
-                                                    <td><select id="grade" name="grade">
-                                                            <option value="">- 学年選択 -</option>
-                                                            <?php for ($i = 1; $i <= $years; $i++): ?>
-                                                            <option value="<?= $i ?>" <?=(isset($_GET['grade']) && $_GET['grade']==$i)
-                                                                ? 'selected' : '' ?>>
-                                                                <?= $i ?>年生
-                                                            </option>
-                                                            <?php endfor; ?>
-
-                                                        </select></td>
-                                                    <td><input type="text" id="student_group" name="student_group"></td>
-                                                    <!-- 在校状況ラジオボタン -->
-                                                    <td><label>在校</label>
-                                                        <input type="radio" name="status" value="1">
-                                                        <label>退校・卒業</label>
-                                                        <input type="radio" name="status" value="0">
-                                                    </td>
+                                        <tbody>
+                                            <tr>
+                                                <td><input type="text" id="student_id" name="student_id" required></td>
+                                                <td><input type="text" id="student_name" name="student_name" required></td>
+                                                <span id="department_name">
+                                                    <?= htmlspecialchars($departmentName, ENT_QUOTES, 'UTF-8') ?>
+                                                </span>
+                                                <!-- 学年プルダウン -->
+                                                <td><select id="grade" name="grade">
+                                                        <?php
+                                                        $selected_grade = $_GET['grade'] ?? '';
+                                                        include 'components/_grade_options.php';
+                                                        ?>
+                                                    </select></td>
+                                                <td><input type="text" id="student_group" name="student_group"></td>
+                                                <!-- 在校状況ラジオボタン -->
+                                                <td><label>在校</label>
+                                                    <input type="radio" name="status" value="1">
+                                                    <label>退校・卒業</label>
+                                                    <input type="radio" name="status" value="0">
+                                                </td>
 
                                                     <td><button type="button" class="add-btn"
                                                         onclick="addStudent(this)">
                                                         登録
                                                     </button></td>
 
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
+                        </div>
 
 
                     </div>

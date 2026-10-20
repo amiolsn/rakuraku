@@ -49,6 +49,13 @@ body {
   gap: 12px;
 }
 
+/* ロゴリンクの下線と色変化をリセット */
+a.logo-wrapper {
+  text-decoration: none;
+  color: inherit; /* 親要素の文字色をそのまま継承 */
+  display: flex; /* 既存のレイアウトを維持 */
+}
+
 .logo-text-title {
   font-size: 1.5rem;
   font-weight: 800;

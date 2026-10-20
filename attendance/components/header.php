@@ -1,6 +1,23 @@
+<?php
+// 未ログイン時の戻り先
+$home_url = 'login-input.php';
+
+if (isset($_SESSION['user']['usertype_id'])) {
+    $userType = (int)$_SESSION['user']['usertype_id'];
+
+    if ($userType === 3) {
+        // 生徒の場合。今後TOPを作成したら変更する
+        $home_url = "#";
+    } else {
+        // 教員・学科の場合
+        $home_url = 'input.php';
+    }
+}
+?>
+
 <!-- アプリヘッダー＆ロゴマーク -->
 <header class="app-header">
-    <div class="logo-wrapper">
+    <a href="<?= $home_url ?>" class="logo-wrapper">
         <!-- SVGロゴ：チャコールグレーのバインダー + 淡いピンクのチェックマーク -->
         <svg width="44" height="44" viewBox="0 0 48 48" fill="none" xmls="http://www.w3.org/2000/svg">
             <!-- バインダークリップ -->
@@ -22,7 +39,7 @@
             <div class="logo-text-title"><span>らくらく</span>出席簿</div>
             <div class="logo-text-subtitle">Smart Attendance System</div>
         </div>
-    </div>
+    </a>
 
     <!-- ナビゲーション -->
     <!-- ログインしているときのみナビゲーションを表示する -->
