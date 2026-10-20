@@ -16,7 +16,7 @@ unset($_SESSION['user']);
      FROM users 
      JOIN usertype 
         ON users.usertype_id = usertype.usertype_id
-     JOIN department
+     LEFT JOIN department
         ON users.user_id = department.user_id
      WHERE users.login_id = ? AND users.password = ?
      ');
@@ -30,34 +30,38 @@ unset($_SESSION['user']);
 
     
     if ($row) {
-        $_SESSION['user'] = [
-            'user_id' => $row['user_id'],
-            'usertype_id' => $row['usertype_id'],
-            'usertype_name' => $row['usertype_name'],
-            'login_id' => $row['login_id'],
-            'department_id' => $row['department_id']
+    $_SESSION['user'] = [
+        'user_id' => $row['user_id'],
+        'usertype_id' => $row['usertype_id'],
+        'usertype_name' => $row['usertype_name'],
+        'login_id' => $row['login_id'],
+        'department_id' => $row['department_id']
     ];
 
     if ($row['usertype_id'] == 1) {
+        // 教員TOP
         header('Location: input.php');
         exit;
+
     } elseif ($row['usertype_id'] == 2) {
-        echo '<script>
-        alert("管理者TOPはまだ作成されていません。");
-        location.href = "login-input.php";
-        </script>';
+        // 管理者TOP（学科TOP）
+        header('Location: input.php');
         exit;
+
     } elseif ($row['usertype_id'] == 3) {
+        // 生徒TOP
         echo '<script>
             alert("生徒TOP画面はまだ作成されていません。");
             location.href = "login-input.php";
         </script>';
         exit;
     }
-    } else {
-        $error = 'ログインIDまたはパスワードが正しくありません。';
-    }
-    }
+
+} else {
+    // ログインIDまたはパスワードが一致しない場合
+    $error = 'ログインIDまたはパスワードが正しくありません。';
+}
+}
     
 ?>
 

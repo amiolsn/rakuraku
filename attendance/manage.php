@@ -116,32 +116,39 @@ try {
                     </thead>
 
                     <tbody>
-                        <tr>
-                            <td><input type="text" id="student_id" name="student_id" required></td>
-                            <td><input type="text" id="name"student_name="student_name" required></td>
-                            <td>情報システム科</td>
-                            <!-- 学年プルダウン -->
-                             <td><select id="grade" name="grade" onchange="this.form.submit()">
-                                <option value="">- 学年選択 -</option>
-                                <?php for ($i = 1; $i <= $years; $i++): ?>
-                                    <option value="<?= $i ?>"
-                                        <?= (isset($_GET['grade']) && $_GET['grade'] == $i) ? 'selected' : '' ?>>
-                                        <?= $i ?>年生
-                                    </option>
-                                <?php endfor; ?>
+                <tr>
+                    <td><input type="text" id="student_id" name="student_id" required></td>
+                    <td><input type="text" id="name" student_name="student_name" required></td>
+                    <td>情報システム科</td>
+                    <!-- 学年プルダウン -->
+                    <td><select id="grade" name="grade" onchange="this.form.submit()">
+                            <option value="">- 学年選択 -</option>
+                            <?php for ($i = 1; $i <= $years; $i++): ?>
+                            <option value="<?= $i ?>" <?=(isset($_GET['grade']) && $_GET['grade']==$i) ? 'selected' : ''
+                                ?>>
+                                <?= $i ?>年生
+                            </option>
+                            <?php endfor; ?>
 
-                            </select></td>
-                            <td><input type="text" id="student_group" name="student_group"></td>
-                            <!-- 在校状況ラジオボタン -->
-                             <td><label>在校</label>
-                                        <input type="radio" name="zaikou" value="1">
-                                    <label>退校・卒業</label>
-                                        <input type="radio" name="taikou" value="0"></td>
+                        </select></td>
+                    <td><input type="text" id="student_group" name="student_group"></td>
+                    <!-- 在校状況ラジオボタン -->
+                    <td><label>
+                            <input type="radio" name="status_${row.dataset.studentId}" value="1" ${status==='1'
+                                ? 'checked' : '' }>
+                            在校
+                        </label>
+                        <label>
+                            <input type="radio" name="status_${row.dataset.studentId}" value="0" ${status==='0'
+                                ? 'checked' : '' }>
+                            退校・卒業
+                        </label>
+                    </td>
 
-                            <td><button>登録</button></td>
-                                    
-                        </tr>
-                    </tbody>
+                    <td><button>登録</button></td>
+
+                </tr>
+            </tbody>
 </table>
                         <a href="#">ゲットする</a>
                         </div>
