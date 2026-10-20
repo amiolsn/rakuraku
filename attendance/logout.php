@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 
@@ -20,8 +19,7 @@ if (!isset($_SESSION['user'])) {
 </head>
 
 <body>
-    <?php require_once 'header-top.php'; ?>
-    <?php require_once 'header-bottom.php'; ?>
+    <?php require_once 'components/header.php'; ?>
 
     <div id="wrapper">
         <main>
@@ -33,14 +31,12 @@ if (!isset($_SESSION['user'])) {
                 <input
                     type="submit"
                     value="ログアウト"
-                    class="submit-btn"
-                >
+                    class="submit-btn">
 
                 <button
                     type="button"
                     class="cancel-btn"
-                    onclick="history.back()"
-                >
+                    onclick="history.back()">
                     キャンセル
                 </button>
             </form>
