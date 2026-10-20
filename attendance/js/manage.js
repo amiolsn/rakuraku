@@ -60,6 +60,8 @@ async function toggleEdit(button) {
 
 
 async function saveStudent(button) {
+    console.log('saveStudent が呼び出されました');
+    
     const row = button.closest('tr');
     const studentId = row.dataset.studentId;
     const editableCells = row.querySelectorAll('.editable');
@@ -68,19 +70,19 @@ async function saveStudent(button) {
     editableCells.forEach(cell => {
         const field = cell.dataset.field;
 
-        // 編集前の値を保存
-        if (field === 'status') {
-            cell.dataset.original = cell.dataset.status;
-        } else {
-            let original = cell.textContent.trim();
+        // // 編集前の値を保存
+        // if (field === 'status') {
+        //     cell.dataset.original = cell.dataset.status;
+        // } else {
+        //     let original = cell.textContent.trim();
 
-            // 班の「-」は空欄として扱う
-            if (field === 'student_group' && original === '-') {
-                original = '';
-            }
+        //     // 班の「-」は空欄として扱う
+        //     if (field === 'student_group' && original === '-') {
+        //         original = '';
+        //     }
 
-            cell.dataset.original = original;
-        }
+        //     cell.dataset.original = original;
+        // }
 
         let newValue;
 
@@ -96,6 +98,10 @@ async function saveStudent(button) {
             newValue = cell.querySelector('.edit-input').value.trim();
         }
 
+        console.log('項目:', field);
+console.log('変更前:', JSON.stringify(cell.dataset.original));
+console.log('変更後:', JSON.stringify(newValue));
+
         // 変更された項目だけ記録
         if (newValue !== cell.dataset.original) {
             changes[field] = newValue;
@@ -110,6 +116,7 @@ async function saveStudent(button) {
     button.disabled = true;
 
     try {
+        console.log('送信する変更内容:', changes);
         const response = await fetch('update_student.php', {
             method: 'POST',
             headers: {
@@ -120,6 +127,9 @@ async function saveStudent(button) {
                 changes: changes
             })
         });
+
+        console.log('HTTPステータス:', response.status);
+console.log('通信先:', response.url);
 
         const data = await response.json();
 
