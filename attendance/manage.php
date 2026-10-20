@@ -63,6 +63,21 @@ try {
     $stmtDepartment->execute([$departmentId]);
 
     $departmentName = $stmtDepartment->fetchColumn();
+
+        // 修業年限の取得
+    $stmtRequirement = $pdo->prepare("
+        SELECT MAX(grade) AS term
+        FROM course_requirements
+        WHERE department_id = ?
+    ");
+
+    $stmtRequirement->execute([$departmentId]);
+
+    $requirement = $stmtRequirement->fetch();
+
+
+    $years = (int)($requirement['term'] ?? 0);
+
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
 }
@@ -99,7 +114,7 @@ try {
                     <div class="table-actions-top">
 
                         <!-- 新規追加 -->
-                        <button id="click-btn" class="add-btn" onclick="toggleAdd(this)">新規追加</button>
+                        <button id="click-btn" class="add-btn" >新規追加</button>
                             <div id="popup-wrapper">
                                 <div id="popup-inside">
                                     <div id="close">x</div>
@@ -121,9 +136,9 @@ try {
                                                 <tr>
                                                     <td><input type="text" id="student_id" name="student_id" required></td>
                                                     <td><input type="text" id="student_name" name="student_name" required></td>
-                                                    <span id="department_name">
+                                                    <td><span id="department_name">
                                                         <?= htmlspecialchars($departmentName, ENT_QUOTES, 'UTF-8') ?>
-                                                    </span>
+                                                    </span></td>
                                                     <!-- 学年プルダウン -->
                                                     <td><select id="grade" name="grade">
                                                             <option value="">- 学年選択 -</option>
@@ -143,7 +158,10 @@ try {
                                                         <input type="radio" name="status" value="0">
                                                     </td>
 
-                                                    <td><button type="button" class="add-btn">登録</button></td>
+                                                    <td><button type="button" class="add-btn"
+                                                        onclick="addStudent(this)">
+                                                        登録
+                                                    </button></td>
 
                                                 </tr>
                                             </tbody>

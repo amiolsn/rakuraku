@@ -150,9 +150,9 @@ console.log('通信先:', response.url);
 
 
 async function addStudent(button) {
+    alert('登録ボタンが押されました！');
     const studentId = document.getElementById('student_id').value.trim();
     const studentName = document.getElementById('student_name').value.trim();
-    const departmentId = document.getElementById('department_id').value.trim();
     const grade = document.getElementById('grade').value;
     const studentGroup = document.getElementById('student_group').value.trim();
 
@@ -162,7 +162,7 @@ async function addStudent(button) {
     );
 
     // 入力チェック
-    if(!studentID || !studentName || grade || !statusElement) {
+    if(!studentId || !studentName || !grade || !statusElement) {
         alert('必要項目を入力・選択してください');
         return;
     }
@@ -171,9 +171,8 @@ async function addStudent(button) {
     const data = {
         student_id: studentId,
         student_name: studentName,
-        department_id: departmentId,
         grade: grade,
-        studentGroup: studentGroup || null,
+        student_group: studentGroup || null,
         status: statusElement.value
     };
 
@@ -184,15 +183,18 @@ async function addStudent(button) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
+            body: JSON.stringify(
                 data
-            })
-        });
+            )
+        });console.log('HTTPステータス:', response.status);
 
-        const data = await response.json();
+const result = await response.json();
+console.log('PHPの応答:', result);
 
-        if (!response.ok || !data.success) {
-            throw new Error(data.message || '保存に失敗しました。');
+        
+
+        if (!response.ok || !result.success) {
+            throw new Error(result.message || '保存に失敗しました。');
         }
         
         alert('生徒情報を新規登録しました。');
