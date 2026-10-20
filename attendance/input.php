@@ -209,6 +209,7 @@ try {
     <nav><a href="manage.php">登録情報編集</a></nav>
 
     <a href="login-input.php">ログイン</a>
+    <a href="logout.php">ログアウト</a>
     <?php require_once 'header-bottom.php'; ?>
 
 

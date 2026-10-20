@@ -1,35 +1,36 @@
 /* css/login.css */
 #wrapper {
     display: flex;
-    justify-content: center; /* 横方向の中央 */
+    justify-content: center;
+    /* 横方向の中央 */
     padding: 60px 16px;
 }
 
 main {
     box-sizing: border-box;
-width: 320px;
-max-width: 100%;
-padding: 28px 24px;
-text-align: center;
-background-color: #FFFFFF;
-border: 1px solid #F0D9DE;
-border-radius: 16px;
-box-shadow: 0 4px 16px rgba(52, 58, 64, 0.08);
+    width: 320px;
+    max-width: 100%;
+    padding: 28px 24px;
+    text-align: center;
+    background-color: #FFFFFF;
+    border: 1px solid #F0D9DE;
+    border-radius: 16px;
+    box-shadow: 0 4px 16px rgba(52, 58, 64, 0.08);
 }
 
 #title-flex {
     position: relative;
-display: flex;
-align-items: center;
-justify-content: center;
-width: 100%;
-margin-bottom: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-bottom: 28px;
 }
 
 #title-flex h1 {
-margin: 0;
-font-size: 1.5rem;
-color: #343A40;
+    margin: 0;
+    font-size: 1.5rem;
+    color: #343A40;
 }
 
 #today {
@@ -52,48 +53,70 @@ color: #343A40;
 
 
 form p {
-margin: 0 0 20px;
-text-align: left;
-font-size: 0.9rem;
-color: #343A40;
+    margin: 0 0 20px;
+    text-align: left;
+    font-size: 0.9rem;
+    color: #343A40;
 }
 
 form input[type="text"],
 form input[type="password"] {
-box-sizing: border-box;
-width: 100%;
-margin-top: 6px;
-padding: 10px 12px;
-border: 1px solid #CED4DA;
-border-radius: 6px;
-background-color: #FFFFFF;
-font-size: 1rem;
+    box-sizing: border-box;
+    width: 100%;
+    margin-top: 6px;
+    padding: 10px 12px;
+    border: 1px solid #CED4DA;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    font-size: 1rem;
 }
 
 
 form input[type="text"],
 form input[type="password"] {
-outline: 2px solid #F7CAD0;
-outline-offset: 1px;
-border-color: #D88A99;
+    outline: 2px solid #F7CAD0;
+    outline-offset: 1px;
+    border-color: #D88A99;
 }
 
 
 /* ログインボタン */
 .submit-btn {
-width: 100%;
-margin-top: 4px;
-padding: 12px;
-border: none;
-border-radius: 8px;
-background-color: #F7CAD0;
-color: #343A40;
-font-size: 1rem;
-font-weight: bold;
-cursor: pointer;
+    width: 100%;
+    margin-top: 4px;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: #F7CAD0;
+    color: #343A40;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 /* ボタンのホバー */
 .submit-btn:hover {
-background-color: #F0B5BF;
+    background-color: #F0B5BF;
+}
+
+.cancel-btn {
+    width: 100%;
+    margin-top: 20px;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: #f2e3e5;
+    color: #343A40;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(52, 58, 64, 0.25);
+  transition: all 0.2s ease;
+}
+
+.cancel-btn:hover {
+    background-color: #eec3c9;
+  border-color: #ffffff;
+  box-shadow: 0 6px 18px rgba(52, 58, 64, 0.35);
+  transform: translateY(-2px);
 }

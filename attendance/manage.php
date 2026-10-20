@@ -111,6 +111,7 @@ try {
                             <th>学年</th>
                             <th>班</th>
                             <th>在校状況</th>
+                            <th></th>
                         </tr>
                     </thead>
 
@@ -118,8 +119,7 @@ try {
                         <tr>
                             <td><input type="text" id="student_id" name="student_id" required></td>
                             <td><input type="text" id="name"student_name="student_name" required></td>
-                            <!-- 学科名プルダウン -->
-
+                            <td>情報システム科</td>
                             <!-- 学年プルダウン -->
                              <td><select id="grade" name="grade" onchange="this.form.submit()">
                                 <option value="">- 学年選択 -</option>
@@ -133,6 +133,13 @@ try {
                             </select></td>
                             <td><input type="text" id="student_group" name="student_group"></td>
                             <!-- 在校状況ラジオボタン -->
+                             <td><label>在校</label>
+                                        <input type="radio" name="zaikou" value="1">
+                                    <label>退校・卒業</label>
+                                        <input type="radio" name="taikou" value="0"></td>
+
+                            <td><button>登録</button></td>
+                                    
                         </tr>
                     </tbody>
 </table>
