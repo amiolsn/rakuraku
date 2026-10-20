@@ -3,12 +3,12 @@
 require_once 'db.php';
 require_once 'auth.php';
 
-// URLからの直接アクセスを防ぐ
-// 管理者以外からのアクセスを拒否して出欠入力画面に戻す
-if (empty($_SESSION['user']['is_admin']) || $_SESSION['user']['is_admin'] !== 1) {
-    header('Location: input.php');
-    exit;
-}
+// // URLからの直接アクセスを防ぐ
+// // 管理者以外からのアクセスを拒否して出欠入力画面に戻す
+// if (empty($_SESSION['user']['is_admin']) || $_SESSION['user']['is_admin'] !== 1) {
+//     header('Location: input.php');
+//     exit;
+// }
 
 
 try {
@@ -133,9 +133,9 @@ try {
                             <td><input type="text" id="student_group" name="student_group"></td>
                             <!-- 在校状況ラジオボタン -->
                              <td><label>在校</label>
-                                        <input type="radio" name="zaikou" value="1">
+                                        <input type="radio" name="status" value="1">
                                     <label>退校・卒業</label>
-                                        <input type="radio" name="taikou" value="0"></td>
+                                        <input type="radio" name="status" value="0"></td>
 
                             <td><button>登録</button></td>
                                     
