@@ -34,7 +34,7 @@
 
             <!-- 管理者のみに表示 -->
             <?php if (!empty($_SESSION['user']['is_admin']) && $_SESSION['user']['is_admin'] === 1): ?>
-                <a href="manage.php" class="admin-link">管理者メニュー</a>
+                <a href="#" class="admin-link">管理者メニュー</a>
             <?php endif; ?>
 
             <a href="logout.php">ログアウト</a>
