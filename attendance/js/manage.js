@@ -149,6 +149,60 @@ console.log('通信先:', response.url);
 }
 
 
-async function toggleAdd(button) {
-    
+async function addStudent(button) {
+    const studentId = document.getElementById('student_id').value.trim();
+    const studentName = document.getElementById('student_name').value.trim();
+    const departmentId = document.getElementById('department_id').value.trim();
+    const grade = document.getElementById('grade').value;
+    const studentGroup = document.getElementById('student_group').value.trim();
+
+    // 選択された在校状況を取得
+    const statusElement = document.querySelector(
+        'input[name="status"]:checked'
+    );
+
+    // 入力チェック
+    if(!studentID || !studentName || grade || !statusElement) {
+        alert('必要項目を入力・選択してください');
+        return;
+    }
+
+    // PHPへ送信するデータをまとめる
+    const data = {
+        student_id: studentId,
+        student_name: studentName,
+        department_id: departmentId,
+        grade: grade,
+        studentGroup: studentGroup || null,
+        status: statusElement.value
+    };
+
+    try {
+        //PHPへ送信する
+        const response = await fetch('add_student.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                data
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || '保存に失敗しました。');
+        }
+        
+        alert('生徒情報を新規登録しました。');
+
+        location.reload();
+
+    } catch (error) {
+        console.error(error);
+        alert(error.message || '通信エラーが発生しました。');
+    } finally {
+        button.disabled = false;
+    }
 }
