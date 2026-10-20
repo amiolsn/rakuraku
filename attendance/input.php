@@ -202,16 +202,7 @@ try {
 
 <body>
     <!-- ヘッダー -->
-    <?php require_once 'header-top.php'; ?>
-    <!-- 仮ナビゲーション -->
-    <nav><a href="#">欠席登録・届け出管理</a></nav>
-    <nav><a href="#">集計</a></nav>
-    <nav><a href="manage.php">登録情報編集</a></nav>
-
-    <a href="login-input.php">ログイン</a>
-    <a href="logout.php">ログアウト</a>
-    <?php require_once 'header-bottom.php'; ?>
-
+    <?php require_once 'components/header.php'; ?>
 
     <div class="filter-controller">
         <!-- 日付選択コントローラー -->
