@@ -3,14 +3,6 @@
 require_once 'db.php';
 require_once 'auth.php';
 
-// URLからの直接アクセスを防ぐ
-// 管理者以外からのアクセスを拒否して出欠入力画面に戻す
-if (empty($_SESSION['user']['is_admin']) || $_SESSION['user']['is_admin'] !== 1) {
-    header('Location: input.php');
-    exit;
-}
-
-
 try {
     $departmentId = $_SESSION['user']['department_id'];
 
