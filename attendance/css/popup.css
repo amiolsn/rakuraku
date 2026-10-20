@@ -1,19 +1,170 @@
+/* =========================
+   新規追加ポップアップ
+========================= */
 
+/* 背景のオーバーレイ */
 #popup-wrapper {
-  background-color: rgba(0, 0, 0, .5);
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  display: none;
+    background-color: rgba(33, 37, 41, 0.55);
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 24px;
+    box-sizing: border-box;
 }
 
+/* ポップアップ本体 */
+#popup-inside {
+    position: relative;
+    width: 100%;
+    max-width: 1100px;
+    max-height: 90vh;
+    overflow: auto;
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 32px 24px 24px;
+    box-shadow: 0 12px 40px rgba(33, 37, 41, 0.18);
+    box-sizing: border-box;
+}
 
-
+/* 閉じるボタン */
 #close {
-  position: absolute;
-  top: 0;
-  right: 5px;
-  cursor: pointer;
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    color: var(--color-text-sub);
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+/* =========================
+   新規追加テーブル
+========================= */
+
+.add-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    background-color: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+/* 見出し */
+.add-table th {
+    background-color: var(--color-header-bg);
+    color: var(--color-primary);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 14px 12px;
+    text-align: center;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* セル */
+.add-table td {
+    background-color: var(--color-bg-card);
+    padding: 14px 10px;
+    text-align: center;
+    vertical-align: middle;
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* 最終行の下線 */
+.add-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* テキスト入力欄・プルダウン */
+.add-table input[type="text"],
+.add-table select {
+    width: 100%;
+    min-width: 80px;
+    padding: 9px 10px;
+    box-sizing: border-box;
+    border: 1px solid var(--color-border-control);
+    border-radius: 5px;
+    background-color: var(--color-bg-card);
+    color: var(--color-primary);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+/* 入力時 */
+.add-table input[type="text"]:focus,
+.add-table select:focus {
+   outline: 2px solid #F7CAD0;
+    outline-offset: 1px;
+    border-color: #D88A99;
+}
+
+/* ラジオボタン */
+.add-table input[type="radio"] {
+    accent-color: var(--color-accent-text);
+    cursor: pointer;
+    margin: 0 4px 0 2px;
+    vertical-align: middle;
+}
+
+.add-table label {
+    color: var(--color-primary);
+    font-size: 13px;
+    white-space: nowrap;
+}
+
+/* 登録ボタン */
+.add-table .add-btn {
+    width: 100%;
+    margin-top: 4px;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: var(--color-primary);
+    color: var(--color-bg-card);
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+      box-shadow: 0 4px 14px rgba(52, 58, 64, 0.25);
+  transition: all 0.2s ease;
+
+}
+
+.add-table .add-btn:hover {
+  background-color: #F0B5BF;
+  box-shadow: 0 6px 18px rgba(52, 58, 64, 0.35);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    #popup-wrapper {
+        padding: 12px;
+    }
+
+    #popup-inside {
+        padding: 32px 12px 16px;
+    }
+
+    .add-table {
+        min-width: 750px;
+    }
+
+    #message {
+        overflow-x: auto;
+    }
 }

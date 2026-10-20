@@ -52,6 +52,17 @@ try {
     $stmtTeachers->execute([$departmentId]);
 
     $teachers = $stmtTeachers->fetchAll();
+
+        // ログイン中の教員の学科名を取得
+    $stmtDepartment = $pdo->prepare("
+        SELECT department_name
+        FROM department
+        WHERE department_id = ?
+    ");
+
+    $stmtDepartment->execute([$departmentId]);
+
+    $departmentName = $stmtDepartment->fetchColumn();
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
 }
@@ -89,58 +100,61 @@ try {
 
                         <!-- 新規追加 -->
                         <button id="click-btn" class="add-btn" onclick="toggleAdd(this)">新規追加</button>
-                        <div id="popup-wrapper">
-                            <div id="popup-inside">
-                                <div id="close">x</div>
-                                <div id="message">
-                                    <table class="management-table">
-                                        <thead>
-                                            <tr>
-                                                <th>学籍番号</th>
-                                                <th>生徒氏名</th>
-                                                <th>学科名</th>
-                                                <th>学年</th>
-                                                <th>班</th>
-                                                <th>在校状況</th>
-                                                <th></th>
-                                            </tr>
-                                        </thead>
+                            <div id="popup-wrapper">
+                                <div id="popup-inside">
+                                    <div id="close">x</div>
+                                    <div id="message">
+                                        <table class="management-table add-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>学籍番号</th>
+                                                    <th>生徒氏名</th>
+                                                    <th>学科名</th>
+                                                    <th>学年</th>
+                                                    <th>班</th>
+                                                    <th>在校状況</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
 
-                                        <tbody>
-                                            <tr>
-                                                <td><input type="text" id="student_id" name="student_id" required></td>
-                                                <td><input type="text" id="name" student_name="student_name" required></td>
-                                                <td>情報システム科</td>
-                                                <!-- 学年プルダウン -->
-                                                <td><select id="grade" name="grade" onchange="this.form.submit()">
-                                                        <option value="">- 学年選択 -</option>
-                                                        <?php for ($i = 1; $i <= $years; $i++): ?>
-                                                            <option value="<?= $i ?>"
-                                                                <?= (isset($_GET['grade']) && $_GET['grade'] == $i) ? 'selected' : '' ?>>
+                                            <tbody>
+                                                <tr>
+                                                    <td><input type="text" id="student_id" name="student_id" required></td>
+                                                    <td><input type="text" id="student_name" name="student_name" required></td>
+                                                    <span id="department_name">
+                                                        <?= htmlspecialchars($departmentName, ENT_QUOTES, 'UTF-8') ?>
+                                                    </span>
+                                                    <!-- 学年プルダウン -->
+                                                    <td><select id="grade" name="grade">
+                                                            <option value="">- 学年選択 -</option>
+                                                            <?php for ($i = 1; $i <= $years; $i++): ?>
+                                                            <option value="<?= $i ?>" <?=(isset($_GET['grade']) && $_GET['grade']==$i)
+                                                                ? 'selected' : '' ?>>
                                                                 <?= $i ?>年生
                                                             </option>
-                                                        <?php endfor; ?>
+                                                            <?php endfor; ?>
 
-                            </select></td>
-                            <td><input type="text" id="student_group" name="student_group"></td>
-                            <!-- 在校状況ラジオボタン -->
-                             <td><label>在校</label>
-                                        <input type="radio" name="status" value="1">
-                                    <label>退校・卒業</label>
-                                        <input type="radio" name="status" value="0"></td>
+                                                        </select></td>
+                                                    <td><input type="text" id="student_group" name="student_group"></td>
+                                                    <!-- 在校状況ラジオボタン -->
+                                                    <td><label>在校</label>
+                                                        <input type="radio" name="status" value="1">
+                                                        <label>退校・卒業</label>
+                                                        <input type="radio" name="status" value="0">
+                                                    </td>
 
-                            <td><button>登録</button></td>
-                                    
-                        </tr>
-                    </tbody>
-</table>
-                        <a href="#">ゲットする</a>
-                        </div>
+                                                    <td><button type="button" class="add-btn">登録</button></td>
+
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+
                     </div>
-                </div>
 
-
-                    </div>
                     <table class="management-table">
                         <thead>
                             <tr>
@@ -172,7 +186,10 @@ try {
                                     <!-- 在校状況 -->
                                     <td class="editable" data-field="status" data-status="<?= (int)$st['status'] ?>"><?= $st['status'] == 1 ? '在校' : '退校・卒業' ?></td>
                                     <!-- 編集・削除ボタン -->
-                                    <td class="table-actions"><button class="edit-btn" onclick="toggleEdit(this)">編集</button><button class="delete-btn" onclick="toggledelete(this)">削除</button></td>
+                                    <td class="table-actions">
+                                        <button class="edit-btn" onclick="toggleEdit(this)">編集</button>
+                                        <button class="delete-btn" onclick="toggledelete(this)">削除</button>
+                                    </td>
 
                                 </tr>
                             <?php endforeach; ?>
