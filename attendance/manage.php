@@ -272,15 +272,20 @@ try {
                                     <!-- 編集・削除ボタン -->
                                     <td class="table-actions">
                                         <button class="edit-btn" onclick="toggleEdit(this)">編集</button>
-                                        <button class="delete-btn">削除</button>
-                                        <?php include 'components/_delete_popup.php'; ?>
+                                        <button
+                                            type="button"
+                                            class="delete-btn"
+                                            data-type="student"
+                                            data-id="<?= htmlspecialchars($st['student_id'], ENT_QUOTES, 'UTF-8') ?>">
+                                            削除
+                                        </button>
                                     </td>
 
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
-
+                    <?php include 'components/_delete_popup.php'; ?>
                 </div>
 
             </div>
@@ -292,6 +297,7 @@ try {
     <script src="js/tab.js"></script>
     <script src="js/manage.js"></script>
     <script src="js/popup.js"></script>
+    <script src="js/delete-popup.js"></script>
 </body>
 
 </html>

@@ -209,14 +209,6 @@ async function addStudent(button) {
     }
 }
 
-function toggledelete(button) {
-    const row = button.closest('tr');
-
-
-
-    // 削除が押されたらdeleteするもしくは退避させる
-    // キャンセルが押されたらポップアップを閉じる
-}
 
 document.addEventListener('DOMContentLoaded', function () {
     const clearBtn = document.getElementById('clear-btn');
@@ -228,21 +220,3 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-// 削除確認ポップアップ
-const deleteBtns = document.querySelectorAll('.delete-btn');
-const deletePopupWrapper = document.getElementById('delete-popup-wrapper');
-const deleteClose = document.getElementById('delete-close');
-
-// 各削除ボタンにクリックイベントを設定
-deleteBtns.forEach(deleteBtn => {
-    deleteBtn.addEventListener('click', () => {
-        deletePopupWrapper.style.display = 'block';
-    });
-});
-
-// 外側または「x」をクリックしたら閉じる
-deletePopupWrapper.addEventListener('click', e => {
-    if (e.target === deletePopupWrapper || e.target === deleteClose) {
-        deletePopupWrapper.style.display = 'none';
-    }
-});
