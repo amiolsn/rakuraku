@@ -1,9 +1,9 @@
-const clickBtn = document.getElementById('click-btn');
+const addBtn = document.getElementById('add-btn');
 const popupWrapper = document.getElementById('popup-wrapper');
 const close = document.getElementById('close');
 
 // ボタンをクリックしたときにポップアップを表示させる
-clickBtn.addEventListener('click', () => {
+addBtn.addEventListener('click', () => {
   popupWrapper.style.display = "block";
 });
 

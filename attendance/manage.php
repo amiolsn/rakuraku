@@ -7,7 +7,7 @@ try {
     $departmentId = $_SESSION['user']['department_id'];
 
     // 生徒一覧の取得（学科名も結合して取得）
-    $stmtStudents = $pdo->prepare("
+    $sql = "
         SELECT
             s.student_id,
             s.student_name,
@@ -18,14 +18,44 @@ try {
         FROM students s
         JOIN department d
             ON s.department_id = d.department_id
-        WHERE s.status = 1
-        AND d.department_id = ?
-        ORDER BY s.student_id ASC
-    ");
+        WHERE d.department_id = ?
+    ";
 
-    $stmtStudents->execute([$departmentId]);
+    $params = [$departmentId];
 
-    $students = $stmtStudents->fetchAll();
+    // 学籍番号が検索欄に入力されている場合だけ条件を追加
+    if (isset($_GET['student_id']) && $_GET['student_id'] !== '') {
+        $sql .= " AND s.student_id = ?";
+        $params[] = (int)$_GET['student_id'];
+    }
+
+    // 生徒氏名が検索欄に入力されている場合だけ条件を追加
+    if (isset($_GET['student_name']) && $_GET['student_name'] !== '') {
+        $sql .= " AND s.student_name LIKE ?";
+        $params[] = '%' . $_GET['student_name'] . '%';
+    }
+
+    // 学年が選択されている場合だけ条件を追加
+    if (isset($_GET['grade']) && $_GET['grade'] !== '') {
+        $sql .= " AND grade = ?";
+        $params[] = (int)$_GET['grade'];
+    }
+
+    // 班が選択されている場合だけ条件を追加
+    if (isset($_GET['student_group']) && $_GET['student_group'] !== '') {
+        $sql .= " AND s.student_group = ?";
+        $params[] = $_GET['student_group'];
+    }
+
+    $sql .= " ORDER BY s.student_id ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    $students = $stmt->fetchAll();
+
+
+
 
     // 科目一覧の取得
     $stmtSubjects = $pdo->prepare("
@@ -90,6 +120,20 @@ try {
 
 
     $years = (int)($requirement['term'] ?? 0);
+
+    // 班一覧の取得（重複なし）
+    $stmtGroups = $pdo->prepare("
+        SELECT DISTINCT student_group
+        FROM students
+        WHERE department_id = ?
+        AND status = 1
+        AND student_group IS NOT NULL
+        AND student_group <> ''
+        ORDER BY student_group ASC
+    ");
+
+    $stmtGroups->execute([$departmentId]);
+    $groups = $stmtGroups->fetchAll();
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
 }
@@ -104,6 +148,7 @@ try {
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/tab.css">
     <link rel="stylesheet" href="css/popup.css">
+    <link rel="stylesheet" href="css/delete-popup.css">
 
 </head>
 
@@ -143,16 +188,19 @@ try {
                                     <td></td>
                                     <td>
                                         <label for="student_id">学籍番号</label>
-                                        <input type="text" name="student_id">
+                                        <input type="text" name="student_id"
+                                            value="<?= htmlspecialchars($_GET['student_id'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+
                                     </td>
                                     <td>
                                         <label for="student_name">生徒氏名</label>
-                                        <input type="text" name="studestudent_nament_id">
+                                        <input type="text" name="student_name"
+                                            value="<?= htmlspecialchars($_GET['student_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                                     </td>
                                     <td></td>
                                     <td>
                                         <label for="grade">学年</label>
-                                        <select id="grade" name="grade" onchange="this.form.submit()">
+                                        <select id="grade" name="grade">
                                             <?php
                                             $selected_grade = $_GET['grade'] ?? '';
                                             include 'components/_grade_options.php';
@@ -161,7 +209,7 @@ try {
                                     </td>
                                     <td>
                                         <label for="student_group">班</label>
-                                        <select id="student_group" name="student_group" onchange="this.form.submit()">
+                                        <select id="student_group" name="student_group">
                                             <?php
                                             $selected_group = $_GET['student_group'] ?? '';
                                             include 'components/_group_options.php';
@@ -170,7 +218,7 @@ try {
                                     </td>
                                     <td>
                                         <label for="status">在校状況</label>
-                                        <select id="status" name="status" onchange="this.form.submit()">
+                                        <select id="status" name="status">
                                             <?php
                                             $selected_grade = $_GET['status'] ?? '';
                                             include 'components/_status_options.php';
@@ -178,8 +226,8 @@ try {
                                         </select>
                                     </td>
                                     <td>
-                                        <button id="search-btn" class="search-btn">検索</button>
-                                        <button id="clear-btn" class="clear-btn">クリア</button>
+                                        <button type="submit" id="search-btn" class="search-btn">検索</button>
+                                        <button type="button" id="clear-btn" class="clear-btn">クリア</button>
                                     </td>
                                 </form>
                             </tr>
@@ -224,24 +272,16 @@ try {
                                     <!-- 編集・削除ボタン -->
                                     <td class="table-actions">
                                         <button class="edit-btn" onclick="toggleEdit(this)">編集</button>
-                                        <button class="delete-btn" onclick="toggledelete(this)">削除</button>
+                                        <button class="delete-btn">削除</button>
+                                        <?php include 'components/_delete_popup.php'; ?>
                                     </td>
 
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
-                </div>
-                <script>
-                    function toggledelete(button) {
-                        const row = button.closest('tr');
-                        const editableCells = row.querySelectorAll('.editable');
 
-                        // 削除しますか？ポップアップ表示
-                        // 削除が押されたらdeleteするもしくは退避させる
-                        // キャンセルが押されたらポップアップを閉じる
-                    }
-                </script>
+                </div>
 
             </div>
             <div class="tabbody-elem" id="tab-page2">タブ2内容タブ2内容</div>
