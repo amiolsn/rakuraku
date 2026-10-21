@@ -149,9 +149,9 @@ try {
                                             <tr>
                                                 <td><input type="text" id="student_id" name="student_id" required></td>
                                                 <td><input type="text" id="student_name" name="student_name" required></td>
-                                                <span id="department_name">
+                                                <td><span id="department_name">
                                                     <?= htmlspecialchars($departmentName, ENT_QUOTES, 'UTF-8') ?>
-                                                </span>
+                                                </span></td>
                                                 <!-- 学年プルダウン -->
                                                 <td><select id="grade" name="grade">
                                                         <?php

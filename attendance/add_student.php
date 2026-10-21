@@ -69,45 +69,86 @@ if(
     }
 
 
+$studentUsertypeId = 3;
 
+// 初期パスワード（仮）：生徒ごとにランダムに生成
+$initialPassword = bin2hex(random_bytes(8));
+$passwordHash = password_hash($initialPassword, PASSWORD_DEFAULT);
 
+//usersとstudentsへの登録をまとめる
+$pdo->beginTransaction();
 
-//INSERT
-$sql = "
-    INSERT into students
-        (student_id, student_name, department_id, grade, student_group, status)
+//users.user_idはAUTO_INCREMENTで自動採番
+$stmtUser = $pdo->prepare("
+    INSERT into users
+        (usertype_id, login_id, password)
     VALUES
-        (:student_id, :student_name, :department_id, :grade, :student_group, :status)
-";
+        (:usertype_id, :login_id, :password)
+");
 
-$stmt = $pdo->prepare($sql);
+$stmtUser->execute([
+    ':usertype_id'=> $studentUsertypeId,
+    ':login_id'=> $studentId,
+     ':password' => $passwordHash
+]);
 
-$stmt->execute([
+//自動採番されたuser_idを取得
+$userId = $pdo->lastInsertId();
+
+//studentsへ登録
+$stmtStudent = $pdo->prepare("
+    INSERT into students
+        (student_id,  department_id, user_id, student_name, grade, student_group, status)
+    VALUES
+        (:student_id, :department_id, :user_id, :student_name, :grade, :student_group, :status)
+");
+
+$stmtStudent->execute([
     ':student_id'=> $studentId,
+    ':department_id' => $departmentId,
+    ':user_id' => $userId,
     ':student_name'=> $studentName,
-     ':department_id' => $departmentId,
     ':grade'=> (int)$grade,
     ':student_group'=> $studentGroup === '' ? null : $studentGroup,
     ':status' => (int)$status
 ]);
 
+$pdo->commit();
+
 echo json_encode([
         'success' => true,
         'message' => '生徒情報を新規登録しました。'
     ]);
+
 } catch (PDOException $e) {
-    // 詳しいエラーをPHPのエラーログに出力
-    error_log('生徒登録エラー: ' . $e->getMessage());
+    if($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    error_log('生徒登録エラー：' . $e->getMessage());
+
+    if($e->getCode() === '23000') {
+        http_response_code(409);
+        $message = '学籍番号が重複しているか、登録内容に規約違反があります。';
+    } else {
+        http_response_code(500);
+        $message = 'データベースへの登録に失敗しました。';
+    }
+
+    echo json_encode([
+        'success' => false,
+        'message' => $message
+    ], JSON_UNESCAPED_UNICODE);
+
+}catch (Throwable   $e) {
+    if($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+    error_log('生徒登録エラー：' . $e->getMessage());
+
 
     http_response_code(500);
-
     echo json_encode([
         'success' => false,
-        'message' => 'データベースへの登録に失敗しました。'
-    ], JSON_UNESCAPED_UNICODE);
-}catch (RuntimeException  $e) {
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage()
+        'message' => '生徒登録処理中にエラーが発生しました。'
     ], JSON_UNESCAPED_UNICODE);
 }
