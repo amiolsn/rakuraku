@@ -77,7 +77,7 @@ try {
 
     $departmentName = $stmtDepartment->fetchColumn();
 
-        // 修業年限の取得
+    // 修業年限の取得
     $stmtRequirement = $pdo->prepare("
         SELECT MAX(grade) AS term
         FROM course_requirements
@@ -90,7 +90,6 @@ try {
 
 
     $years = (int)($requirement['term'] ?? 0);
-
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
 }
@@ -125,59 +124,69 @@ try {
             <div class="table-container">
                 <div class="tabbody-elem" id="tab-page1">
                     <div class="table-actions-top">
-
                         <!-- 新規追加 -->
-                        <button id="click-btn" class="add-btn" >新規追加</button>
-                            <div id="popup-wrapper">
-                                <div id="popup-inside">
-                                    <div id="close">x</div>
-                                    <div id="message">
-                                        <table class="management-table add-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>学籍番号</th>
-                                                    <th>生徒氏名</th>
-                                                    <th>学科名</th>
-                                                    <th>学年</th>
-                                                    <th>班</th>
-                                                    <th>在校状況</th>
-                                                    <th></th>
-                                                </tr>
-                                            </thead>
+                        <button id="add-btn" class="add-btn">新規追加</button>
+                        <?php include 'components/_add_student_popup.php'; ?>
+                        <button id="bulkAdd-btn" class="bulkAdd-btn">一括登録</button>
+                    </div>
 
-                                        <tbody>
-                                            <tr>
-                                                <td><input type="text" id="student_id" name="student_id" required></td>
-                                                <td><input type="text" id="student_name" name="student_name" required></td>
-                                                <td><span id="department_name">
-                                                    <?= htmlspecialchars($departmentName, ENT_QUOTES, 'UTF-8') ?>
-                                                </span></td>
-                                                <!-- 学年プルダウン -->
-                                                <td><select id="grade" name="grade">
-                                                        <?php
-                                                        $selected_grade = $_GET['grade'] ?? '';
-                                                        include 'components/_grade_options.php';
-                                                        ?>
-                                                    </select></td>
-                                                <td><input type="text" id="student_group" name="student_group"></td>
-                                                <!-- 在校状況ラジオボタン -->
-                                                <td><label>在校</label>
-                                                    <input type="radio" name="status" value="1">
-                                                    <label>退校・卒業</label>
-                                                    <input type="radio" name="status" value="0">
-                                                </td>
+                    <div class="table-actions-top">
+                        <!-- 検索フィルター -->
+                        <!-- 学籍番号
+                            生徒氏名
+                            学年
+                            班
+                            在校状況 -->
+                        <table class="management-table">
+                            <tr>
+                                <form action="" method="GET" class="period-header select">
+                                    <td></td>
+                                    <td>
+                                        <label for="student_id">学籍番号</label>
+                                        <input type="text" name="student_id">
+                                    </td>
+                                    <td>
+                                        <label for="student_name">生徒氏名</label>
+                                        <input type="text" name="studestudent_nament_id">
+                                    </td>
+                                    <td></td>
+                                    <td>
+                                        <label for="grade">学年</label>
+                                        <select id="grade" name="grade" onchange="this.form.submit()">
+                                            <?php
+                                            $selected_grade = $_GET['grade'] ?? '';
+                                            include 'components/_grade_options.php';
+                                            ?>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label for="student_group">班</label>
+                                        <select id="student_group" name="student_group" onchange="this.form.submit()">
+                                            <?php
+                                            $selected_group = $_GET['student_group'] ?? '';
+                                            include 'components/_group_options.php';
+                                            ?>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <label for="status">在校状況</label>
+                                        <select id="status" name="status" onchange="this.form.submit()">
+                                            <?php
+                                            $selected_grade = $_GET['status'] ?? '';
+                                            include 'components/_status_options.php';
+                                            ?>
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <button id="search-btn" class="search-btn">検索</button>
+                                        <button id="clear-btn" class="clear-btn">クリア</button>
+                                    </td>
+                                </form>
+                            </tr>
+                        </table>
 
-                                                    <td><button type="button" class="add-btn"
-                                                        onclick="addStudent(this)">
-                                                        登録
-                                                    </button></td>
 
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
+
 
 
                     </div>
