@@ -45,13 +45,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($row['usertype_id'] == 1 || $row['usertype_id'] == 2) {
             header('Location: input.php');
             exit;
-            // }
-            // elseif ($row['usertype_id'] == 2) {
-            //     echo '<script>
-            // alert("管理者TOPはまだ作成されていません。");
-            // location.href = "login-input.php";
-            // </script>';
-            //     exit;
         } elseif ($row['usertype_id'] == 3) {
             echo '<script>
             alert("生徒TOP画面はまだ作成されていません。");
