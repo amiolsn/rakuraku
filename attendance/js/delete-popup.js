@@ -1,6 +1,6 @@
 // 削除確認ポップアップ
-let selectedType = '';
-let selectedId = '';
+let deleteSelectedType = '';
+let deleteSelectedId = '';
 
 const deleteBtns = document.querySelectorAll('.delete-btn');
 const deletePopupWrapper = document.getElementById('delete-popup-wrapper');
@@ -10,8 +10,8 @@ const deleteClose = document.getElementById('delete-close');
 deleteBtns.forEach(deleteBtn => {
     deleteBtn.addEventListener('click', () => {
         //押された削除ボタンの情報を保存
-        selectedType = deleteBtn.dataset.type;
-        selectedId = deleteBtn.dataset.id;
+        deleteSelectedType = deleteBtn.dataset.type;
+        deleteSelectedId = deleteBtn.dataset.id;
 
         //確認ポップアップを表示
         deletePopupWrapper.style.display = 'block';
@@ -27,7 +27,7 @@ deletePopupWrapper.addEventListener('click', e => {
 
 //確認画面の削除ボタン
 document.getElementById('delete-yes').addEventListener('click', () => {
-    deleteInfo(selectedType, selectedId);
+    deleteInfo(deleteSelectedType, deleteSelectedId);
 });
 
 async function deleteInfo(type, id) {

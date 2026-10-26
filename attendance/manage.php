@@ -47,6 +47,20 @@ try {
         $params[] = $_GET['student_group'];
     }
 
+    // 班が選択されている場合だけ条件を追加
+    if (isset($_GET['student_group']) && $_GET['student_group'] !== '') {
+        $sql .= " AND s.student_group = ?";
+        $params[] = $_GET['student_group'];
+    }
+
+
+    // 班が選択されている場合だけ条件を追加
+    if (isset($_GET['status']) && $_GET['status'] !== '') {
+        $sql .= " AND s.status= ?";
+        $params[] = $_GET['status'];
+    }
+
+
     $sql .= " ORDER BY s.student_id ASC";
 
     $stmt = $pdo->prepare($sql);
@@ -149,6 +163,7 @@ try {
     <link rel="stylesheet" href="css/tab.css">
     <link rel="stylesheet" href="css/popup.css">
     <link rel="stylesheet" href="css/delete-popup.css">
+    <link rel="stylesheet" href="css/import-popup.css">
 
 </head>
 
@@ -172,7 +187,13 @@ try {
                         <!-- 新規追加 -->
                         <button id="add-btn" class="add-btn">新規追加</button>
                         <?php include 'components/_add_student_popup.php'; ?>
-                        <button id="bulkAdd-btn" class="bulkAdd-btn">一括登録</button>
+                        <button
+                            type="button"
+                            class="bulkAdd-btn"
+                            data-type="student">
+                            生徒一括登録
+                        </button>
+                        <?php include 'components/_import_popup.php'; ?>
                     </div>
 
                     <div class="table-actions-top">
@@ -298,6 +319,7 @@ try {
     <script src="js/manage.js"></script>
     <script src="js/popup.js"></script>
     <script src="js/delete-popup.js"></script>
+    <script src="js/import_popup_csv.js"></script>
 </body>
 
 </html>
