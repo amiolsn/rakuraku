@@ -2,6 +2,7 @@
 // データベース接続
 require_once 'db.php';
 require_once 'auth.php';
+require_once 'functions.php';
 
 // 対象日付の決定
 // URLから日付を取り出し、日付の形式が正しいかチェック
@@ -21,18 +22,7 @@ try {
     $departmentId = $_SESSION['user']['department_id'];
 
     // 班一覧の取得（重複なし）
-    $stmtGroups = $pdo->prepare("
-        SELECT DISTINCT student_group
-        FROM students
-        WHERE department_id = ?
-        AND status = 1
-        AND student_group IS NOT NULL
-        AND student_group <> ''
-        ORDER BY student_group ASC
-    ");
-
-    $stmtGroups->execute([$departmentId]);
-    $groups = $stmtGroups->fetchAll();
+    $groups = getStudentGroup($pdo, $departmentId);
 
     // 生徒一覧の取得（学科名も結合して取得）
     $sql = "
@@ -72,30 +62,10 @@ try {
 
 
     // 科目一覧の取得
-    $stmtSubjects = $pdo->prepare("
-        SELECT subject_id, subject_name
-        FROM subjects s
-        JOIN department d ON s.department_id = d.department_id
-        WHERE d.department_id = ?
-        ORDER BY subject_id ASC
-    ");
-
-    $stmtSubjects->execute([$departmentId]);
-
-    $subjects = $stmtSubjects->fetchAll();
+    $subjects = getSubjectsByDepartment($pdo, $departmentId);
 
     // 教員一覧の取得
-    $stmtTeachers = $pdo->prepare("
-        SELECT teacher_id, teacher_name
-        FROM teachers t
-        JOIN department d ON t.department_id = d.department_id
-        WHERE d.department_id = ?
-        ORDER BY teacher_id ASC
-    ");
-
-    $stmtTeachers->execute([$departmentId]);
-
-    $teachers = $stmtTeachers->fetchAll();
+    $teachers = getTeachersByDepartment($pdo, $departmentId);
 
     // カレンダーテーブルから対象日の情報を取得
     $stmtCalendar = $pdo->prepare("
@@ -125,18 +95,7 @@ try {
         : $default_max_period;
 
     // 修業年限の取得
-    $stmtRequirement = $pdo->prepare("
-        SELECT MAX(grade) AS term
-        FROM course_requirements
-        WHERE department_id = ?
-    ");
-
-    $stmtRequirement->execute([$departmentId]);
-
-    $requirement = $stmtRequirement->fetch();
-
-
-    $years = (int)($requirement['term'] ?? 0);
+    $years = getDepartmentYears($pdo, $departmentId);
 
     // その日の出欠データDBから探す
     $stmtAttendance = $pdo->prepare("
