@@ -153,6 +153,13 @@ async function addData(button, config) {
         }
 
         if (field.required && !value) {
+            console.log('必須項目が未入力:', {
+                key: field.key,
+                elementId: field.elementId,
+                radioName: field.radioName,
+                value: value
+            });
+
             alert('必要項目を入力・選択してください。');
             return;
         }

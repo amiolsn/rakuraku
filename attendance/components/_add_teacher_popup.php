@@ -7,9 +7,9 @@
 ?>
 
 
-<div id="popup-wrapper">
-    <div id="popup-inside">
-        <div id="close">x</div>
+<div class="popup-wrapper" id="teacher-popup">
+    <div class="popup-inside">
+        <div class="popup-close">x</div>
         <div id="message">
             <table class="management-table add-table">
                 <thead>
@@ -31,7 +31,9 @@
 
 
                         <td>
-                            <button type="button" class="add-btn"
+                            <button
+                                type="button"
+                                class="add-btn"
                                 onclick="addTeacher(this)">
                                 登録
                             </button>

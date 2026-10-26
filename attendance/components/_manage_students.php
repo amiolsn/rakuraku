@@ -8,7 +8,12 @@
 
 <div class="table-actions-top">
     <!-- 新規追加 -->
-    <button id="add-btn" class="add-btn">新規追加</button>
+    <button
+        type="button"
+        class="add-btn"
+        data-popup-target="student-popup">
+        新規追加
+    </button>
     <?php include 'components/_add_student_popup.php'; ?>
     <button
         type="button"
