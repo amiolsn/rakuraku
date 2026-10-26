@@ -1,15 +1,30 @@
-const addBtn = document.getElementById('add-btn');
-const popupWrapper = document.getElementById('popup-wrapper');
-const close = document.getElementById('close');
+console.log('popup.js 読み込み確認');
 
-// ボタンをクリックしたときにポップアップを表示させる
-addBtn.addEventListener('click', () => {
-  popupWrapper.style.display = "block";
+document.querySelectorAll('[data-popup-target]').forEach(button => {
+  button.onclick = function () {
+    console.log('onclick が実行されました！');
+
+    const popupId = this.dataset.popupTarget;
+    const popup = document.getElementById(popupId);
+
+    console.log('対象ID:', popupId);
+    console.log('ポップアップ:', popup);
+
+    if (popup) {
+      popup.style.display = 'flex';
+    }
+  };
 });
 
-// ポップアップの外側又は「x」のマークをクリックしたときポップアップを閉じる
-popupWrapper.addEventListener('click', e => {
-  if (e.target.id === popupWrapper.id || e.target.id === close.id) {
-    popupWrapper.style.display = 'none';
-  }
+
+// 外側または閉じるボタンをクリックしたら閉じる
+document.querySelectorAll('.popup-wrapper').forEach(popup => {
+  popup.addEventListener('click', event => {
+    if (
+      event.target === popup ||
+      event.target.classList.contains('popup-close')
+    ) {
+      popup.style.display = 'none';
+    }
+  });
 });
