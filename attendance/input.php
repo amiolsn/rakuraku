@@ -67,32 +67,11 @@ try {
     // 教員一覧の取得
     $teachers = getTeachersByDepartment($pdo, $departmentId);
 
-    // カレンダーテーブルから対象日の情報を取得
-    $stmtCalendar = $pdo->prepare("
-        SELECT
-            calendar_date,
-            is_holiday,
-            max_period,
-            description
-        FROM school_calendar
-        WHERE calendar_date = :att_date
-    ");
-    $stmtCalendar->execute(['att_date' => $target_date]);
-    $calendar_info = $stmtCalendar->fetch();
-
-    // 休校フラグと休校理由の判定
-    $is_holiday = false;
-    $description = '';
-    if ($calendar_info && !empty($calendar_info['is_holiday'])) {
-        $is_holiday = true;
-        $description = $calendar_info['description'] ?? '休校日';
-    }
-
-    // 時限数の動的決定
-    $default_max_period = 7;
-    $max_period = (!empty($calendar_info['max_period']) && $calendar_info['max_period'] > 0)
-        ? (int)$calendar_info['max_period']
-        : $default_max_period;
+    // カレンダー情報の取得
+    $calendar_info = getCalendarInfo($pdo, $target_date);
+    $is_holiday = $calendar_info['is_holiday'];
+    $description = $calendar_info['description'];
+    $max_period = $calendar_info['max_period'];
 
     // 修業年限の取得
     $years = getDepartmentYears($pdo, $departmentId);
