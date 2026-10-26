@@ -176,3 +176,51 @@ function getAttendanceData(PDO $pdo, string $target_date, int $max_period): arra
         'existing_periods' => $existing_periods,
     ];
 }
+
+/**
+ * 出欠入力用の生徒一覧を取得する（在校生・学年/班の絞り込み対応)
+ * 
+ * @param PDO $pdo
+ * @param int $department_id
+ * @param int|null $grade
+ * @param string|null $group
+ * @return array
+ */
+// 生徒一覧の取得
+function getAttendanceStudents(PDO $pdo, int $department_id, ?int $grade = null, ?string $group = null): array
+{
+    $sql = "
+        SELECT
+                s.student_id,
+                s.student_name,
+                s.grade,
+                s.student_group,
+                d.department_name
+        FROM students s
+        LEFT OUTER JOIN department d
+            ON s.department_id = d.department_id
+        WHERE s.status = 1
+        AND d.department_id = ?
+    ";
+
+    $params = [$department_id];
+
+    // 学年指定がある場合
+    if ($grade !== null) {
+        $sql .= " AND s. grade = ?";
+        $params[] = $grade;
+    }
+
+    // 班指定がある場合
+    if ($group !== null) {
+        $sql .= " AND s.student_group = ?";
+        $params[] = $group;
+    }
+
+    $sql .= " ORDER BY s.student_id ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll();
+}
