@@ -5,7 +5,7 @@ require_once 'auth.php';
 require_once 'functions.php';
 
 try {
-    $departmentId = $_SESSION['user']['department_id'];
+    $department_id = $_SESSION['user']['department_id'];
 
     // 生徒一覧の取得（学科名も結合して取得）
     $sql = "
@@ -22,7 +22,7 @@ try {
         WHERE d.department_id = ?
     ";
 
-    $params = [$departmentId];
+    $params = [$department_id];
 
     // 学籍番号が検索欄に入力されている場合だけ条件を追加
     if (isset($_GET['student_id']) && $_GET['student_id'] !== '') {
@@ -70,13 +70,13 @@ try {
     $students = $stmt->fetchAll();
 
     // 科目一覧の取得
-    $subjects = getSubjectsByDepartment($pdo, $departmentId);
+    $subjects = getSubjectsByDepartment($pdo, $department_id);
 
     // 教員一覧の取得
-    $teachers = getTeachersByDepartment($pdo, $departmentId);
+    $teachers = getTeachersByDepartment($pdo, $department_id);
 
     // 修業年限の取得
-    $years = getDepartmentYears($pdo, $departmentId);
+    $years = getDepartmentYears($pdo, $department_id);
 
     // ログイン中の教員の学科名を取得
     $stmtDepartment = $pdo->prepare("
@@ -85,12 +85,12 @@ try {
         WHERE department_id = ?
     ");
 
-    $stmtDepartment->execute([$departmentId]);
+    $stmtDepartment->execute([$department_id]);
 
     $departmentName = $stmtDepartment->fetchColumn();
 
     // 班一覧の取得（重複なし）
-    $groups = getStudentGroup($pdo, $departmentId);
+    $groups = getStudentGroup($pdo, $department_id);
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
 }

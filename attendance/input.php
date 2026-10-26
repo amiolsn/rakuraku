@@ -19,10 +19,10 @@ $week_days = ['日', '月', '火', '水', '木', '金', '土'];
 $target_w = $week_days[date('w', strtotime($target_date))];
 
 try {
-    $departmentId = $_SESSION['user']['department_id'];
+    $department_id = $_SESSION['user']['department_id'];
 
     // 班一覧の取得（重複なし）
-    $groups = getStudentGroup($pdo, $departmentId);
+    $groups = getStudentGroup($pdo, $department_id);
 
     // 生徒一覧の取得（学科名も結合して取得）
     $sql = "
@@ -39,7 +39,7 @@ try {
         AND d.department_id = ?
     ";
 
-    $params = [$departmentId];
+    $params = [$department_id];
 
     // 学年が選択されている場合だけ条件を追加
     if (isset($_GET['grade']) && $_GET['grade'] !== '') {
@@ -62,10 +62,10 @@ try {
 
 
     // 科目一覧の取得
-    $subjects = getSubjectsByDepartment($pdo, $departmentId);
+    $subjects = getSubjectsByDepartment($pdo, $department_id);
 
     // 教員一覧の取得
-    $teachers = getTeachersByDepartment($pdo, $departmentId);
+    $teachers = getTeachersByDepartment($pdo, $department_id);
 
     // カレンダー情報の取得
     $calendar_info = getCalendarInfo($pdo, $target_date);
@@ -74,55 +74,12 @@ try {
     $max_period = $calendar_info['max_period'];
 
     // 修業年限の取得
-    $years = getDepartmentYears($pdo, $departmentId);
+    $years = getDepartmentYears($pdo, $department_id);
 
-    // その日の出欠データDBから探す
-    $stmtAttendance = $pdo->prepare("
-        SELECT student_id, period, subject_id, teacher_id, attendance_status_id
-        FROM attendance
-        WHERE attendance_date = :att_date
-    ");
-    $stmtAttendance->execute(['att_date' => $target_date]);
-    $saved_records = $stmtAttendance->fetchAll();
-
-    // 整理用の箱を用意
-    $existing_attendance = [];  // 生徒の出欠を入れる箱
-    $period_subjects = [];      // 時限ごとの科目IDを追跡する箱
-    $period_teachers = [];      // 時限ごとの教員IDを追跡する箱
-
-    // DBからとれたデータを箱に入れる
-    foreach ($saved_records as $rec) {
-        // ”学籍番号_時限”をキーにして、ステータスを記憶
-        $p = $rec['period'];
-        $key = "{$rec['student_id']}_{$p}";
-        $existing_attendance[$key] = $rec['attendance_status_id'];
-
-        // 科目IDと教員IDを時限ごとに集める：連想配列のキーにして重複を削除
-        if (!empty($rec['subject_id'])) {
-            $period_subjects[$p][$rec['subject_id']] = true;
-        }
-        if (!empty($rec['teacher_id'])) {
-            $period_teachers[$p][$rec['teacher_id']] = true;
-        }
-    }
-
-    // 時限ごとに全員一致しているかを確認
-    $existing_periods = [];
-    for ($p = 1; $p <= $max_period; $p++) {
-        // 科目の判定
-        // 登録されている科目が1つだけなら採用
-        $subj_keys = isset($period_subjects[$p]) ? array_keys($period_subjects[$p]) : [];
-        $match_subj = (count($subj_keys) === 1) ? $subj_keys[0] : "";
-
-        // 教員の判定
-        $teach_keys = isset($period_teachers[$p]) ? array_keys($period_teachers[$p]) : [];
-        $match_teach = (count($teach_keys) === 1) ? $teach_keys[0] : "";
-
-        $existing_periods[$p] = [
-            'subject_id' => $match_subj,
-            'teacher_id' => $match_teach
-        ];
-    }
+    // 出欠データおよび時限設定の取得
+    $attendance_date = getAttendanceData($pdo, $target_date, $max_period);
+    $existing_attendance = $attendance_date['existing_attendance'];
+    $existing_periods = $attendance_date['existing_periods'];
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
 }
