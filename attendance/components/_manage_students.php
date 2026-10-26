@@ -134,5 +134,3 @@
         <?php endforeach; ?>
     </tbody>
 </table>
-<?php include 'components/_delete_popup.php'; ?>
-</div>

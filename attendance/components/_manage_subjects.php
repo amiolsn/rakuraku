@@ -8,12 +8,17 @@
 
 <div class="table-actions-top">
     <!-- 新規追加 -->
-    <button id="add-btn" class="add-btn">新規追加</button>
-    <!-- <?php include 'components/_add_subjects_popup.php'; ?> -->
+    <button
+        type="button"
+        class="add-btn"
+        data-popup-target="subject-popup">
+        新規追加
+    </button>
+    <?php include 'components/_add_subject_popup.php'; ?>
     <button
         type="button"
         class="bulkAdd-btn"
-        data-type="subjects">
+        data-type="subject">
         科目一括登録
     </button>
     <!-- <?php include 'components/_import_popup.php'; ?> -->
@@ -91,5 +96,3 @@
         <?php endforeach; ?>
     </tbody>
 </table>
-<?php include 'components/_delete_popup.php'; ?>
-</div>

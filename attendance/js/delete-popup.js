@@ -5,22 +5,29 @@ let deleteSelectedId = '';
 const deleteBtns = document.querySelectorAll('.delete-btn');
 const deletePopupWrapper = document.getElementById('delete-popup-wrapper');
 const deleteClose = document.getElementById('delete-close');
+const deleteCancel = document.getElementById('delete-cancel');
+
+console.log('削除ボタンの数:', deleteBtns.length);
 
 // 各削除ボタンにクリックイベントを設定
 deleteBtns.forEach(deleteBtn => {
     deleteBtn.addEventListener('click', () => {
-        //押された削除ボタンの情報を保存
         deleteSelectedType = deleteBtn.dataset.type;
         deleteSelectedId = deleteBtn.dataset.id;
 
-        //確認ポップアップを表示
+        console.log('削除対象:', deleteSelectedType);
+        console.log('削除ID:', deleteSelectedId);
+        console.log('ポップアップ要素:', deletePopupWrapper);
+
         deletePopupWrapper.style.display = 'block';
+
+        console.log('表示設定:', deletePopupWrapper.style.display);
     });
 });
 
 // 外側または「x」をクリックしたら閉じる
 deletePopupWrapper.addEventListener('click', e => {
-    if (e.target === deletePopupWrapper || e.target === deleteClose) {
+    if (e.target === deletePopupWrapper || e.target === deleteClose || e.target === deleteCancel) {
         deletePopupWrapper.style.display = 'none';
     }
 });
@@ -48,6 +55,11 @@ async function deleteInfo(type, id) {
         recipient = 'delete_teacher.php';
         alertMsg = '教員';
 
+    } else if (type === 'subject') {
+        console.log('科目を削除：', id);
+        //科目情報の削除処理
+        recipient = 'delete_subject.php';
+        alertMsg = '科目';
     } else {
         alert('削除対象が正しくありません。');
         return;
