@@ -11,7 +11,7 @@
 function getSubjectsByDepartment(PDO $pdo, int $department_id): array
 {
     $stmt = $pdo->prepare("
-        SELECT subject_id, subject_name
+        SELECT subject_id, subject_name, department_name
         FROM subjects s
         JOIN department d
             ON s.department_id = d.department_id
@@ -26,7 +26,7 @@ function getSubjectsByDepartment(PDO $pdo, int $department_id): array
 function getTeachersByDepartment(PDO $pdo, int $department_id): array
 {
     $stmt = $pdo->prepare("
-        SELECT teacher_id, teacher_name
+        SELECT teacher_id, teacher_name, department_name
         FROM teachers t
         JOIN department d 
             ON t.department_id = d.department_id

@@ -139,6 +139,9 @@ try {
             </div>
         </div>
     </div>
+
+    <?php include 'components/_delete_popup.php'; ?>
+
     <script src="js/common.js" defer></script>
     <script src="js/manage.js" defer></script>
     <script src="js/manage_teacher.js" defer></script>
