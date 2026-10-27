@@ -31,7 +31,8 @@ if (!isset($_SESSION['user'])) {
                 <input
                     type="submit"
                     value="ログアウト"
-                    class="submit-btn">
+                    class="submit-btn"
+                    id="logout-btn">
 
                 <button
                     type="button"
@@ -42,6 +43,11 @@ if (!isset($_SESSION['user'])) {
             </form>
         </main>
     </div>
+    <script>
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            localStorage.removeItem('active');
+        });
+    </script>
 </body>
 
 </html>
