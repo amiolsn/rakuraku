@@ -20,6 +20,19 @@ try {
 
     // 選択学年(未選択時は１年)
     $selected_grade = (isset($_GET['grade']) && $_GET['grade'] !== '') ? (int)$_GET['grade'] : 1;
+
+    // 週間集計用データの取得
+    if ($active_tab === 'weekly') {
+        $target_week_date = $_GET['date'] ?? date('Y-m-d');
+        $week_dates = getWeekDates($target_week_date);
+        $date_only_list = array_column($week_dates, 'date');
+
+        // 生徒一覧の取得
+        $students = getAttendanceStudents($pdo, $department_id, $selected_grade);
+
+        // 出欠データの取得
+        $weekly_attendance = getWeeklyAttendance($pdo, $date_only_list);
+    }
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
 }
@@ -75,13 +88,13 @@ try {
         <div class="tab-h">
             <ul class="tab-contena">
                 <li class="tab-elem <?= $active_tab === 'monthly' ? 'is-active' : '' ?>">
-                    <a href="summary.php?tab=monthly$grade=<?= $selected_grade ?>">月間集計</a>
+                    <a href="summary.php?tab=monthly&grade=<?= $selected_grade ?>">月間集計</a>
                 </li>
                 <li class="tab-elem <?= $active_tab === 'weekly' ? 'is-active' : '' ?>">
-                    <a href="summary.php?tab=weekly$grade=<?= $selected_grade ?>">週間集計</a>
+                    <a href="summary.php?tab=weekly&grade=<?= $selected_grade ?>">週間集計</a>
                 </li>
                 <li class="tab-elem <?= $active_tab === 'total' ? 'is-active' : '' ?>">
-                    <a href="summary.php?tab=monthly$grade=<?= $selected_grade ?>">訓練全期間集計</a>
+                    <a href="summary.php?tab=monthly&grade=<?= $selected_grade ?>">訓練全期間集計</a>
                 </li>
             </ul>
 
