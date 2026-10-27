@@ -191,3 +191,29 @@ async function addData(button, config) {
 function clearSearch() {
     window.location.href = window.location.pathname;
 }
+
+
+// document.addEventListener('DOMContentLoaded', function () {
+//     const form = document.getElementById('student-search-form');
+
+//     if (!form) return;
+
+//     form.addEventListener('submit', async function (event) {
+//         event.preventDefault();
+
+//         const data = Object.fromEntries(new FormData(form));
+
+//         try {
+//             const result = await postJson(
+//                 'search_students.php',
+//                 data
+//             );
+
+//             document.querySelector('#student-table tbody').innerHTML =
+//                 result.html;
+//         } catch (error) {
+//             console.error(error);
+//             alert(error.message || '検索に失敗しました。');
+//         }
+//     });
+// });

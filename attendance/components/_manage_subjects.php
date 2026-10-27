@@ -21,7 +21,6 @@
         data-type="subject">
         科目一括登録
     </button>
-    <!-- <?php include 'components/_import_popup.php'; ?> -->
 </div>
 
 <div class="table-actions-top">

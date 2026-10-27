@@ -2,7 +2,7 @@
 
 /**
  * 必要な変数:
- * @var String         $departmentName          学科名
+ * @var String         $department_name          学科名
  */
 ?>
 
@@ -29,7 +29,7 @@
                         <td><input type="text" id="student_id" name="student_id" required></td>
                         <td><input type="text" id="student_name" name="student_name" required></td>
                         <td><span id="department_name">
-                                <?= htmlspecialchars($departmentName, ENT_QUOTES, 'UTF-8') ?>
+                                <?= htmlspecialchars($department_name, ENT_QUOTES, 'UTF-8') ?>
                             </span></td>
                         <!-- 学年プルダウン -->
                         <td><select id="grade" name="grade">
