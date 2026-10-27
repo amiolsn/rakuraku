@@ -6,13 +6,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //ログイン認証成功後を想定
     unset($_SESSION['user']);
 
-    $pdo = new PDO('mysql:host=localhost;dbname=attendance_db;charset=utf8', 'staff', 'password');
+    // 共通設定の読込
+    require_once 'db.php';
 
     $sql = $pdo->prepare('
      SELECT 
         users.*, 
         usertype.usertype_name, 
         COALESCE(teachers.department_id, department.department_id) AS department_id,
+        COALESCE(teachers.teacher_name, department.department_name, students.student_name) AS user_name,
         teachers.is_admin
      FROM users 
      JOIN usertype 
@@ -21,6 +23,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ON users.user_id = department.user_id
      LEFT JOIN teachers
         ON users.user_id = teachers.user_id
+     LEFT JOIN students
+        ON users.user_id = students.user_id
      WHERE users.login_id = ? AND users.password = ?
      ');
 
@@ -29,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_POST['password'] ?? ''
     ]);
 
-    $row = $sql->fetch(PDO::FETCH_ASSOC);
+    $row = $sql->fetch();
 
 
     if ($row) {
@@ -39,6 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'usertype_name' => $row['usertype_name'],
             'login_id' => $row['login_id'],
             'department_id' => $row['department_id'],
+            'user_name' => $row['user_name'],
             'is_admin' => (int)($row['is_admin'] ?? '0'),
         ];
 
