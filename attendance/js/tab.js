@@ -1,40 +1,55 @@
 // ---------------------------
 // 対象要素の取得
 // ---------------------------
-let tabsH = document.getElementById('tab-h').getElementsByClassName('tab-elem');
-let pagesH = document.getElementById('tabbody-h').getElementsByClassName('tabbody-elem');
+document.addEventListener('DOMContentLoaded', function () {
+    const tabContainer = document.getElementById('tab-h');
+    const pageContainer = document.getElementById('tabbody-h');
 
-// ---------------------------
-// タブ切り替え
-// ---------------------------
-function changeTabH() {
-    // href属性値から対象のid名を抜き出す
-    let targetIdH = this.dataset.tabid;
+    const tabsH = tabContainer.getElementsByClassName('tab-elem');
+    const pagesH = pageContainer.getElementsByClassName('tabbody-elem');
+    // ---------------------------
+    // タブ切り替え
+    // ---------------------------
 
-    // クリックされたタブページを表示
-    for (let i = 0; i < pagesH.length; i++) {
-        if (pagesH[i].id != targetIdH) {
-            pagesH[i].style.display = "none";
-        } else {
-            pagesH[i].style.display = "block";
+    const storageKey = 'active';
+
+    // タブの切り替えと保存
+    function changeTabH(targetId) {
+        // コンテンツを切り替える
+        for (let i = 0; i < pagesH.length; i++) {
+            pagesH[i].style.display =
+                pagesH[i].id === targetId ? 'block' : 'none';
         }
+
+        // タブの選択状態を切り替える
+        for (let i = 0; i < tabsH.length; i++) {
+            tabsH[i].classList.toggle(
+                'active',
+                tabsH[i].dataset.tabid === targetId
+            );
+        }
+
+        // 選択中のタブを保存
+        localStorage.setItem(storageKey, targetId);
     }
 
-    // クリックされたタブを前面に表示する
+    // タブのクリックイベントを設定
     for (let i = 0; i < tabsH.length; i++) {
-        tabsH[i].classList.remove('active');
+        tabsH[i].addEventListener('click', function () {
+            changeTabH(this.dataset.tabid);
+        });
     }
-    this.classList.add('active');
-}
 
-// ---------------------------
-// すべてのタブに対して、タブ切り替えのクリックイベントを設定
-// ---------------------------
-for (let i = 0; i < tabsH.length; i++) {
-    tabsH[i].onclick = changeTabH;
-}
+    // 保存されたタブを復元
+    const savedTab = localStorage.getItem(storageKey);
 
-// ---------------------------
-// 初期表示は先頭のタブ
-// ---------------------------
-tabsH[0].onclick();
+    // 保存されたIDが実在するタブか確認
+    const isValidTab = Array.from(tabsH).some(function (tab) {
+        return tab.dataset.tabid === savedTab;
+    });
+
+    // 保存値があれば復元し、なければ先頭のタブを表示
+    changeTabH(
+        isValidTab ? savedTab : tabsH[0].dataset.tabid
+    );
+});
