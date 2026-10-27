@@ -2,7 +2,7 @@
 
 /**
  * 必要な変数:
- * @var String         $departmentName          学科名
+ * @var String         $department_name          学科名
  */
 ?>
 
@@ -26,7 +26,7 @@
                         <td><input type="text" id="teacher_id" name="teacher_id" required></td>
                         <td><input type="text" id="teacher_name" name="teacher_name" required></td>
                         <td><span id="department_name">
-                                <?= htmlspecialchars($departmentName, ENT_QUOTES, 'UTF-8') ?>
+                                <?= htmlspecialchars($department_name, ENT_QUOTES, 'UTF-8') ?>
                             </span></td>
 
 

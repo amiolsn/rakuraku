@@ -22,7 +22,7 @@ try {
     $filters = [
         'student_id' => $_GET['student_id'] ?? '',
         'student_name' => $_GET['student_name'] ?? '',
-        'grade' => $_GET['student_group'] ?? '',
+        'grade' => $_GET['grade'] ?? '',
         'student_group' => $_GET['student_group'] ?? '',
         'status' => $_GET['status'] ?? '',
     ];
@@ -50,6 +50,7 @@ try {
     <?php require_once 'components/header.php'; ?>
 
 
+
     <!-- タブグループ -->
     <div class="tab-h" id="tab-h">
         <!-- タブメニュー -->
@@ -61,6 +62,8 @@ try {
         <!-- タブ内コンテンツ  ※コンテンツは自由に編集可能 -->
         <div class="tabbody-h" id="tabbody-h">
             <div class="table-container">
+                <?php include 'components/_import_popup.php'; ?>
+
                 <div class="tabbody-elem" id="tab-page1">
                     <?php include 'components/_manage_students.php'; ?>
                 </div>

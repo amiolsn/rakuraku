@@ -64,6 +64,8 @@ importForm.addEventListener('submit', async e => {
         alertMsg = '生徒';
     } else if (importSelectedType === 'teacher') {
         alertMsg = '教員';
+    } else if (importSelectedType === 'subject') {
+        alertMsg = '科目';
     } else {
         alert('登録対象が不正です。');
         return;

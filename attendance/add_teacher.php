@@ -113,7 +113,7 @@ try {
 ");
 
         $stmtUser->execute([
-            ':usertype_id' => $studentUsertypeId,
+            ':usertype_id' => $userId,
             ':login_id' => $teacherId,
             ':password' => $passwordHash
         ]);

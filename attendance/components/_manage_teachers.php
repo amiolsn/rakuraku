@@ -21,7 +21,6 @@
         data-type="teacher">
         教員一括登録
     </button>
-    <!-- <?php include 'components/_import_popup.php'; ?> -->
 </div>
 
 <div class="table-actions-top">

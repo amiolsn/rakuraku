@@ -31,9 +31,13 @@
                             学年
                             班
                             在校状況 -->
-    <table class="management-table">
-        <tr>
-            <form action="" method="GET" class="period-header select">
+    <form action="" method="GET"
+        class="period-header select"
+        id="student-search-form">
+
+        <table class="management-table" id="student-table">
+            <tr>
+
                 <td></td>
                 <td>
                     <label for="student_id">学籍番号</label>
@@ -78,10 +82,10 @@
                     <button type="submit" id="search-btn" class="search-btn">検索</button>
                     <button type="button" id="clear-btn" class="clear-btn">クリア</button>
                 </td>
-            </form>
-        </tr>
-    </table>
 
+            </tr>
+        </table>
+    </form>
 
 
 
