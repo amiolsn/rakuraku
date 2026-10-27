@@ -5,92 +5,28 @@ require_once 'auth.php';
 require_once 'functions.php';
 
 try {
-    $department_id = $_SESSION['user']['department_id'];
-
-    // 生徒一覧の取得（学科名も結合して取得）
-    $sql = "
-        SELECT
-            s.student_id,
-            s.student_name,
-            s.grade,
-            s.student_group,
-            s.status,
-            d.department_name
-        FROM students s
-        JOIN department d
-            ON s.department_id = d.department_id
-        WHERE d.department_id = ?
-    ";
-
-    $params = [$department_id];
-
-    // 学籍番号が検索欄に入力されている場合だけ条件を追加
-    if (isset($_GET['student_id']) && $_GET['student_id'] !== '') {
-        $sql .= " AND s.student_id = ?";
-        $params[] = (int)$_GET['student_id'];
-    }
-
-    // 生徒氏名が検索欄に入力されている場合だけ条件を追加
-    if (isset($_GET['student_name']) && $_GET['student_name'] !== '') {
-        $sql .= " AND s.student_name LIKE ?";
-        $params[] = '%' . $_GET['student_name'] . '%';
-    }
-
-    // 学年が選択されている場合だけ条件を追加
-    if (isset($_GET['grade']) && $_GET['grade'] !== '') {
-        $sql .= " AND grade = ?";
-        $params[] = (int)$_GET['grade'];
-    }
-
-    // 班が選択されている場合だけ条件を追加
-    if (isset($_GET['student_group']) && $_GET['student_group'] !== '') {
-        $sql .= " AND s.student_group = ?";
-        $params[] = $_GET['student_group'];
-    }
-
-    // 班が選択されている場合だけ条件を追加
-    if (isset($_GET['student_group']) && $_GET['student_group'] !== '') {
-        $sql .= " AND s.student_group = ?";
-        $params[] = $_GET['student_group'];
-    }
-
-
-    // 班が選択されている場合だけ条件を追加
-    if (isset($_GET['status']) && $_GET['status'] !== '') {
-        $sql .= " AND s.status= ?";
-        $params[] = $_GET['status'];
-    }
-
-
-    $sql .= " ORDER BY s.student_id ASC";
-
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute($params);
-
-    $students = $stmt->fetchAll();
+    $department_id = (int)$_SESSION['user']['department_id'];
 
     // 科目一覧の取得
     $subjects = getSubjectsByDepartment($pdo, $department_id);
-
     // 教員一覧の取得
     $teachers = getTeachersByDepartment($pdo, $department_id);
-
     // 修業年限の取得
     $years = getDepartmentYears($pdo, $department_id);
-
-    // ログイン中の教員の学科名を取得
-    $stmtDepartment = $pdo->prepare("
-        SELECT department_name
-        FROM department
-        WHERE department_id = ?
-    ");
-
-    $stmtDepartment->execute([$department_id]);
-
-    $departmentName = $stmtDepartment->fetchColumn();
-
     // 班一覧の取得（重複なし）
     $groups = getStudentGroup($pdo, $department_id);
+    // ログイン中教員の学科名を取得
+    $department_name = getDepartmentName($pdo, $department_id);
+
+    // 検索条件の取得と生徒一覧の取得
+    $filters = [
+        'student_id' => $_GET['student_id'] ?? '',
+        'student_name' => $_GET['student_name'] ?? '',
+        'grade' => $_GET['student_group'] ?? '',
+        'student_group' => $_GET['student_group'] ?? '',
+        'status' => $_GET['status'] ?? '',
+    ];
+    $students = searchStudents($pdo, $department_id, $filters);
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
 }
