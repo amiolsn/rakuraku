@@ -6,7 +6,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     //ログイン認証成功後を想定
     unset($_SESSION['user']);
 
-    $pdo = new PDO('mysql:host=localhost;dbname=attendance_db;charset=utf8', 'staff', 'password');
+    // 共通設定の読込
+    require_once 'db.php';
 
     $sql = $pdo->prepare('
      SELECT 
@@ -32,7 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $_POST['password'] ?? ''
     ]);
 
-    $row = $sql->fetch(PDO::FETCH_ASSOC);
+    $row = $sql->fetch();
 
 
     if ($row) {
