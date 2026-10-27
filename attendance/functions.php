@@ -66,6 +66,18 @@ function getStudentGroup(PDO $pdo, int $department_id): array
     return $stmt->fetchAll();
 }
 
+// 学科IDから学科名を取得
+function getDepartmentName(PDO $pdo, int $department_id): string
+{
+    $stmt = $pdo->prepare("
+        SELECT department_name
+        FROM department
+        WHERE department_id = ?
+    ");
+    $stmt->execute([$department_id]);
+    return (string)$stmt->fetchColumn();
+}
+
 /**
  * 対象日のカレンダー情報(休校日判定、理由、最大時限数)を取得する
  * 
@@ -175,4 +187,116 @@ function getAttendanceData(PDO $pdo, string $target_date, int $max_period): arra
         'existing_attendance' => $existing_attendance,
         'existing_periods' => $existing_periods,
     ];
+}
+
+/**
+ * 出欠入力用の生徒一覧を取得する（在校生・学年/班の絞り込み対応)
+ * 
+ * @param PDO $pdo
+ * @param int $department_id
+ * @param int|null $grade
+ * @param string|null $group
+ * @return array
+ */
+// 生徒一覧の取得
+function getAttendanceStudents(PDO $pdo, int $department_id, ?int $grade = null, ?string $group = null): array
+{
+    $sql = "
+        SELECT
+                s.student_id,
+                s.student_name,
+                s.grade,
+                s.student_group,
+                d.department_name
+        FROM students s
+        LEFT OUTER JOIN department d
+            ON s.department_id = d.department_id
+        WHERE s.status = 1
+        AND d.department_id = ?
+    ";
+
+    $params = [$department_id];
+
+    // 学年指定がある場合
+    if ($grade !== null) {
+        $sql .= " AND s. grade = ?";
+        $params[] = $grade;
+    }
+
+    // 班指定がある場合
+    if ($group !== null) {
+        $sql .= " AND s.student_group = ?";
+        $params[] = $group;
+    }
+
+    $sql .= " ORDER BY s.student_id ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll();
+}
+
+/**
+ * 管理画面用の生徒一覧・検索結果を習得する
+ * 
+ * @param PDO $pdo
+ * @param int $department_id
+ * @param array $filters 検索条件連想配列[student_id, student_name, grade, student_group, status]
+ * @return array
+ */
+function searchStudents(PDO $pdo, int $department_id, array $filters = []): array
+{
+    $sql = "
+        SELECT
+            s.student_id,
+            s.student_name,
+            s.grade,
+            s.student_group,
+            s.status,
+            d.department_name
+        FROM students s
+        JOIN department d
+            ON s.department_id = d.department_id
+        WHERE d.department_id = ?
+    ";
+
+    $params = [$department_id];
+
+    // 学籍番号が検索欄に入力されている場合だけ条件を追加
+    if (!empty($filters['student_id'])) {
+        $sql .= " AND s.student_id = ?";
+        $params[] = (int)$filters['student_id'];
+    }
+
+    // 生徒氏名が検索欄に入力されている場合だけ条件を追加
+    if (isset($_GET['student_name']) && $_GET['student_name'] !== '') {
+        $sql .= " AND s.student_name LIKE ?";
+        $params[] = '%' . $_GET['student_name'] . '%';
+    }
+
+    // 学年が選択されている場合だけ条件を追加
+    if (isset($_GET['grade']) && $_GET['grade'] !== '') {
+        $sql .= " AND grade = ?";
+        $params[] = (int)$_GET['grade'];
+    }
+
+    // 班が選択されている場合だけ条件を追加
+    if (isset($_GET['student_group']) && $_GET['student_group'] !== '') {
+        $sql .= " AND s.student_group = ?";
+        $params[] = $_GET['student_group'];
+    }
+
+    // 在校状況が選択されている場合だけ条件を追加
+    if (isset($_GET['status']) && $_GET['status'] !== '') {
+        $sql .= " AND s.status= ?";
+        $params[] = $_GET['status'];
+    }
+
+    $sql .= " ORDER BY s.student_id ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll();
 }
