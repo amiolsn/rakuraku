@@ -11,7 +11,8 @@ require_once 'csv_helper.php';
 require_once 'functions.php';
 function importStudents(
     PDO $pdo,
-    int $departmentId,
+    ?int $departmentId,
+    bool $isAdminAccount,
     string $tmpPath
 ): string {
 
@@ -30,6 +31,7 @@ function importStudents(
 
         validateCsvHeader($header, [
             'student_id',
+            'department_id',
             'student_name',
             'grade',
             'student_group',
@@ -61,22 +63,24 @@ function importStudents(
                 continue;
             }
 
-            if (count($row) !== 5) {
+            if (count($row) !== 6) {
                 throw new RuntimeException(
                     "{$lineNumber}行目：列数が正しくありません。"
                 );
             }
             $studentId = trim($row[0] ?? '');
-            $studentName = trim($row[1] ?? '');
-            $grade = trim($row[2] ?? '');
-            $studentGroup = trim($row[3] ?? '');
-            $status = trim($row[4] ?? '');
+            $department_id = trim($row[1] ?? '');
+            $studentName = trim($row[2] ?? '');
+            $grade = trim($row[3] ?? '');
+            $studentGroup = trim($row[4] ?? '');
+            $status = trim($row[5] ?? '');
 
             // ここで入力チェックを行う
             // 問題がなければ登録処理を行う
             //必要項目の確認
             if (
                 $studentId === '' ||
+                $department_id === '' ||
                 $studentName === '' ||
                 !ctype_digit($grade) ||
                 (int)$grade < 1 ||
@@ -96,10 +100,37 @@ function importStudents(
                 );
             }
 
+            $csvDepartmentId = $department_id;
+
+            if ($isAdminAccount) {
+                $sessionDepartmentId = null;
+            } else {
+                $sessionDepartmentId = $departmentId;
+            }
+
+
+            if (
+                $rtdepartmentId = resolveDepartmentId(
+                    $csvDepartmentId,
+                    $sessionDepartmentId,
+                    $isAdminAccount
+                ) === null ||
+                !is_numeric($rtdepartmentId) ||
+                (int)$rtdepartmentId <= 0
+            ) {
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'message' => '学科情報を取得できません。'
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+
             $studentIds[$studentId] = true;
 
             $students[] = [
                 'student_id' => $studentId,
+                'department_id' => $rtdepartmentId,
                 'student_name' => $studentName,
                 'grade' => (int)$grade,
                 'student_group' => $studentGroup === ''
@@ -159,7 +190,7 @@ function importStudents(
             // studentsに登録
             $stmtStudent->execute([
                 ':student_id' => $student['student_id'],
-                ':department_id' => $departmentId,
+                ':department_id' => $student['department_id'],
                 ':user_id' => $userId,
                 ':student_name' => $student['student_name'],
                 ':grade' => $student['grade'],

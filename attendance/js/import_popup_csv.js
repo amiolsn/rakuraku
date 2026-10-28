@@ -85,10 +85,13 @@ importForm.addEventListener('submit', async e => {
             body: formData
         });
 
+        const responseText = await response.text();
+
         console.log('HTTPステータス:', response.status);
         console.log('通信先:', response.url);
+        console.log('サーバーからの応答本文:', responseText);
 
-        const result = await response.json();
+        const result = JSON.parse(responseText);
 
         if (!response.ok || !result.success) {
             throw new Error(result.message || '登録に失敗しました。');

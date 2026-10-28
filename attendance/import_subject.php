@@ -13,16 +13,16 @@ require_once __DIR__ . '/csv_helper.php';
  */
 function importSubjects(
     PDO $pdo,
-    int $departmentId,
+    ?int $departmentId,
+    bool $isAdminAccount,
     string $tmpPath
 ): string {
 
-    if ($departmentId <= 0) {
-        throw new RuntimeException('学科情報を取得できません。');
-    }
+    // if ($departmentId <= 0) {
+    //     throw new RuntimeException('学科情報を取得できません。');
+    // }
 
     $handle = fopen($tmpPath, 'r');
-
     if ($handle === false) {
         throw new RuntimeException('CSVファイルを開けません。');
     }
@@ -33,11 +33,17 @@ function importSubjects(
 
         error_log('CSV header: ' . var_export($header, true));
 
-        validateCsvHeader($header, ['subject_name']);
+        validateCsvHeader($header, [
+            'subject_name',
+            'department_id'
+        ]);
 
         // 全行を読み込み、入力内容を先に検証する
         $subjects = [];
         $lineNumber = 1;
+
+
+
 
         while (($row = fgetcsv($handle, 0, ',', '"', '')) !== false) {
             $lineNumber++;
@@ -47,13 +53,14 @@ function importSubjects(
                 continue;
             }
 
-            if (count($row) !== 1) {
+            if (count($row) !== 2) {
                 throw new RuntimeException(
                     "{$lineNumber}行目：列数が正しくありません。"
                 );
             }
 
             $subjectName = trim($row[0] ?? '');
+            $department_id = trim($row[1] ?? '');
 
             if ($subjectName === '') {
                 throw new RuntimeException(
@@ -61,9 +68,38 @@ function importSubjects(
                 );
             }
 
+            $csvDepartmentId = $department_id;
+
+
+            if ($isAdminAccount) {
+                $sessionDepartmentId = null;
+            } else {
+                $sessionDepartmentId = $departmentId;
+            }
+
+
+            if (
+                $rtdepartmentId = resolveDepartmentId(
+                    $csvDepartmentId,
+                    $sessionDepartmentId,
+                    $isAdminAccount
+                ) === null ||
+                !is_numeric($rtdepartmentId) ||
+                (int)$rtdepartmentId <= 0
+            ) {
+                http_response_code(400);
+                echo json_encode([
+                    'success' => false,
+                    'message' => '学科情報を取得できません。'
+                ], JSON_UNESCAPED_UNICODE);
+                exit;
+            }
+
+
+
             $subjects[] = [
                 'subject_name' => $subjectName,
-                'department_id' => $departmentId
+                'department_id' => $rtdepartmentId
             ];
         }
 

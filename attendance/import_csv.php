@@ -10,7 +10,10 @@ try {
     // 実際のセッション名・権限に合わせて調整してください
     $departmentId = $_SESSION['user']['department_id'] ?? null;
 
-    if (!$departmentId) {
+    // 管理者かどうかを判定
+    $isAdminAccount = (int)($_SESSION['user']['usertype_id'] ?? 0) === 2;
+
+    if (!$isAdminAccount && !$departmentId) {
         throw new RuntimeException(
             '学科情報を取得できません。'
         );
@@ -34,17 +37,17 @@ try {
     switch ($target) {
         case 'student':
             require_once __DIR__ . '/import_student.php';
-            $message = importStudents($pdo, (int)$departmentId, $tmpPath);
+            $message = importStudents($pdo, $departmentId, $isAdminAccount, $tmpPath);
             break;
 
         case 'teacher':
             require_once __DIR__ . '/import_teacher.php';
-            $message = importTeachers($pdo, (int)$departmentId, $tmpPath);
+            $message = importTeachers($pdo, $departmentId, $isAdminAccount, $tmpPath);
             break;
 
         case 'subject':
             require_once __DIR__ . '/import_subject.php';
-            $message = importSubjects($pdo, (int)$departmentId, $tmpPath);
+            $message = importSubjects($pdo, $departmentId, $isAdminAccount, $tmpPath);
             break;
 
         default:
