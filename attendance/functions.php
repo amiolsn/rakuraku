@@ -300,3 +300,67 @@ function searchStudents(PDO $pdo, int $department_id, array $filters = []): arra
 
     return $stmt->fetchAll();
 }
+
+/**
+ * 指定日が含まれる週の「月～金曜日」の日付情報を取得する
+ * 
+ * @param string $date
+ * @return array [ ['date' => '2026-09-07', 'month' => 9, 'day' => 7, 'week_day' => '月'], ...]
+ */
+function getWeekDates(string $date): array
+{
+    $timestamp = strtotime($date);
+    $w = (int)date('w', $timestamp);
+
+    // 月曜日のタイムスタンプを計算
+    $diff_to_monday = ($w === 0) ? -6 : 1 - $w;
+    $monday_time = strtotime("{$diff_to_monday} days", $timestamp);
+
+    $week_day_name = ['月', '火', '水', '木', '金'];
+    $week_dates = [];
+
+    for ($i = 0; $i < 5; $i++) {
+        $current_time = strtotime("+{$i} days", $monday_time);
+        $week_dates[] = [
+            'date' => date('Y-m-d', $current_time),
+            'month' => (int)date('n', $current_time),
+            'day' => (int)date('j', $current_time),
+            'week_day' => $week_day_name[$i],
+        ];
+    }
+
+    return $week_dates;
+}
+
+/**
+ * 指定された日付リスト（週間）の出欠データを一括取得する
+ * 
+ * @param PDO $pdo
+ * @param array $date_list
+ * @return array ["student_id_YYYY-MM-DD_period" => attendance_status_id, ...]
+ */
+function getWeeklyAttendance(PDO $pdo, array $date_list): array
+{
+    if (empty($date_list)) {
+        return [];
+    }
+
+    // IN句のプレイスホルダー
+    $place_holders = implode(',', array_fill(0, count($date_list), '?'));
+
+    $stmt = $pdo->prepare("
+        SELECT student_id, attendance_date, period, attendance_status_id
+        FROM attendance
+        WHERE attendance_date IN ({$place_holders})
+    ");
+    $stmt->execute($date_list);
+    $records = $stmt->fetchAll();
+
+    $weekly_attendance = [];
+    foreach ($records as $rec) {
+        $key = "{$rec['student_id']}_{$rec['attendance_date']}_{$rec['period']}";
+        $weekly_attendance[$key] = (int)$rec['attendance_status_id'];
+    }
+
+    return $weekly_attendance;
+}

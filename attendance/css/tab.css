@@ -10,105 +10,118 @@ li {
 }
 /* ------------------------------------------- */
 
-#tab-h {
-    /* タブの上下左右に余白を設けるためだけのCSS */
-    margin: 1em;
+#tab-h,
+.tab-h {
+  /* タブの上下左右に余白を設けるためだけのCSS */
+  margin: 1em;
 }
 
-#tab-h .tab-contena{
-    width: 100%;
-    height: auto;
-    display: flex;
-    column-gap: 0.5em; /* タブの隙間 */
-    justify-content: space-around;
-    border-bottom: solid 2px #656766;
+#tab-h .tab-contena,
+.tab-h .tab-contena {
+  width: 100%;
+  height: auto;
+  display: flex;
+  column-gap: 0.5em; /* タブの隙間 */
+  justify-content: space-around;
+  border-bottom: solid 2px #656766;
 }
 
-#tab-h .tab-elem {
-    width: 100%; 
-    padding: 7px 0 7px 0;
-    text-align: center;
-    border-top: solid 2px #656766;
-    border-right: solid 2px #656766;
-    border-left: solid 2px #656766;
-    color: #ffffff;
-    border-radius: 10px 10px 0 0;
-    background-color: #656766;
+/* タブ内のリンクをタブ全体に広げる */
+.tab-h .tab-elem a {
+  display: block;
+  width: 100%;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
 }
 
+#tab-h .tab-elem,
+.tab-h .tab-elem {
+  width: 100%;
+  padding: 7px 0 7px 0;
+  text-align: center;
+  border-top: solid 2px #656766;
+  border-right: solid 2px #656766;
+  border-left: solid 2px #656766;
+  color: #ffffff;
+  border-radius: 10px 10px 0 0;
+  background-color: #656766;
+}
 
-
-#tab-h .tab-elem:hover {
+#tab-h .tab-elem:hover,
+.tab-h .tab-elem:hover {
   cursor: pointer;
 }
 
 /* 表示中のタブのCSS */
-#tab-h .tab-elem.active {
-    color: #656766;
-    background-color: #ffffff;
-    position: relative;
+#tab-h .tab-elem.active,
+.tab-h .tab-elem.active {
+  color: #656766;
+  background-color: #ffffff;
+  position: relative;
 }
 
-#tab-h .tab-elem.active::after {
-    content: "";
-    display: inline-block;
-    width: 100%;
-    height: 0.1em;
-    background-color: #fff;
-    position: absolute;
-    right: 0;
-    bottom: -0.1em; /* 疑似要素の高さ（height）分だけ下に下げる */
+#tab-h .tab-elem.active::after,
+.tab-h .tab-elem.is-active::after {
+  content: "";
+  display: inline-block;
+  width: 100%;
+  height: 0.1em;
+  background-color: #fff;
+  position: absolute;
+  right: 0;
+  bottom: -0.1em; /* 疑似要素の高さ（height）分だけ下に下げる */
 }
 
 #tab-h .tabbody-elem {
-    display: none;
-    margin: 0 auto 0 auto;
-    padding: 2% 1% 3.75% 1%;
-    width: auto;
-    border: solid 2px #656766;
-    border-top: none;
-    background-color: #FFFFFF;
+  display: none;
+  margin: 0 auto 0 auto;
+  padding: 2% 1% 3.75% 1%;
+  width: auto;
+  border: solid 2px #656766;
+  border-top: none;
+  background-color: #ffffff;
 }
 
 /* テーブルの外側 */
 .table-container {
-    width: 100%;
-    overflow-x: auto;
+  width: 100%;
+  overflow-x: auto;
 }
 
 /* テーブル本体 */
 .management-table {
-    width: 100%;
-    table-layout: fixed;
-    border-collapse: collapse;
-    color: var(--color-primary);
-    background-color: var(--colorr-bg-card);
-    font-size: 14px;
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  color: var(--color-primary);
+  background-color: var(--colorr-bg-card);
+  font-size: 14px;
 }
 
 /* 見出し */
 .management-table th {
-    padding: 14px 12px;
-    background-color: #f1f3f5; /* チャコールグレー */
-    color: var(--color-primary);
-    font-weight: 600;
-    text-align: center;
-    white-space: nowrap;
+  padding: 14px 12px;
+  background-color: #f1f3f5; /* チャコールグレー */
+  color: var(--color-primary);
+  font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
 }
 
 /* データ部分 */
 .management-table td {
-    padding: 12px;
-    border-bottom: 1px solid var(--color-border);
-    text-align: center;
-    vertical-align: middle;/* 文字を縦方向の中央に配置 */
-    box-sizing: border-box;
-    overflow: hidden;
+  padding: 12px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: center;
+  vertical-align: middle; /* 文字を縦方向の中央に配置 */
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 /* 交互の背景色 */
 .management-table tbody tr:nth-child(even) {
-    background-color: var(--color-header-bg);
+  background-color: var(--color-header-bg);
 }
 
 /* マウスを乗せた行 */
@@ -118,65 +131,64 @@ li {
 
 /* 操作ボタンのセル */
 .management-table .table-actions {
-    white-space: nowrap;
+  white-space: nowrap;
 }
-
 
 /* 編集ボタン */
 .management-table .edit-btn {
-    padding: 6px 12px;
-    border: 1px solid var(--color-accent-text);
-    border-radius: 5px;
-    background-color: #ffffff;
-    color: var(--color-accent-text);
-    cursor: pointer;
+  padding: 6px 12px;
+  border: 1px solid var(--color-accent-text);
+  border-radius: 5px;
+  background-color: #ffffff;
+  color: var(--color-accent-text);
+  cursor: pointer;
 }
 
 /* 削除ボタン */
 .management-table .delete-btn {
-    margin-left: 6px;
-    padding: 6px 12px;
-    border: 1px solid var(--color-primary);
-    border-radius: 5px;
-    background-color: var(--color-primary);
-    color: #ffffff;
-    cursor: pointer;
+  margin-left: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-primary);
+  border-radius: 5px;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  cursor: pointer;
 }
 
 .table-actions-top {
-    display: flex;
-    justify-content: flex-end;
-    margin-bottom: 10px;
-    margin-right: 5px;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+  margin-right: 5px;
 }
 
 /* 新規追加ボタン */
-.add-btn, .bulkAdd-btn{
-    margin-left: 10px;
-    padding: 6px 12px;
-    border: 1px solid var(--color-primary);
-    border-radius: 5px;
-    background-color: var(--color-primary);
-    color: #ffffff;
-    cursor: pointer;
+.add-btn,
+.bulkAdd-btn {
+  margin-left: 10px;
+  padding: 6px 12px;
+  border: 1px solid var(--color-primary);
+  border-radius: 5px;
+  background-color: var(--color-primary);
+  color: #ffffff;
+  cursor: pointer;
 }
 
 .management-table .edit-input {
-    display: block;
-    box-sizing: border-box;
-    width: 100%;
-    margin-top: 6px;
-    padding: 10px 12px;
-    border: 1px solid #CED4DA;
-    border-radius: 6px;
-    background-color: #FFFFFF;
-    font-size: 1rem;
-    color: #343A40;
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  margin-top: 6px;
+  padding: 10px 12px;
+  border: 1px solid #ced4da;
+  border-radius: 6px;
+  background-color: #ffffff;
+  font-size: 1rem;
+  color: #343a40;
 }
 
-
 .management-table .edit-input {
-outline: 2px solid #F7CAD0;
-outline-offset: 1px;
-border-color: #D88A99;
+  outline: 2px solid #f7cad0;
+  outline-offset: 1px;
+  border-color: #d88a99;
 }
