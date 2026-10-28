@@ -364,3 +364,70 @@ function getWeeklyAttendance(PDO $pdo, array $date_list): array
 
     return $weekly_attendance;
 }
+
+/**
+ * 指定年の日本の祝日一覧を取得する
+ * 
+ * @param int $year
+ * @return array ['YYYY-MM-DD' => '祝日名', ...]
+ */
+function getJapaneseHolidays(int $year): array
+{
+    $holidays = [];
+
+    // 固定祝日
+    $holidays["{$year}-01-01"] = '元旦';
+    $holidays["{$year}-02-11"] = '建国記念の日';
+    $holidays["{$year}-02-23"] = '天皇誕生日';
+    $holidays["{$year}-04-29"] = '昭和の日';
+    $holidays["{$year}-05-03"] = '憲法記念日';
+    $holidays["{$year}-05-04"] = 'みどりの日';
+    $holidays["{$year}-05-05"] = 'こどもの日';
+    $holidays["{$year}-08-11"] = '山の日';
+    $holidays["{$year}-11-03"] = '文化の日';
+    $holidays["{$year}-11-23"] = '勤労感謝の日';
+
+    // ハッピーマンデー（成人の日:1月第2月曜 / 海の日: 7月第3月曜 / 敬老の日: 9月第3月曜 / スポーツの日: 10月第2月曜）
+    $holidays[date('Y-m-d', strtotime("second monday of january {$year}"))] = '成人の日';
+    $holidays[date('Y-m-d', strtotime("third monday of july {$year}"))] = '海の日';
+    $holidays[date('Y-m-d', strtotime("third monday of september {$year}"))] = '敬老の日';
+    $holidays[date('Y-m-d', strtotime("second monday of octorber {$year}"))] = '体育の日';
+
+    // 春分の日・秋分の日
+    $spring_equinox_day = floor(20.8431 + 0.242194 * ($year - 1980) - floor(($year - 1980) / 4));
+    $autumn_equinox_day = floor(23.2488 + 0.242194 * ($year - 1980) - floor(($year - 1980) / 4));
+    $holidays[sprintf('%04d-03-%02d', $year, $spring_equinox_day)] = '春分の日';
+    $holidays[sprintf('%04d-09-$02d', $year, $autumn_equinox_day)] = '秋分の日';
+
+    // 国民の休日の判定（祝日に挟まれた平日）
+    $citizen_holidays = [];
+    foreach ($holidays as $date => $name) {
+        $two_days_later = date('Y-m-d', strtotime('+2 days', strtotime($date)));
+        $between_day = date('Y-m-d', strtotime('+1 day', strtotime($date)));
+
+        // 2日後も祝日であり、かつ間の日が祝日でもない場合
+        if (isset($holidays[$two_days_later]) && !isset($holidays[$between_day])) {
+            if ((int)date('w', strtotime($between_day)) !== 0) {
+                $citizen_holidays[$between_day] = '国民の休日';
+            }
+        }
+    }
+    $holidays = array_merge($holidays, $citizen_holidays);
+
+    // 振替休日の判定
+    $substitute_holidays = [];
+    foreach ($holidays as $date) {
+        if ((int)date('w', strtotime($date)) === 0) {
+            $next_day = date('Y-m-d', strtotime('+1 day', strtotime($date)));
+            while (isset($holidays[$next_day]) || isset($substitute_holidays[$next_day])) {
+                $next_day = date('Y-m-d', strtotime('+1 day', strtotime($next_day)));
+            }
+            $substitute_holidays[$next_day] = '振替休日';
+        }
+    }
+
+    $all_holidays = array_merge($holidays, $substitute_holidays);
+    ksort($all_holidays);
+
+    return $all_holidays;
+}
