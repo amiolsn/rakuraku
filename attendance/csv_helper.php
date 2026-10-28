@@ -56,3 +56,41 @@ function validateCsvHeader(
         );
     }
 }
+/**
+ * CSVの学科IDを検証する
+ *
+ * @param int $csvDepartmentId CSVに記載された学科ID
+ * @param ?int $sessionDepartmentId セッションの学科ID
+ * @param bool $isAdminAccount 管理者かどうか
+ * @return int 登録に使用する学科ID
+ */
+function resolveDepartmentId(
+    int $csvDepartmentId,
+    ?int $sessionDepartmentId,
+    bool $isAdminAccount
+): int {
+    if ($isAdminAccount) {
+        // 管理者はCSVの学科IDを使用する
+        // 実在する学科IDかどうかも別途確認する
+        return $csvDepartmentId;
+    }
+
+    if ($sessionDepartmentId === null) {
+        throw new RuntimeException(
+            'セッションから学科IDを取得できません。'
+        );
+    }
+
+    if ($csvDepartmentId !== $sessionDepartmentId) {
+        throw new RuntimeException(
+            'CSVにログイン中の学科とは異なる学科IDが含まれています。'
+        );
+    }
+
+    return $sessionDepartmentId;
+}
+
+function removeUtf8Bom(string $value): string
+{
+    return preg_replace('/^\xEF\xBB\xBF/', '', $value) ?? $value;
+}
