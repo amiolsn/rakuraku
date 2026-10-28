@@ -15,12 +15,12 @@
         新規追加
     </button>
     <?php include 'components/_add_teacher_popup.php'; ?>
-    <button
+    <!-- <button
         type="button"
         class="bulkAdd-btn"
         data-type="teacher">
         教員一括登録
-    </button>
+    </button> -->
 </div>
 
 <div class="table-actions-top">

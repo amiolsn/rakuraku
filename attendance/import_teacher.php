@@ -11,7 +11,8 @@ require_once 'csv_helper.php';
 require_once 'functions.php';
 function importTeachers(
     PDO $pdo,
-    int $departmentId,
+    ?int $departmentId,
+    bool $isAdminAccount,
     string $tmpPath
 ): string {
 
@@ -28,44 +29,24 @@ function importTeachers(
         // 1行目の見出しを読み込む
         $header = readCsvHeader($handle);
 
-
+        if (isset($header[0])) {
+            $header[0] = removeUtf8Bom($header[0]);
+        }
 
         validateCsvHeader($header, [
             'teacher_id',
             'teacher_name',
-            'isAdmin'
+            'isAdmin',
+            'department_id'
         ]);
-
-
-        // CSVの値を取得
-        $teacherId = trim($row[0] ?? '');
-        $teacherName = trim($row[1] ?? '');
-        $isAdminText = trim($row[2] ?? '');
-
-
-        // 管理者フラグの値をチェック
-        if (!in_array($isAdminText, [0, 1], true)) {
-            echo json_encode([
-                'success' => false,
-                'message' => '管理者フラグが不正です。'
-            ], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-
-
-        // 学科の修業年限を取得
-        $years = getDepartmentYears($pdo, $departmentId);
-
-        if ($years === 0) {
-            throw new RuntimeException(
-                '学科の修業年限を取得できません。'
-            );
-        }
 
         // CSV全行を読み込み、先に入力チェックする
         $teachers = [];
         $teacherIds = [];
         $lineNumber = 1;
+
+
+
 
 
         // 2行目以降を1行ずつ読み込む
@@ -77,7 +58,7 @@ function importTeachers(
                 continue;
             }
 
-            if (count($row) !== 3) {
+            if (count($row) !== 4) {
                 throw new RuntimeException(
                     "{$lineNumber}行目：列数が正しくありません。"
                 );
@@ -85,6 +66,16 @@ function importTeachers(
             $teacherId = trim($row[0] ?? '');
             $teacherName = trim($row[1] ?? '');
             $isAdmin = trim($row[2] ?? '');
+            $department_id = trim($row[3] ?? '');
+
+            if (!in_array($isAdmin, ['0', '1'], true)) {
+                throw new RuntimeException(
+                    "{$lineNumber}行目：管理者フラグが不正です。"
+                );
+            }
+
+            $isAdmin = (int)$isAdmin;
+
 
             // ここで入力チェックを行う
             // 問題がなければ登録処理を行う
@@ -92,59 +83,53 @@ function importTeachers(
             //必要項目の確認
             if (
                 $teacherId === '' ||
-                $teacherName === ''
+                $teacherName === '' ||
+                $department_id === ''
             ) {
-                http_response_code(400);
-                echo json_encode([
-                    'success' => false,
-                    'message' => '入力内容を確認してください。'
-                ]);
-                exit;
-            }
-
-            // 管理者フラグは0か1のみ許可
-            if (!in_array($isAdminText, ['0', '1'], true)) {
                 throw new RuntimeException(
-                    "{$lineNumber}行目：管理者フラグが不正です。"
+                    "{$lineNumber}行目：入力内容を確認してください。"
                 );
             }
 
-            $isAdmin = (int)$isAdminText;
+
+
 
             // ※ 実際の管理者判定用セッション項目に置き換える
-            $isLoggedInAdmin =
-                (int)($_SESSION['user']['usertype'] ?? 0) === 2;
+            // $isAdminAccount =
+            //     (int)($_SESSION['user']['usertype_id'] ?? 0) === 2;
 
             // 学科アカウントから管理者は作成できない
-            if (!$isLoggedInAdmin && $isAdmin === 1) {
-                http_response_code(403);
-                echo json_encode([
-                    'success' => false,
-                    'message' => '管理者を登録する権限がありません。'
-                ], JSON_UNESCAPED_UNICODE);
-                exit;
+            if (!$isAdminAccount && $isAdmin === 1) {
+
+                return count($teachers) . '管理者を登録する権限がありません。';
             }
+
+            $csvDepartmentId = $department_id;
 
             // 学科アカウントはログイン中の学科IDを使用する
             // 管理者は登録対象の学科IDを指定する
-            if ($isLoggedInAdmin) {
-                $departmentId = $row['department_id'] ?? null;
+            //管理者も学科もcsvから学科IDを取得学科はその後セッションと比較
+            //管理者はcsvdepartmentId,sessiondepartmentId:null, 
+            if ($isAdminAccount) {
+                $sessionDepartmentId = null;
             } else {
-                $departmentId = $_SESSION['user']['department_id'] ?? null;
+                $sessionDepartmentId = $departmentId;
             }
 
 
+            $rtDepartmentId = resolveDepartmentId(
+                $csvDepartmentId,
+                $sessionDepartmentId,
+                $isAdminAccount
+            );
+
             if (
-                $departmentId === null ||
-                !is_numeric($departmentId) ||
-                (int)$departmentId <= 0
+                !is_numeric($rtDepartmentId) ||
+                (int)$rtDepartmentId <= 0
             ) {
-                http_response_code(400);
-                echo json_encode([
-                    'success' => false,
-                    'message' => '学科情報を取得できません。'
-                ], JSON_UNESCAPED_UNICODE);
-                exit;
+                throw new RuntimeException(
+                    '学科情報を取得できません。'
+                );
             }
 
 
@@ -161,7 +146,7 @@ function importTeachers(
                 'teacher_id' => $teacherId,
                 'teacher_name' => $teacherName,
                 'is_admin' => $isAdmin,
-                'department_id' => $departmentId
+                'department_id' =>  $rtDepartmentId
             ];
         }
 
@@ -230,10 +215,7 @@ function importTeachers(
 
         $pdo->commit();
 
-        echo json_encode([
-            'success' => true,
-            'message' => '教員情報を新規登録しました。'
-        ], JSON_UNESCAPED_UNICODE);
+        return count($teachers) . '人の教員を登録しました。';
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();
