@@ -346,7 +346,7 @@ function getWeeklyAttendance(PDO $pdo, array $date_list): array
     }
 
     // IN句のプレイスホルダー
-    $place_holders = implode('.', array_fill(0, count($date_list), '?'));
+    $place_holders = implode(',', array_fill(0, count($date_list), '?'));
 
     $stmt = $pdo->prepare("
         SELECT student_id, attendance_date, period, attendance_status_id
@@ -358,7 +358,7 @@ function getWeeklyAttendance(PDO $pdo, array $date_list): array
 
     $weekly_attendance = [];
     foreach ($records as $rec) {
-        $key = "{$rec['sutdent_id']}_{$rec['attendance_date']}_{$rec['period']}";
+        $key = "{$rec['student_id']}_{$rec['attendance_date']}_{$rec['period']}";
         $weekly_attendance[$key] = (int)$rec['attendance_status_id'];
     }
 

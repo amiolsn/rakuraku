@@ -1,0 +1,71 @@
+/* css/summary.css */
+
+.weekly-table-wrapper {
+  overflow-x: auto;
+  background-color: #ffffff;
+  border: 1px solid #dee2e6;
+}
+
+.summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  text-align: center;
+}
+
+.summary-table th,
+.summary-table td {
+  border: 1px solid #333333;
+  padding: 4px 2px;
+}
+
+.summary-table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+.day-group-header {
+  background-color: #e9ecef;
+}
+
+.col-num {
+  width: 65px;
+  text-align: center;
+}
+
+.col-name {
+  width: 130px;
+  text-align: left;
+  padding-left: 8px;
+}
+
+.name-cell {
+  text-align: left;
+  padding-left: 8px;
+  white-space: nowrap;
+}
+
+.cell-period {
+  width: 22px;
+  height: 24px;
+  font-weight: bold;
+}
+
+/* --- 出欠ステータスの色分け --- */
+/* 欠席（赤色） */
+.cell-period.status-absent {
+  background-color: #ff4d4f !important;
+  color: #ffffff;
+}
+
+/* 遅刻（黄色） */
+.cell-period.status-late {
+  background-color: #faad14 !important;
+  color: #ffffff;
+}
+
+/* 公欠（緑色） */
+.cell-period.status-leave {
+  background-color: #52c41a !important;
+  color: #ffffff;
+}
