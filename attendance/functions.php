@@ -301,6 +301,45 @@ function searchStudents(PDO $pdo, int $department_id, array $filters = []): arra
     return $stmt->fetchAll();
 }
 
+
+function searchTeachers(PDO $pdo, int $department_id, array $filters = []): array
+{
+    $sql = "
+        SELECT
+            t.teacher_id,
+            t.teacher_name,
+            d.department_name
+        FROM teachers t
+        JOIN department d
+            ON t.department_id = d.department_id
+        WHERE d.department_id = ?
+    ";
+
+    $params = [$department_id];
+
+    // 教員番号が検索欄に入力されている場合だけ条件を追加
+    if (!empty($filters['teacher_id'])) {
+        $sql .= " AND t.teacher_id = ?";
+        $params[] = (int)$filters['teacher_id'];
+    }
+
+    // 教員氏名が検索欄に入力されている場合だけ条件を追加
+    if (isset($_GET['teacher_name']) && $_GET['teacher_name'] !== '') {
+        $sql .= " AND t.teacher_name LIKE ?";
+        $params[] = '%' . $_GET['teacher_name'] . '%';
+    }
+
+
+    $sql .= " ORDER BY t.teacher_id ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll();
+}
+
+
+
 /**
  * 指定日が含まれる週の「月～金曜日」の日付情報を取得する
  * 

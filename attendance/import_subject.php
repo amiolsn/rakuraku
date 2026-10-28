@@ -31,6 +31,10 @@ function importSubjects(
         // CSVの見出しを確認
         $header = readCsvHeader($handle);
 
+        if (isset($header[0])) {
+            $header[0] = removeUtf8Bom($header[0]);
+        }
+
         error_log('CSV header: ' . var_export($header, true));
 
         validateCsvHeader($header, [

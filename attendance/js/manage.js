@@ -61,6 +61,6 @@ function addStudent(button) {
 
 // 検索条件のクリア
 document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('clear-btn')
+    document.querySelector('clear-btn')
         ?.addEventListener('click', clearSearch);
 });

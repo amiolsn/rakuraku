@@ -29,6 +29,10 @@ function importStudents(
         // 1行目の見出しを読み込む
         $header = readCsvHeader($handle);
 
+        if (isset($header[0])) {
+            $header[0] = removeUtf8Bom($header[0]);
+        }
+
         validateCsvHeader($header, [
             'student_id',
             'department_id',

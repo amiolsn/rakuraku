@@ -19,14 +19,21 @@ try {
     $department_name = getDepartmentName($pdo, $department_id);
 
     // 検索条件の取得と生徒一覧の取得
-    $filters = [
+    $student_filters = [
         'student_id' => $_GET['student_id'] ?? '',
         'student_name' => $_GET['student_name'] ?? '',
         'grade' => $_GET['grade'] ?? '',
         'student_group' => $_GET['student_group'] ?? '',
         'status' => $_GET['status'] ?? '',
     ];
-    $students = searchStudents($pdo, $department_id, $filters);
+    $students = searchStudents($pdo, $department_id, $student_filters);
+
+    // 検索条件の取得と生徒一覧の取得
+    $teacher_filters = [
+        'teacher_id' => $_GET['teacher_id'] ?? '',
+        'teacher_name' => $_GET['teacher_name'] ?? ''
+    ];
+    $teachers = searchTeachers($pdo, $department_id, $teacher_filters);
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
 }
