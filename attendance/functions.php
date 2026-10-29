@@ -600,7 +600,7 @@ function updatePeriodForDateRange(PDO $pdo, string $start_date, string $end_date
  * @param  string $description 理由
  * @return bool
  */
-function setSpecialCalendar(PDO $pdo, string $target_date, bool $is_holiday, int $max_period, string $description): bool
+function setSpecialCalendarDate(PDO $pdo, string $target_date, bool $is_holiday, int $max_period, string $description): bool
 {
     $stmt = $pdo -> prepare("
         INSERT INTO school_calendar (
