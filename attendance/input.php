@@ -32,19 +32,19 @@ try {
 
     // カレンダー情報の取得
     $calendar_info = getCalendarInfo($pdo, $target_date);
-    $is_holiday = $calendar_info['is_holiday'];
-    $description = $calendar_info['description'];
-    $max_period = $calendar_info['max_period'];
+    $is_holiday    = $calendar_info['is_holiday'];
+    $description   = $calendar_info['description'];
+    $max_period    = $calendar_info['max_period'];
 
     // 生徒一覧の取得（学科名も結合して取得）
     $grade_param = (isset($_GET['grade']) && $_GET['grade'] !== '') ? (int)$_GET['grade'] : null;
     $group_param = (isset($_GET['student_group']) && $_GET['student_group'] !== '') ? $_GET['student_group'] : null;
-    $students = getAttendanceStudents($pdo, $department_id, $grade_param, $group_param);
+    $students    = getAttendanceStudents($pdo, $department_id, $grade_param, $group_param);
 
     // 出欠データおよび時限設定の取得
-    $attendance_date = getAttendanceData($pdo, $target_date, $max_period);
+    $attendance_date     = getAttendanceData($pdo, $target_date, $max_period);
     $existing_attendance = $attendance_date['existing_attendance'];
-    $existing_periods = $attendance_date['existing_periods'];
+    $existing_periods    = $attendance_date['existing_periods'];
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
 }
@@ -76,15 +76,15 @@ try {
             <select id="grade" name="grade" onchange="this.form.submit()">
                 <?php
                 $selected_grade = $_GET['grade'] ?? '';
-                include 'components/_grade_options.php';
-                ?>
+include 'components/_grade_options.php';
+?>
             </select>
 
             <select id="student_group" name="student_group" onchange="this.form.submit()">
                 <?php
-                $selected_group = $_GET['student_group'] ?? '';
-                include 'components/_group_options.php';
-                ?>
+$selected_group = $_GET['student_group'] ?? '';
+include 'components/_group_options.php';
+?>
             </select>
         </form>
     </div>
