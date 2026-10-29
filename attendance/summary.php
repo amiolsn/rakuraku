@@ -8,9 +8,9 @@ try {
     $department_id = (int)$_SESSION['user']['department_id'];
 
     // マスタ情報取得
-    $years = getDepartmentYears($pdo, $department_id);
+    $years           = getDepartmentYears($pdo, $department_id);
     $department_name = getDepartmentName($pdo, $department_id);
-    $groups = getStudentGroup($pdo, $department_id);
+    $groups          = getStudentGroup($pdo, $department_id);
 
     // 現在のタブ判定
     $active_tab = $_GET['tab'] ?? 'monthly';
@@ -24,8 +24,8 @@ try {
     // 週間集計用データの取得
     if ($active_tab === 'weekly') {
         $target_week_date = $_GET['date'] ?? date('Y-m-d');
-        $week_dates = getWeekDates($target_week_date);
-        $date_only_list = array_column($week_dates, 'date');
+        $week_dates       = getWeekDates($pdo, $target_week_date);
+        $date_only_list   = array_column($week_dates, 'date');
 
         // 生徒一覧の取得
         $students = getAttendanceStudents($pdo, $department_id, $selected_grade);
@@ -66,13 +66,13 @@ try {
                     <?php
                     // components/_grade_options.phpを利用
                     include 'components/_grade_options.php';
-                    ?>
+?>
                 </select>
 
                 <!-- 各タブ固有の操作パーツ（週カレンダーや年月プルダウン -->
                 <?php if ($active_tab === 'weekly'): ?>
                     <?php
-                    $target_week_date = $_GET['date'] ?? date('Y-m-d');
+$target_week_date = $_GET['date'] ?? date('Y-m-d');
                     ?>
                     <input type="date" name="date" value="<?= htmlspecialchars($target_week_date, ENT_QUOTES, 'UTF-8') ?>" onchange="this.form.submit()">
                 <?php elseif ($active_tab === 'monthly'): ?>
@@ -109,7 +109,7 @@ try {
                     } else {
                         include 'components/_summary_monthly.php';
                     }
-                    ?>
+?>
                 </div>
             </div>
         </div>

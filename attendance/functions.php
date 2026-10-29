@@ -344,10 +344,11 @@ function searchTeachers(PDO $pdo, int $department_id, array $filters = []): arra
 /**
  * 指定日が含まれる週の「月～金曜日」の日付情報を取得する
  *
+ * @param  PDO    $pdo
  * @param  string $date
  * @return array  [ ['date' => '2026-09-07', 'month' => 9, 'day' => 7, 'week_day' => '月'], ...]
  */
-function getWeekDates(string $date): array
+function getWeekDates(PDO $pdo, string $date): array
 {
     $timestamp = strtotime($date);
     $w         = (int)date('w', $timestamp);
@@ -357,19 +358,45 @@ function getWeekDates(string $date): array
     $monday_time    = strtotime("{$diff_to_monday} days", $timestamp);
 
     $week_day_name = ['月', '火', '水', '木', '金'];
+    $date_list     = [];
     $week_dates    = [];
 
     for ($i = 0; $i < 5; $i++) {
         $current_time = strtotime("+{$i} days", $monday_time);
-        $week_dates[] = [
-            'date'     => date('Y-m-d', $current_time),
-            'month'    => (int)date('n', $current_time),
-            'day'      => (int)date('j', $current_time),
-            'week_day' => $week_day_name[$i],
+        $d            = date('Y-m-d', $current_time);
+        $date_list[]  = $d;
+
+        $week_dates[$d] = [
+            'date'        => $d,
+            'month'       => (int)date('n', $d),
+            'day'         => (int)date('j', $d),
+            'week_day'    => $week_day_name[$i],
+            'max_period'  => 7,
+            'is_holiday'  => 0,
+            'description' => '',
         ];
     }
 
-    return $week_dates;
+    // school_calendarから該当週のカレンダー設定を取得
+    $placeholders = implode(',', array_fill(0, count($date_list), '?'));
+    $stmt         = $pdo -> prepare("
+        SELECT calendar_date, is_holiday, max_period, description 
+        FROM school_calendar 
+        WHERE calendar_date IN ({$placeholders})
+    ");
+    $stmt -> execute($date_list);
+    $cal_records = $stmt -> fetchAll();
+
+    foreach ($cal_records as $cal) {
+        $d = $cal['calendar_date'];
+        if (isset($weekDates[$d])) {
+            $weekDates[$d]['max_period']  = (int)$cal['max_period'];
+            $weekDates[$d]['is_holiday']  = (int)$cal['is_holiday'];
+            $weekDates[$d]['description'] = $cal['description'] ?? '';
+        }
+    }
+
+    return array_values($week_dates);
 }
 
 /**
