@@ -4,7 +4,7 @@
  * ・school_calendar を参照し、休校日はスキップ、各日の max_period 分のコマを生成
  * ・情報システム科の1年生・2年生を対象に多様な出欠パターン（皆勤・遅刻・早退・病欠・公欠）を登録
  */
-require_once 'db.php';
+require_once '../db.php';
 
 try {
     $pdo->beginTransaction();
@@ -126,8 +126,8 @@ try {
     echo "授業日数: " . count($schoolDays) . " 日<br>";
     echo "登録レコード総数: {$recordCount} 件<br><br>";
     echo '<ul>';
-    echo '<li><a href="summary.php?tab=weekly&grade=1&date=2026-07-01">週間集計（1年生）で確認する</a></li>';
-    echo '<li><a href="summary.php?tab=weekly&grade=2&date=2026-07-01">週間集計（2年生）で確認する</a></li>';
+    echo '<li><a href="../summary.php?tab=weekly&grade=1&date=2026-07-01">週間集計（1年生）で確認する</a></li>';
+    echo '<li><a href="../summary.php?tab=weekly&grade=2&date=2026-07-01">週間集計（2年生）で確認する</a></li>';
     echo '</ul>';
 
 } catch (Exception $e) {
