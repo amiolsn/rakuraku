@@ -7,11 +7,11 @@ try {
     $pdo -> beginTransaction();
 
     echo "<h3>1. 2026年7月 ベースカレンダー生成（土日祝日の自動判定）</h3>";
-    $count = generateBaseSchoolCalendar($pdo, '2026-07-01', '2-26-07-31', 7);
+    $count = generateBaseSchoolCalendar($pdo, '2026-07-01', '2026-07-31', 7);
     echo "ベースカレンダー作成完了: {$count}日分<br>";
 
-    echo "<h3>2. 台風振替対応7月1日＝7月13日（授業日）を8時間授,業に変更</h3>";
-    $updated_periods = updatePeriodForDateRange($pdo, '2-26-07-01', '2026-07-13', 8, '台風授業振替(8h)');
+    echo "<h3>2. 台風振替対応: 7月1日～7月13日（授業日）を8時間授業に変更</h3>";
+    $updated_periods = updatePeriodForDateRange($pdo, '2026-07-01', '2026-07-13', 8, '台風授業振替(8h)');
     echo "時限変更適用: {$updated_periods}日分<br>";
 
     echo "<h3>3. 調整日設定: 7月10日を休校日に変更</h3>";

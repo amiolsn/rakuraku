@@ -505,7 +505,7 @@ function generateBaseSchoolCalendar(PDO $pdo, string $start_date, string $end_da
             :max_period,
             :description
         )
-        ON DUPLICATE KEY VALUE
+        ON DUPLICATE KEY UPDATE
             is_holiday = VALUES(is_holiday),
             max_period = VALUES(max_period),
             description = VALUES(description)
@@ -520,7 +520,7 @@ function generateBaseSchoolCalendar(PDO $pdo, string $start_date, string $end_da
     $count = 0;
     foreach ($period as $dt) {
         $date_str = $dt -> format('Y-m-d');
-        $w        = $dt -> format('w');
+        $w        = (int)$dt -> format('w');
 
         if (isset($holidays[$date_str])) {
             // 祝日（振替休日・国民の休日を含む）
@@ -571,12 +571,8 @@ function updatePeriodForDateRange(PDO $pdo, string $start_date, string $end_date
     $sql = "
         UPDATE school_calendar
         SET max_period = :max_period,
-            description =
-                CASE
-                    WHEN :desc <> '' THEN :desc
-                    ELSE description
-                END
-        WHERE calendar_Date BETWEEN :start_date AND :end_date
+            description = COALESCE(NULLIF(:desc, ''), description)
+        WHERE calendar_date BETWEEN :start_date AND :end_date
         AND is_holiday = 0    
     ";
     $stmt = $pdo -> prepare($sql);
@@ -616,8 +612,8 @@ function setSpecialCalendarDate(PDO $pdo, string $target_date, bool $is_holiday,
             :description
         )
         ON DUPLICATE KEY UPDATE
-            is_holiday = VALUE(is_holiday),
-            max_period = VALUE(max_period),
+            is_holiday = VALUES(is_holiday),
+            max_period = VALUES(max_period),
             description = VALUES(description)
     ");
 
