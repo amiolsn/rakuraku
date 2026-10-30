@@ -22,6 +22,25 @@
         生徒一括登録
     </button>
     <?php include 'components/_import_popup.php'; ?>
+    <button
+        type="button"
+        class="year-update-btn"
+        data-type="student">
+        年度更新
+    </button>
+    <div id="year-update-popup-wrapper">
+        <div id="year-update-popup-inside">
+            <div id="year-update-close">x</div>
+            <div id="message">
+                <h2>年度を更新します</h2>
+                <p>1.&nbsp;1年生を2年生に進級させます。</p>
+                <p>2.&nbsp;2年生を卒業扱いにします。</p>
+                <button type="button" id="year-update-yes">更新</button>
+                <button type="button" id="year-update-cancel">キャンセル</button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <div class="table-actions-top">

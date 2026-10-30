@@ -102,3 +102,40 @@ async function deleteInfo(type, id) {
         alert(error.message || '通信エラーが発生しました。');
     }
 }
+
+
+
+
+// 削除確認ポップアップ
+let yearUpdateSelectedType = '';
+let yearUpdateSelectedId = '';
+
+const yearUpdateBtns = document.querySelectorAll('.year-update-btn');
+const yearUpdatePopupWrapper = document.getElementById('year-update-popup-wrapper');
+const yearUpdateClose = document.getElementById('year-update-close');
+const yearUpdateCancel = document.getElementById('year-update-cancel');
+
+console.log('削除ボタンの数:', yearUpdateBtns.length);
+
+// 各削除ボタンにクリックイベントを設定
+yearUpdateBtns.forEach(yearUpdateBtn => {
+    yearUpdateBtn.addEventListener('click', () => {
+        yearUpdateSelectedType = yearUpdateBtn.dataset.type;
+        yearUpdateSelectedId = yearUpdateBtn.dataset.id;
+
+        console.log('削除対象:', yearUpdateSelectedType);
+        console.log('削除ID:', yearUpdateSelectedId);
+        console.log('ポップアップ要素:', yearUpdatePopupWrapper);
+
+        yearUpdatePopupWrapper.style.display = 'block';
+
+        console.log('表示設定:', yearUpdatePopupWrapper.style.display);
+    });
+});
+
+// 外側または「x」をクリックしたら閉じる
+yearUpdatePopupWrapper.addEventListener('click', e => {
+    if (e.target === yearUpdatePopupWrapper || e.target === yearUpdateClose || e.target === yearUpdateCancel) {
+        yearUpdatePopupWrapper.style.display = 'none';
+    }
+});
