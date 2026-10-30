@@ -7,10 +7,11 @@ require_once 'functions.php';
 try {
     $department_id = (int)$_SESSION['user']['department_id'];
 
-    // 科目一覧の取得
-    $subjects = getSubjectsByDepartment($pdo, $department_id);
-    // 教員一覧の取得
-    $teachers = getTeachersByDepartment($pdo, $department_id);
+    // // 科目一覧の取得
+    // $subjects = getSubjectsByDepartment($pdo, $department_id);
+    // // 教員一覧の取得
+    // $teachers = getTeachersByDepartment($pdo, $department_id);
+
     // 修業年限の取得
     $years = getDepartmentYears($pdo, $department_id);
     // 班一覧の取得（重複なし）
@@ -34,6 +35,12 @@ try {
         'teacher_name' => $_GET['teacher_name'] ?? ''
     ];
     $teachers = searchTeachers($pdo, $department_id, $teacher_filters);
+
+    $subject_filters = [
+        'subject_id' => $_GET['subject_id'] ?? '',
+        'subject_name' => $_GET['subject_name'] ?? ''
+    ];
+    $subjects = searchSubjects($pdo, $department_id, $subject_filters);
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
 }

@@ -339,6 +339,43 @@ function searchTeachers(PDO $pdo, int $department_id, array $filters = []): arra
     return $stmt->fetchAll();
 }
 
+function searchSubjects(PDO $pdo, int $department_id, array $filters = []): array
+{
+    $sql = "
+        SELECT
+            s.subject_id,
+            s.subject_name,
+            d.department_name
+        FROM subjects s
+        JOIN department d
+            ON s.department_id = d.department_id
+        WHERE d.department_id = ?
+    ";
+
+    $params = [$department_id];
+
+    // 科目番号が検索欄に入力されている場合だけ条件を追加
+    if (!empty($filters['subject_id'])) {
+        $sql .= " AND s.subject_id = ?";
+        $params[] = (int)$filters['subject_id'];
+    }
+
+    // 科目名が検索欄に入力されている場合だけ条件を追加
+    if (isset($_GET['subject_name']) && $_GET['subject_name'] !== '') {
+        $sql .= " AND s.subject_name LIKE ?";
+        $params[] = '%' . $_GET['subject_name'] . '%';
+    }
+
+
+    $sql .= " ORDER BY s.subject_id ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll();
+}
+
+
 
 
 /**
@@ -379,13 +416,13 @@ function getWeekDates(PDO $pdo, string $date): array
 
     // school_calendarから該当週のカレンダー設定を取得
     $placeholders = implode(',', array_fill(0, count($date_list), '?'));
-    $stmt         = $pdo -> prepare("
+    $stmt         = $pdo->prepare("
         SELECT calendar_date, is_holiday, max_period, description 
         FROM school_calendar 
         WHERE calendar_date IN ({$placeholders})
     ");
-    $stmt -> execute($date_list);
-    $cal_records = $stmt -> fetchAll();
+    $stmt->execute($date_list);
+    $cal_records = $stmt->fetchAll();
 
     foreach ($cal_records as $cal) {
         $d = $cal['calendar_date'];
@@ -519,7 +556,7 @@ function generateBaseSchoolCalendar(PDO $pdo, string $start_date, string $end_da
         $holidays = array_merge($holidays, getJapaneseHolidays($y));
     }
 
-    $stmt = $pdo -> prepare("
+    $stmt = $pdo->prepare("
         INSERT INTO school_calendar (
             calendar_date,
             is_holiday,
@@ -540,14 +577,14 @@ function generateBaseSchoolCalendar(PDO $pdo, string $start_date, string $end_da
 
     $start = new DateTime($start_date);
     $end   = new DateTime($end_date);
-    $end -> modify('+1 day');   // 終了日も含める
+    $end->modify('+1 day');   // 終了日も含める
     $interval = new DateInterval('P1D');
     $period   = new DatePeriod($start, $interval, $end);
 
     $count = 0;
     foreach ($period as $dt) {
-        $date_str = $dt -> format('Y-m-d');
-        $w        = (int)$dt -> format('w');
+        $date_str = $dt->format('Y-m-d');
+        $w        = (int)$dt->format('w');
 
         if (isset($holidays[$date_str])) {
             // 祝日（振替休日・国民の休日を含む）
@@ -571,7 +608,7 @@ function generateBaseSchoolCalendar(PDO $pdo, string $start_date, string $end_da
             $desc       = '';
         }
 
-        $stmt -> execute([
+        $stmt->execute([
             ':calendar_date' => $date_str,
             ':is_holiday'    => $is_holiday,
             ':max_period'    => $max_period,
@@ -602,15 +639,15 @@ function updatePeriodForDateRange(PDO $pdo, string $start_date, string $end_date
         WHERE calendar_date BETWEEN :start_date AND :end_date
         AND is_holiday = 0    
     ";
-    $stmt = $pdo -> prepare($sql);
-    $stmt -> execute([
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
         ':max_period' => $new_max_period,
         ':desc'       => $description,
         ':start_date' => $start_date,
         ':end_date'   => $end_date,
     ]);
 
-    return $stmt -> rowCount();
+    return $stmt->rowCount();
 }
 
 /**
@@ -625,7 +662,7 @@ function updatePeriodForDateRange(PDO $pdo, string $start_date, string $end_date
  */
 function setSpecialCalendarDate(PDO $pdo, string $target_date, bool $is_holiday, int $max_period, string $description): bool
 {
-    $stmt = $pdo -> prepare("
+    $stmt = $pdo->prepare("
         INSERT INTO school_calendar (
             calendar_date,
             is_holiday,
@@ -644,7 +681,7 @@ function setSpecialCalendarDate(PDO $pdo, string $target_date, bool $is_holiday,
             description = VALUES(description)
     ");
 
-    return $stmt -> execute([
+    return $stmt->execute([
         ':calendar_date' => $target_date,
         ':is_holiday'    => $is_holiday ? 1 : 0,
         ':max_period'    => $max_period,
