@@ -89,3 +89,121 @@
   color: #adb5bd;
   font-weight: normal;
 }
+
+/* 日付ごとの区切り線（右端を太線化） */
+.summary-table th.border-day-end,
+.summary-table td.border-day-end {
+  border-right: 2.5px solid #495057 !important;
+}
+
+/* 固定列（氏名）とデータエリアの区切り線 */
+.summary-table th.border-col-end,
+.summary-table td.border-col-end {
+  border-right: 2.5px solid #495057 !important;
+}
+
+/* 週間ナビゲーションボタングループ */
+.week-navigation {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.week-navigation .btn-nav {
+  display: inline-block;
+  padding: 4px 10px;
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  color: #495057;
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  transition: all 0.15s ease-in-out;
+  line-height: 1.5;
+}
+
+.week-navigation .btn-nav:hover {
+  background-color: #e2e6ea;
+  border-color: #dae0e5;
+  color: #212529;
+}
+
+.week-navigation .btn-today {
+  background-color: #e9ecef;
+  font-weight: bold;
+}
+
+/* --- テーブル外枠および主要な区切り線の太線化 --- */
+
+/* テーブル上端・下端の太線 */
+.summary-table thead tr:first-child th {
+  border-top: 2.5px solid #495057 !important;
+}
+
+.summary-table tbody tr:last-child td {
+  border-bottom: 2.5px solid #495057 !important;
+}
+
+/* テーブル左端・右端の太線 */
+.summary-table th:first-child,
+.summary-table td:first-child {
+  border-left: 2.5px solid #495057 !important;
+}
+
+.summary-table th:last-child,
+.summary-table td:last-child {
+  border-right: 2.5px solid #495057 !important;
+}
+
+/* 出席番号セルの右側ボーダー（出席番号と氏名の境目） */
+.summary-table th.col-num,
+.summary-table td.col-num {
+  border-right: 2.5px solid #495057 !important;
+}
+
+/* 氏名セルの右側ボーダー（固定列とデータエリアの境目） */
+.summary-table th.border-col-end,
+.summary-table td.border-col-end {
+  border-right: 2.5px solid #495057 !important;
+}
+
+/* 各日の右側ボーダー（日付ごとの境目） */
+.summary-table th.border-day-end,
+.summary-table td.border-day-end {
+  border-right: 2.5px solid #495057 !important;
+}
+
+/* 週間ナビゲーション */
+.week-navigation {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.week-navigation .btn-nav {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 10px;
+  background-color: #f8f9fa;
+  border: 1px solid #ced4da;
+  border-radius: 4px;
+  color: #495057;
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  line-height: 1.5;
+  transition: all 0.15s ease-in-out;
+}
+
+.week-navigation .btn-nav:hover {
+  background-color: #e2e6ea;
+  border-color: #dae0e5;
+  color: #212529;
+}
+
+.week-navigation .btn-today {
+  background-color: #e9ecef;
+  font-weight: bold;
+}
