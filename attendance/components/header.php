@@ -1,4 +1,7 @@
 <?php
+
+$currentPage = basename($_SERVER['PHP_SELF']);
+
 // 未ログイン時の戻り先
 $home_url = 'login-input.php';
 
@@ -47,11 +50,24 @@ if (isset($_SESSION['user'])) {
     <?php if (isset($_SESSION['user'])): ?>
         <!-- 中央：ナビゲーション -->
         <nav class="app-nav">
-            <a href="#">欠席登録・届け出管理</a>
-            <a href="summary.php">集計</a>
-            <a href="manage.php">登録情報編集</a>
+            <a href="#" class="nav-elem <?= $currentPage === 'index.php' ? 'active' : '' ?>">
+                欠席登録・届け出管理
+            </a>
 
-            <!-- 管理者のみに表示 -->
+            <a href="summary.php"
+                class="nav-elem <?= $currentPage === 'summary.php' ? 'active' : '' ?>">
+                集計
+            </a>
+
+            <a href="manage.php"
+                class="nav-elem <?= $currentPage === 'manage.php' ? 'active' : '' ?>">
+                マスタ管理
+            </a>
+
+            <a href="#"
+                class="nav-elem <?= $currentPage === 'index.php' ? 'active' : '' ?>">
+                アカウント管理
+            </a>
             <?php if (!empty($_SESSION['user']['is_admin']) && $_SESSION['user']['is_admin'] === 1): ?>
                 <a href="#" class="admin-link">管理者メニュー</a>
             <?php endif; ?>
