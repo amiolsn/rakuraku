@@ -389,10 +389,10 @@ function getWeekDates(PDO $pdo, string $date): array
 
     foreach ($cal_records as $cal) {
         $d = $cal['calendar_date'];
-        if (isset($weekDates[$d])) {
-            $weekDates[$d]['max_period']  = (int)$cal['max_period'];
-            $weekDates[$d]['is_holiday']  = (int)$cal['is_holiday'];
-            $weekDates[$d]['description'] = $cal['description'] ?? '';
+        if (isset($week_dates[$d])) {
+            $week_dates[$d]['max_period']  = (int)$cal['max_period'];
+            $week_dates[$d]['is_holiday']  = (int)$cal['is_holiday'];
+            $week_dates[$d]['description'] = $cal['description'] ?? '';
         }
     }
 
@@ -464,7 +464,7 @@ function getJapaneseHolidays(int $year): array
     $spring_equinox_day                                            = floor(20.8431 + 0.242194 * ($year - 1980) - floor(($year - 1980) / 4));
     $autumn_equinox_day                                            = floor(23.2488 + 0.242194 * ($year - 1980) - floor(($year - 1980) / 4));
     $holidays[sprintf('%04d-03-%02d', $year, $spring_equinox_day)] = '春分の日';
-    $holidays[sprintf('%04d-09-$02d', $year, $autumn_equinox_day)] = '秋分の日';
+    $holidays[sprintf('%04d-09-%02d', $year, $autumn_equinox_day)] = '秋分の日';
 
     // 国民の休日の判定（祝日に挟まれた平日）
     $citizen_holidays = [];

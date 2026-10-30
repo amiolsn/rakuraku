@@ -69,3 +69,23 @@
   background-color: #52c41a !important;
   color: #ffffff;
 }
+
+/* 休校日ヘッダー・セル */
+.holiday-header {
+  background-color: #e9ecef !important;
+  color: #495057;
+}
+
+.holiday-th {
+  font-size: 0.75rem;
+  background-color: #f1f3f5 !important;
+  color: #495057;
+  white-space: nowrap;
+  padding: 4px 6px;
+}
+
+.holiday-cell {
+  background-color: #f8f9fa !important;
+  color: #adb5bd;
+  font-weight: normal;
+}
