@@ -192,6 +192,13 @@ function clearSearch() {
     window.location.href = window.location.pathname;
 }
 
+// クリアボタンのイベント登録
+document.addEventListener('click', (event) => {
+    if (event.target.closest('.clear-btn')) {
+        clearSearch();
+    }
+});
+
 
 // document.addEventListener('DOMContentLoaded', function () {
 //     const form = document.getElementById('student-search-form');

@@ -33,8 +33,8 @@ function addTeacher(button) {
     return addData(button, teacherConfig);
 }
 
-// 検索条件のクリア
-document.addEventListener('DOMContentLoaded', () => {
-    document.getElementById('clear-btn')
-        ?.addEventListener('click', clearSearch);
-});
+// // 検索条件のクリア
+// document.addEventListener('DOMContentLoaded', () => {
+//     document.querySelector('.clear-btn')
+//         ?.addEventListener('click', clearSearch);
+// });
