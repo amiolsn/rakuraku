@@ -368,8 +368,8 @@ function getWeekDates(PDO $pdo, string $date): array
 
         $week_dates[$d] = [
             'date'        => $d,
-            'month'       => (int)date('n', $d),
-            'day'         => (int)date('j', $d),
+            'month'       => (int)date('n', $current_time),
+            'day'         => (int)date('j', $current_time),
             'week_day'    => $week_day_name[$i],
             'max_period'  => 7,
             'is_holiday'  => 0,
@@ -458,7 +458,7 @@ function getJapaneseHolidays(int $year): array
     $holidays[date('Y-m-d', strtotime("second monday of january {$year}"))]  = '成人の日';
     $holidays[date('Y-m-d', strtotime("third monday of july {$year}"))]      = '海の日';
     $holidays[date('Y-m-d', strtotime("third monday of september {$year}"))] = '敬老の日';
-    $holidays[date('Y-m-d', strtotime("second monday of octorber {$year}"))] = '体育の日';
+    $holidays[date('Y-m-d', strtotime("second monday of october {$year}"))]  = '体育の日';
 
     // 春分の日・秋分の日
     $spring_equinox_day                                            = floor(20.8431 + 0.242194 * ($year - 1980) - floor(($year - 1980) / 4));
