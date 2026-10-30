@@ -688,3 +688,50 @@ function setSpecialCalendarDate(PDO $pdo, string $target_date, bool $is_holiday,
         ':description'   => $description,
     ]);
 }
+
+/**
+ * 指定年月における月間・年度累計の出欠データを生徒ごとに集計する
+ *
+ * @param  PDO    $pdo
+ * @param  int    $department_id
+ * @param  int    $grade
+ * @param  string $target_month  集計対象月('YYYY-MM')
+ * @return array
+ */
+function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, string $target_month): array
+{
+    // 対象月の開始日・終了日を抽出
+    $start_date = "{$target_month}-01";
+    $end_date   = date('Y-m-t', strtotime($start_date));
+
+    // 今年度の開始日(4月1日)を算出
+    $target_year      = (int)date('Y', strtotime($start_date));
+    $target_month_num = (int)date('n', strtotime($start_date));
+    $fiscal_year      = ($target_month_num >= 4) ? $target_year : $target_year - 1;
+    $fiscal_start     = "{$fiscal_year}-04-01";
+
+    // カレンダーから「当月」および「年度累計」の授業日・時限数を取得
+    $cal_stmt = $pdo -> prepare("
+        SELECT
+            calendar_date,
+            max_period
+        FROM
+            school_calendar
+        WHERE
+            calendar_date
+                BETWEEN :fiscal_start
+                AND :month_end
+        AND is_holiday = 1
+        ORDER BY
+            calendar_date ASC
+    ");
+    $cal_stmt -> execute([
+        ':fiscal_start' => $fiscal_start,
+        ':month_end'    => $end_date,
+    ]);
+    $calendar_records = $cal_stmt -> fetchAll();
+
+    $month_days               = [];
+    $month_total_periods      = 0;
+    $cumulative_total_periods = 0;  // ここから続き
+}
