@@ -72,9 +72,49 @@ try {
                 <!-- 各タブ固有の操作パーツ（週カレンダーや年月プルダウン -->
                 <?php if ($active_tab === 'weekly'): ?>
                     <?php
-$target_week_date = $_GET['date'] ?? date('Y-m-d');
+                    $target_week_date     = (!empty($_GET['date'])) ? $_GET['date'] : date('Y-m-d');
                     ?>
-                    <input type="date" name="date" value="<?= htmlspecialchars($target_week_date, ENT_QUOTES, 'UTF-8') ?>" onchange="this.form.submit()">
+                    <div class="week-navigation">
+                        <button type="button" class="btn-nav" onclick="moveWeek(-7)" title="前週へ">◀ 前週</button>
+                        <input type="date" id="target-date-input" name="date" value="<?= htmlspecialchars($target_week_date, ENT_QUOTES, 'UTF-8') ?>" onchange="this.form.submit()">
+                        <button type="button" class="btn-nav" onclick="moveWeek(+7)" title="次週へ">次週 ▶</button>
+                        <button type="button" class="btn-nav btn-today" onclick="goToday()">今週</button>
+                    </div>
+
+                    <script>
+                        /**
+                         * 指定日数分(-7日/+7日)日付を進めてフォームを送信
+                         */
+                        function moveWeek(days) {
+                            const input = document.getElementById('target-date-input');
+                            // inputの値(未入力なら現在日時)からDateオブジェクトを生成
+                            const baseDate = input.value ? new Date(input.value) : new Date();
+
+                            baseDate.setDate(baseDate.getDate() + days);
+
+                            // YYYY-MM-DD フォーマット整形
+                            const y = baseDate.getFullYear();
+                            const m = String(baseDate.getMonth() + 1).padStart(2, '0');
+                            const d = String(baseDate.getDate()).padStart(2, '0');
+
+                            input.value = `${y}-${m}-${d}`;
+                            input.form.submit();
+                        }
+
+                        /**
+                         * 今日の日付をセットしてフォームを送信
+                         */
+                        function goToday() {
+                            const input = document.getElementById('target-date-input');
+                            const today = new Date();
+                            const y = today.getFullYear();
+                            const m = String(today.getMonth() + 1).padStart(2, '0');
+                            const d = String(today.getDate()).padStart(2, '0');
+
+                            input.value = `${y}-${m}-${d}`;
+                            input.form.submit();
+                        }
+                    </script>
                 <?php elseif ($active_tab === 'monthly'): ?>
                     <?php
                     $target_month = $_GET['month'] ?? date('Y-m');
