@@ -26,26 +26,31 @@
 <div class="table-actions-top">
     <!-- 検索フィルター -->
     <form action="" method="GET" class="period-header select">
-        <table class="management-table">
+        <table class="management-table search-table">
             <tr>
 
                 <td></td>
                 <td>
-                    <label for="student_id">科目番号</label>
-                    <input type="text" name="subject_id"
-                        value="<?= htmlspecialchars($_GET['subject_id'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-
+                    <div class="form-group">
+                        <label for="student_id">科目番号</label>
+                        <input type="text" name="subject_id"
+                            value="<?= htmlspecialchars($_GET['subject_id'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
                 </td>
                 <td>
-                    <label for="subject_name">科目名</label>
-                    <input type="text" name="subject_name"
-                        value="<?= htmlspecialchars($_GET['subject_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <div class="form-group">
+                        <label for="subject_name">科目名</label>
+                        <input type="text" name="subject_name"
+                            value="<?= htmlspecialchars($_GET['subject_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
                 </td>
                 <td></td>
 
                 <td>
-                    <button type="submit" id="search-btn" class="search-btn">検索</button>
-                    <button type="button" id="clear-btn" class="clear-btn">クリア</button>
+                    <div class="table-actions">
+                        <button type="submit" id="search-btn" class="search-btn">検索</button>
+                        <button type="button" id="clear-btn" class="clear-btn">クリア</button>
+                    </div>
                 </td>
 
             </tr>

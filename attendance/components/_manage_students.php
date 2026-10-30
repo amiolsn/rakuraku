@@ -35,52 +35,63 @@
         class="period-header select"
         id="student-search-form">
 
-        <table class="management-table" id="student-table">
+        <table class="management-table search-table" id="student-table">
             <tr>
 
                 <td></td>
                 <td>
-                    <label for="student_id">学籍番号</label>
-                    <input type="text" name="student_id"
-                        value="<?= htmlspecialchars($_GET['student_id'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-
+                    <div class="form-group">
+                        <label for="student_id">学籍番号</label>
+                        <input type="text" name="student_id"
+                            value="<?= htmlspecialchars($_GET['student_id'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
                 </td>
                 <td>
-                    <label for="student_name">生徒氏名</label>
-                    <input type="text" name="student_name"
-                        value="<?= htmlspecialchars($_GET['student_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    <div class="form-group">
+                        <label for="student_name">生徒氏名</label>
+                        <input type="text" name="student_name"
+                            value="<?= htmlspecialchars($_GET['student_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                    </div>
                 </td>
                 <td></td>
                 <td>
-                    <label for="grade">学年</label>
-                    <select id="grade" name="grade">
-                        <?php
-                        $selected_grade = $_GET['grade'] ?? '';
-                        include 'components/_grade_options.php';
-                        ?>
-                    </select>
+                    <div class="form-group">
+                        <label for="grade">学年</label>
+                        <select id="grade" name="grade">
+                            <?php
+                            $selected_grade = $_GET['grade'] ?? '';
+                            include 'components/_grade_options.php';
+                            ?>
+                        </select>
+                    </div>
                 </td>
                 <td>
-                    <label for="student_group">班</label>
-                    <select id="student_group" name="student_group">
-                        <?php
-                        $selected_group = $_GET['student_group'] ?? '';
-                        include 'components/_group_options.php';
-                        ?>
-                    </select>
+                    <div class="form-group">
+                        <label for="student_group">班</label>
+                        <select id="student_group" name="student_group">
+                            <?php
+                            $selected_group = $_GET['student_group'] ?? '';
+                            include 'components/_group_options.php';
+                            ?>
+                        </select>
+                    </div>
                 </td>
                 <td>
-                    <label for="status">在校状況</label>
-                    <select id="status" name="status">
-                        <?php
-                        $selected_grade = $_GET['status'] ?? '';
-                        include 'components/_status_options.php';
-                        ?>
-                    </select>
+                    <div class="form-group">
+                        <label for="status">在校状況</label>
+                        <select id="status" name="status">
+                            <?php
+                            $selected_grade = $_GET['status'] ?? '';
+                            include 'components/_status_options.php';
+                            ?>
+                        </select>
+                    </div>
                 </td>
                 <td>
-                    <button type="submit" id="search-btn" class="search-btn">検索</button>
-                    <button type="button" id="clear-btn" class="clear-btn">クリア</button>
+                    <div class="table-actions">
+                        <button type="submit" id="search-btn" class="search-btn">検索</button>
+                        <button type="button" id="clear-btn" class="clear-btn">クリア</button>
+                    </div>
                 </td>
 
             </tr>
