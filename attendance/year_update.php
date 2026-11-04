@@ -1,10 +1,25 @@
 <?php
+error_log('① PHP開始');
+session_start();
 
+//save_attendance.php 出欠データの保存・更新API
+header('Content-Type: application/json; charset=UTF-8');
 
+require_once 'db.php';
+
+// JavaScriptから送られてきたJSONデータを受信
+$rawInput = file_get_contents('php://input');
+
+error_log('year_update.php に到達しました');
+error_log('受信データ: ' . $rawInput);
+
+$data = json_decode($rawInput, true);
 try {
+
+    error_log('② トランザクション開始前');
     // ログイン情報から学科IDを取得する
     // 実際のセッション名・権限に合わせて調整してください
-    $departmentId = $_SESSION['user']['department_id'];
+    $departmentId = $_SESSION['user']['department_id'] ?? null;
 
     if (!$departmentId) {
         http_response_code(400);
@@ -20,32 +35,26 @@ try {
 
     //usersとstudentsへの登録をまとめる
     $pdo->beginTransaction();
-
+    error_log('③ トランザクション開始成功');
 
     $selectStudent = $pdo->prepare("
-        SELECT
-                s.student_id,
-                s.student_name,
-                s.grade,
-                s.student_group,
-                d.department_name
-        FROM students s
-        LEFT OUTER JOIN department d
-            ON s.department_id = d.department_id
-        WHERE s.status = 1
-        AND d.department_id = ?
-        ORDER BY s.student_id ASC
+         SELECT
+            student_id,
+            student_name,
+            grade
+        FROM students
+        WHERE status = 1
+        AND department_id = ?
+        ORDER BY student_id ASC
     ");
     $params = [$departmentId];
 
-
-    $selectStudent = $pdo->prepare($selectStudent);
     $selectStudent->execute($params);
 
-    return $selectStudent->fetchAll();
+    $students = $selectStudent->fetchAll();
 
-    foreach ($selectStudent as $st) {
-        if ($st[grade] === 1) {
+    foreach ($students as $st) {
+        if ((int)$st['grade'] === 1) {
             $sql = "
         UPDATE students
         SET grade = 2
@@ -56,7 +65,7 @@ try {
             $stmt  = $pdo->prepare($sql);
             $stmt->bindValue(':student_id', $st['student_id']);
             $stmt->execute();
-        } else {
+        } elseif ((int)$st['grade'] === 2) {
             $sql = "
         UPDATE students
         SET status = false
@@ -74,39 +83,22 @@ try {
 
 
     $pdo->commit();
+    error_log('④ コミット成功');
 
     echo json_encode([
         'success' => true,
-        'message' => '生徒情報を新規登録しました。'
+        'message' => '年度更新が完了しました。'
     ]);
 } catch (PDOException $e) {
+    error_log('エラー発生: ' . $e->getMessage());
+
+    // エラー発生時はロールバック
     if ($pdo->inTransaction()) {
         $pdo->rollBack();
-    }
-    error_log('生徒登録エラー：' . $e->getMessage());
-
-    if ($e->getCode() === '23000') {
-        http_response_code(409);
-        $message = '学籍番号が重複しているか、登録内容に規約違反があります。';
-    } else {
-        http_response_code(500);
-        $message = 'データベースへの登録に失敗しました。';
     }
 
     echo json_encode([
         'success' => false,
-        'message' => $message
-    ], JSON_UNESCAPED_UNICODE);
-} catch (Throwable   $e) {
-    if ($pdo->inTransaction()) {
-        $pdo->rollBack();
-    }
-    error_log('生徒登録エラー：' . $e->getMessage());
-
-
-    http_response_code(500);
-    echo json_encode([
-        'success' => false,
-        'message' => '生徒登録処理中にエラーが発生しました。'
-    ], JSON_UNESCAPED_UNICODE);
+        'message' => '年度更新に失敗しました。'
+    ]);
 }
