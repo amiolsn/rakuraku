@@ -63,40 +63,42 @@
 
 </div>
 
-<table class="management-table">
-    <thead>
-        <tr>
-            <th>No</th>
-            <th>科目番号</th>
-            <th>科目名</th>
-            <th>学科名</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php $i = 1; ?>
-        <?php foreach ($subjects as $subject): ?>
-            <tr data-subject-id="<?= htmlspecialchars($subject['subject_id']) ?>">
-                <td><?= $i++ ?></td>
-                <!-- 学籍番号 -->
-                <td><?= htmlspecialchars($subject['subject_id']) ?></td>
-                <!-- 生徒氏名 -->
-                <td class="editable" data-field="subject_name"><?= htmlspecialchars($subject['subject_name']) ?></td>
-                <!-- 学科名 -->
-                <td><?= htmlspecialchars($subject['department_name']) ?></td>
-                <!-- 編集・削除ボタン -->
-                <td class="table-actions">
-                    <button class="edit-btn" onclick="toggleSubjectEdit(this)">編集</button>
-                    <button
-                        type="button"
-                        class="delete-btn"
-                        data-type="subject"
-                        data-id="<?= htmlspecialchars($subject['subject_id'], ENT_QUOTES, 'UTF-8') ?>">
-                        削除
-                    </button>
-                </td>
-
+<div class="table_box">
+    <table class="management-table">
+        <thead>
+            <tr>
+                <th class="sticky">No</th>
+                <th class="sticky">科目番号</th>
+                <th class="sticky">科目名</th>
+                <th class="sticky">学科名</th>
+                <th class="sticky"></th>
             </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            <?php $i = 1; ?>
+            <?php foreach ($subjects as $subject): ?>
+                <tr data-subject-id="<?= htmlspecialchars($subject['subject_id']) ?>">
+                    <td><?= $i++ ?></td>
+                    <!-- 学籍番号 -->
+                    <td><?= htmlspecialchars($subject['subject_id']) ?></td>
+                    <!-- 生徒氏名 -->
+                    <td class="editable" data-field="subject_name"><?= htmlspecialchars($subject['subject_name']) ?></td>
+                    <!-- 学科名 -->
+                    <td><?= htmlspecialchars($subject['department_name']) ?></td>
+                    <!-- 編集・削除ボタン -->
+                    <td class="table-actions">
+                        <button class="edit-btn" onclick="toggleSubjectEdit(this)">編集</button>
+                        <button
+                            type="button"
+                            class="delete-btn"
+                            data-type="subject"
+                            data-id="<?= htmlspecialchars($subject['subject_id'], ENT_QUOTES, 'UTF-8') ?>">
+                            削除
+                        </button>
+                    </td>
+
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>
