@@ -86,7 +86,7 @@
                 <td><?= htmlspecialchars($subject['department_name']) ?></td>
                 <!-- 編集・削除ボタン -->
                 <td class="table-actions">
-                    <button class="edit-btn" onclick="toggleEdit(this)">編集</button>
+                    <button class="edit-btn" onclick="toggleSubjectEdit(this)">編集</button>
                     <button
                         type="button"
                         class="delete-btn"

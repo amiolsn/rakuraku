@@ -25,7 +25,7 @@
     <button
         type="button"
         class="year-update-btn"
-        data-type="student">
+        data-type="year-update">
         年度更新
     </button>
     <div id="year-update-popup-wrapper">
@@ -121,50 +121,51 @@
 
 
 </div>
-
-<table class="management-table">
-    <thead>
-        <tr>
-            <th>No</th>
-            <th>学籍番号</th>
-            <th>生徒氏名</th>
-            <th>学科名</th>
-            <th>学年</th>
-            <th>班</th>
-            <th>在校状況</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        <?php $i = 1; ?>
-        <?php foreach ($students as $st): ?>
-            <tr data-student-id="<?= htmlspecialchars($st['student_id']) ?>">
-                <td><?= $i++ ?></td>
-                <!-- 学籍番号 -->
-                <td><?= htmlspecialchars($st['student_id']) ?></td>
-                <!-- 生徒氏名 -->
-                <td class="editable" data-field="student_name"><?= htmlspecialchars($st['student_name']) ?></td>
-                <!-- 学科名 -->
-                <td><?= htmlspecialchars($st['department_name']) ?></td>
-                <!-- 学年 -->
-                <td><?= htmlspecialchars($st['grade']) ?></td>
-                <!-- 班 -->
-                <td class="editable" data-field="student_group"><?= !empty($st['student_group']) ?  htmlspecialchars($st['student_group']) : "-" ?></td>
-                <!-- 在校状況 -->
-                <td class="editable" data-field="status" data-status="<?= (int)$st['status'] ?>"><?= $st['status'] == 1 ? '在校' : '退校・卒業' ?></td>
-                <!-- 編集・削除ボタン -->
-                <td class="table-actions">
-                    <button class="edit-btn" onclick="toggleEdit(this)">編集</button>
-                    <button
-                        type="button"
-                        class="delete-btn"
-                        data-type="student"
-                        data-id="<?= htmlspecialchars($st['student_id'], ENT_QUOTES, 'UTF-8') ?>">
-                        削除
-                    </button>
-                </td>
-
+<div class="table_box">
+    <table class="management-table">
+        <thead>
+            <tr>
+                <th class="sticky">No</th>
+                <th class="sticky">学籍番号</th>
+                <th class="sticky">生徒氏名</th>
+                <th class="sticky">学科名</th>
+                <th class="sticky">学年</th>
+                <th class="sticky">班</th>
+                <th class="sticky">在校状況</th>
+                <th class="sticky"></th>
             </tr>
-        <?php endforeach; ?>
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            <?php $i = 1; ?>
+            <?php foreach ($students as $st): ?>
+                <tr data-student-id="<?= htmlspecialchars($st['student_id']) ?>">
+                    <td><?= $i++ ?></td>
+                    <!-- 学籍番号 -->
+                    <td><?= htmlspecialchars($st['student_id']) ?></td>
+                    <!-- 生徒氏名 -->
+                    <td class="editable" data-field="student_name"><?= htmlspecialchars($st['student_name']) ?></td>
+                    <!-- 学科名 -->
+                    <td><?= htmlspecialchars($st['department_name']) ?></td>
+                    <!-- 学年 -->
+                    <td><?= htmlspecialchars($st['grade']) ?></td>
+                    <!-- 班 -->
+                    <td class="editable" data-field="student_group"><?= !empty($st['student_group']) ?  htmlspecialchars($st['student_group']) : "-" ?></td>
+                    <!-- 在校状況 -->
+                    <td class="editable" data-field="status" data-status="<?= (int)$st['status'] ?>"><?= $st['status'] == 1 ? '在校' : '退校・卒業' ?></td>
+                    <!-- 編集・削除ボタン -->
+                    <td class="table-actions">
+                        <button class="edit-btn" onclick="toggleStudentEdit(this)">編集</button>
+                        <button
+                            type="button"
+                            class="delete-btn"
+                            data-type="student"
+                            data-id="<?= htmlspecialchars($st['student_id'], ENT_QUOTES, 'UTF-8') ?>">
+                            削除
+                        </button>
+                    </td>
+
+                </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+</div>

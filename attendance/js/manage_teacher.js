@@ -24,7 +24,7 @@ const teacherConfig = {
 };
 
 // 編集・保存
-function toggleEdit(button) {
+function toggleTeacherEdit(button) {
     return window.commonToggleEdit(button, teacherConfig);
 }
 

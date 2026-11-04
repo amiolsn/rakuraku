@@ -24,7 +24,7 @@ const subjectConfig = {
 };
 
 // 編集・保存
-function toggleEdit(button) {
+function toggleSubjectEdit(button) {
     return window.commonToggleEdit(button, subjectConfig);
 }
 
