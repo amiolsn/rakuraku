@@ -120,3 +120,7 @@ form input[type="password"] {
   box-shadow: 0 6px 18px rgba(52, 58, 64, 0.35);
   transform: translateY(-2px);
 }
+
+.new-password {
+    display: none;
+}
