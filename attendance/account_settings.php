@@ -47,20 +47,44 @@ require_once 'functions.php';
                     <?= htmlspecialchars($error, ENT_QUOTES, 'UTF-8') ?>
                 </p>
             <?php endif; ?>
-            <form action="" method="post">
-                <p>アカウント名</p><br>
-                <p id="current-password"><?= htmlspecialchars($_SESSION['user']['user_name'], ENT_QUOTES, 'UTF-8') ?></p>
-                <p>ログインID<br></p><br>
-                <p id="current-password"><?= htmlspecialchars($_SESSION['user']['login_id'], ENT_QUOTES, 'UTF-8') ?></p>
-                <!-- 隠したい👀 -->
-                <p>現在のパスワード</p><br>
-                <p id="current-password"><?= htmlspecialchars($_SESSION['user']['password'], ENT_QUOTES, 'UTF-8') ?></p>
-                <p class="new-password">
-                    新しいパスワード<br>
-                    <input type="password" name="password">
-                </p>
+            <form action="update_password.php" method="post" class="update-password">
 
-                <input type="button" value="パスワード変更" class="passowrd-btn">
+                <!-- アカウント情報 -->
+                <div class="account-info">
+                    <div class="info-group">
+                        <label>アカウント名</label>
+                        <p class="info-value">
+                            <?= htmlspecialchars($_SESSION['user']['user_name'], ENT_QUOTES, 'UTF-8') ?>
+                        </p>
+                    </div>
+
+                    <div class="info-group">
+                        <label>ログインID</label>
+                        <p class="info-value">
+                            <?= htmlspecialchars($_SESSION['user']['login_id'], ENT_QUOTES, 'UTF-8') ?>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- パスワード変更 -->
+                <div class="password-section">
+                    <p class="section-title">パスワード変更</p>
+
+                    <div class="new-password">
+                        <label for="new-password">新しいパスワード</label>
+                        <input
+                            type="password"
+                            id="new-password"
+                            name="new-password"
+                            autocomplete="new-password">
+                    </div>
+
+                    <input
+                        type="button"
+                        value="パスワード変更"
+                        class="password-btn">
+                </div>
+
             </form>
         </main>
     </div>
