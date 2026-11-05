@@ -64,26 +64,48 @@ require_once 'functions.php';
                             <?= htmlspecialchars($_SESSION['user']['login_id'], ENT_QUOTES, 'UTF-8') ?>
                         </p>
                     </div>
-                </div>
 
-                <!-- パスワード変更 -->
-                <div class="password-section">
-                    <p class="section-title">パスワード変更</p>
+                    <div class="info-group">
+                        <label>ユーザー種別</label>
+                        <p class="info-value">
+                            <?= htmlspecialchars($_SESSION['user']['usertype_name'], ENT_QUOTES, 'UTF-8') ?>
+                        </p>
 
-                    <div class="new-password">
-                        <label for="new-password">新しいパスワード</label>
-                        <input
-                            type="password"
-                            id="new-password"
-                            name="new-password"
-                            autocomplete="new-password">
+                        <div class="info-group">
+                            <label>所属学科</label>
+                            <p class="info-value">
+                                <?= htmlspecialchars($_SESSION['user']['department_id'], ENT_QUOTES, 'UTF-8') ?>
+                            </p>
+                        </div>
                     </div>
 
-                    <input
-                        type="button"
-                        value="パスワード変更"
-                        class="password-btn">
-                </div>
+                    <!-- パスワード変更 -->
+                    <div class="password-section">
+                        <p class="section-title">パスワード変更</p>
+
+                        <div class="new-password">
+                            <label for="new-password">新しいパスワード</label>
+                            <input
+                                type="password"
+                                id="new-password"
+                                name="new-password"
+                                required>
+
+                            <label for="confirm-password">新しいパスワード（確認）</label>
+                            <input
+                                type="password"
+                                id="confirm-password"
+                                name="confirm-password"
+                                required>
+
+                            <p id="password-message"></p>
+                        </div>
+
+                        <input
+                            type="button"
+                            value="パスワード変更"
+                            class="password-btn">
+                    </div>
 
             </form>
         </main>

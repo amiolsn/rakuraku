@@ -8,7 +8,7 @@
 
 main {
     box-sizing: border-box;
-    width: 320px;
+    width: 380px;
     max-width: 100%;
     padding: 28px 24px;
     text-align: center;
@@ -214,4 +214,18 @@ form input[type="password"] {
     color: #D9534F;
     font-size: 0.9rem;
     text-align: left;
+}
+
+#password-message {
+    margin: 8px 0 0;
+    font-size: 0.85rem;
+    text-align: left;
+}
+
+.password-success {
+    color: #198754;
+}
+
+.password-error {
+    color: #DC3545;
 }
