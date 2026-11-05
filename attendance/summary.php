@@ -32,6 +32,9 @@ try {
 
         // 出欠データの取得
         $weekly_attendance = getWeeklyAttendance($pdo, $date_only_list);
+    } elseif ($active_tab === 'monthly') {
+        $target_month    = (!empty($_GET['month'])) ? $_GET['month'] : date('Y-m');
+        $monthly_summary = getMonthlyAttendanceSummary($pdo, $department_id, $selected_grade, $target_month);
     }
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
@@ -117,9 +120,18 @@ try {
                     </script>
                 <?php elseif ($active_tab === 'monthly'): ?>
                     <?php
-                    $target_month = $_GET['month'] ?? date('Y-m');
+                    $target_month  = (!empty($_GET['month'])) ? $_GET['month'] : date('Y-m');
+                    $prev_month    = date('Y-m', strtotime('-1 month', strtotime("{$target_month}-01")));
+                    $next_month    = date('Y-m', strtotime('+1 month', strtotime("{$target_month}-01")));
+                    $current_month = date('Y-m');
                     ?>
-                    <input type="month" name="month" value="<?= htmlspecialchars($target_month, ENT_QUOTES, 'UTF-8') ?>" onchange="this.form.submit()">
+                    <div class="month-navigation">
+                        <a href="summary.php?tab=monthly&grade=<?= $selected_grade ?>&month=<?= $prev_month ?>" class="btn-nav" title="前月へ">◀ 前月</a>
+                        <input type="month" name="month" value="<?= htmlspecialchars($target_month, ENT_QUOTES, 'UTF-8') ?>" onchange="this.form.submit()">
+                        <a href="summary.php?tab=monthly&grade=<?= $selected_grade ?>&month=<?= $next_month ?>" class="btn-nav" title="翌月へ">翌月 ▶</a>
+                        <a href="summary.php?tab=monthly&grade=<?= $selected_grade ?>&month=<?= $current_month ?>" class="btn-nav btn-today">今月</a>
+                    </div>
+                    
                 <?php endif; ?>
             </form>
         </div>
