@@ -8,7 +8,7 @@
 
 main {
     box-sizing: border-box;
-    width: 320px;
+    width: 380px;
     max-width: 100%;
     padding: 28px 24px;
     text-align: center;
@@ -123,4 +123,109 @@ form input[type="password"] {
 
 .new-password {
     display: none;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.new-password label {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.new-password input {
+    box-sizing: border-box;
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #CED4DA;
+    border-radius: 6px;
+    background-color: #FFFFFF;
+    font-size: 1rem;
+}
+
+.new-password input:focus {
+    outline: 2px solid #F7CAD0;
+    outline-offset: 1px;
+    border-color: #D88A99;
+}
+
+
+.info-group label,
+.new-password label {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #343A40;
+}
+
+/* 情報表示欄 */
+.info-value {
+    box-sizing: border-box;
+    width: 100%;
+    margin: 0;
+    padding: 11px 12px;
+    border: 1px solid #E9DADD;
+    border-radius: 6px;
+    background-color: #FAF7F8;
+    color: #495057;
+    font-size: 0.95rem;
+    text-align: left;
+}
+
+.password-section {
+    padding-top: 24px;
+    border-top: 1px solid #F0D9DE;
+}
+
+.section-title {
+    margin: 0 0 20px;
+    color: #343A40;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: left;
+}
+
+.password-btn,
+.password-submit {
+    width: 100%;
+    margin-top: 4px;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background-color: #F7CAD0;
+    color: #343A40;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(52, 58, 64, 0.25);
+  transition: all 0.2s ease;
+}
+
+.password-btn:hover,
+.password-submit:hover {
+    background-color: #F0B5BF;
+  box-shadow: 0 6px 18px rgba(52, 58, 64, 0.35);
+    transform: translateY(-2px);
+}
+
+.error {
+    margin: 0 0 20px;
+    padding: 10px;
+    border-radius: 6px;
+    background-color: #FFF0F0;
+    color: #D9534F;
+    font-size: 0.9rem;
+    text-align: left;
+}
+
+#password-message {
+    margin: 8px 0 0;
+    font-size: 0.85rem;
+    text-align: left;
+}
+
+.password-success {
+    color: #198754;
+}
+
+.password-error {
+    color: #DC3545;
 }
