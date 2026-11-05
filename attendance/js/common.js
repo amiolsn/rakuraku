@@ -23,6 +23,11 @@ async function postJson(url, data) {
  * 編集モード切替・保存
  */
 async function commonToggleEdit(button, config) {
+    console.log('渡されたconfig:', config);
+    console.log('configのキー:', Object.keys(config));
+    console.log('statusField:', config.statusField);
+
+    //現在のコードだと在校状況までテキスト入力になっているのでラジオボタンに直したい
     const row = button.closest('tr');
     const cells = row.querySelectorAll('.editable');
 
@@ -68,6 +73,39 @@ async function commonToggleEdit(button, config) {
     await saveData(button, config);
 }
 
+/**
+ * 編集モードを終了する
+ */
+function cancelEdit(button, config) {
+    const row = button.closest('tr');
+
+    row.querySelectorAll('.editable').forEach(cell => {
+        const original = cell.dataset.original;
+        const field = cell.dataset.field;
+
+        if (field === config.statusField) {
+            // 在校状況を元の表示文字列に戻す
+            const option = config.statusOptions.find(
+                option => option.value === original
+            );
+
+            cell.textContent = option?.label ?? original;
+
+        } else {
+            // 通常の入力項目を元の値に戻す
+            cell.textContent =
+                config.emptyAsBlankFields?.includes(field) && original === ''
+                    ? '-'
+                    : original;
+        }
+
+        // 保存していた元の値を削除
+        delete cell.dataset.original;
+    });
+
+    // ボタンの文字を編集に戻す
+    button.textContent = '編集';
+}
 
 /**
  * 編集内容を保存
@@ -95,6 +133,8 @@ async function saveData(button, config) {
 
     if (Object.keys(changes).length === 0) {
         alert('変更された情報はありません。');
+        //編集モードを終了したい
+        cancelEdit(button, config);
         return;
     }
 

@@ -39,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($row) {
         $_SESSION['user'] = [
             'user_id' => $row['user_id'],
+            'password' => $row['password'],
             'usertype_id' => $row['usertype_id'],
             'usertype_name' => $row['usertype_name'],
             'login_id' => $row['login_id'],

@@ -29,13 +29,14 @@ try {
     ];
     $students = searchStudents($pdo, $department_id, $student_filters);
 
-    // 検索条件の取得と生徒一覧の取得
+    // 検索条件の取得と教員一覧の取得
     $teacher_filters = [
         'teacher_id' => $_GET['teacher_id'] ?? '',
         'teacher_name' => $_GET['teacher_name'] ?? ''
     ];
     $teachers = searchTeachers($pdo, $department_id, $teacher_filters);
 
+    // 検索条件の取得と科目一覧の取得
     $subject_filters = [
         'subject_id' => $_GET['subject_id'] ?? '',
         'subject_name' => $_GET['subject_name'] ?? ''
@@ -82,11 +83,11 @@ try {
                     <?php include 'components/_manage_students.php'; ?>
                 </div>
                 <div class="tabbody-elem" id="tab-page2">
-                    <!-- 未作成 -->
+
                     <?php include 'components/_manage_teachers.php'; ?>
                 </div>
                 <div class="tabbody-elem" id="tab-page3">
-                    <!-- 未作成 -->
+
                     <?php include 'components/_manage_subjects.php'; ?>
                 </div>
             </div>

@@ -50,7 +50,7 @@ const studentConfig = {
 
 
 // HTMLから呼び出す関数名は今までどおりにする
-function toggleEdit(button) {
+function toggleStudentEdit(button) {
     return window.commonToggleEdit(button, studentConfig);
 }
 

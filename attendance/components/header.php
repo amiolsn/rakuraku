@@ -64,7 +64,7 @@ if (isset($_SESSION['user'])) {
                 マスタ管理
             </a>
 
-            <a href="#"
+            <a href="account_settings.php"
                 class="nav-elem <?= $currentPage === 'index.php' ? 'active' : '' ?>">
                 アカウント管理
             </a>

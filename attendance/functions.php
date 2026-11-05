@@ -292,6 +292,8 @@ function searchStudents(PDO $pdo, int $department_id, array $filters = []): arra
     if (isset($_GET['status']) && $_GET['status'] !== '') {
         $sql .= " AND s.status= ?";
         $params[] = $_GET['status'];
+    } else {
+        $sql .= " AND s.status= 1";
     }
 
     $sql .= " ORDER BY s.student_id ASC";
@@ -721,7 +723,7 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
             calendar_date
                 BETWEEN :fiscal_start
                 AND :month_end
-        AND is_holiday = 1
+        AND is_holiday = 0
         ORDER BY
             calendar_date ASC
     ");
@@ -744,7 +746,7 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
         // 当月分のみ抽出
         if ($c_date >= $start_date && $c_date <= $end_date) {
             $monthly_days[$c_date] = $periods;
-            $monthly_total_periods += $periods;
+            $month_total_periods += $periods;
         }
     }
 
@@ -898,20 +900,20 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
             'cumulative_rate'     => $cumulative_rate,  // 累計出席率
             'remaining_absent_h'  => $remaining_absent_h,    // 残欠席時間
         ];
+    }
 
-        // クラス平均出席率
-        $st_count        = count($students);
-        $class_avg_month = ($st_count > 0) ? round($total_month_rates / $st_count, 1) : 0.0;
-        $class_avg_cumul = ($st_count > 0) ? round($total_cumulative_rates / $st_count, 1) : 0.0;
+    // クラス平均出席率
+    $st_count        = count($students);
+    $class_avg_month = ($st_count > 0) ? round($total_month_rates / $st_count, 1) : 0.0;
+    $class_avg_cumul = ($st_count > 0) ? round($total_cumulative_rates / $st_count, 1) : 0.0;
 
-        return [
+    return [
             'students'                 => $summary_list,
             'month_total_periods'      => $month_total_periods,  // 今月総授業時間
             'cumulative_total_periods' => $cumulative_total_periods,    // 累計総授業時間
             'class_avg_month'          => $class_avg_month,  // クラス今月平均
             'class_avg_cumul'          => $class_avg_cumul,  // クラス累計平均
         ];
-    }
 }
 
 /**
@@ -921,8 +923,8 @@ function getAbsenceLimitHours(PDO $pdo, int $department_id, int $grade): int
 {
     $stmt = $pdo -> prepare("
         SELECT max_absence_hours
-        FROM cource_requirements
-        WHERE department_id ? AND grade = ?
+        FROM course_requirements
+        WHERE department_id = ? AND grade = ?
     ");
     $stmt -> execute([$department_id, $grade]);
     $limit = $stmt -> fetchColumn();
