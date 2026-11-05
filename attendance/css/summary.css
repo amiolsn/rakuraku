@@ -207,3 +207,56 @@
   background-color: #e9ecef;
   font-weight: bold;
 }
+
+/* 月間集計情報サマリーバー */
+.summary-info-bar {
+  display: flex;
+  gap: 20px;
+  background-color: #f1f3f5;
+  padding: 8px 16px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: #495057;
+}
+
+.summary-info-bar strong {
+  color: #212529;
+  font-weight: 700;
+}
+
+/* 月ナビゲーション */
+.month-navigation {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* テキスト強調 */
+.text-absent {
+  color: #d9363e;
+  font-weight: bold;
+}
+
+.text-late {
+  color: #d48806;
+  font-weight: bold;
+}
+
+.text-early {
+  color: #096dd9;
+  font-weight: bold;
+}
+
+/* 出席率・残時間の警告表示 */
+.alert-rate {
+  background-color: #fff1f0 !important;
+  color: #cf1322 !important;
+  font-weight: bold;
+}
+
+.alert-remain {
+  background-color: #fff2e8 !important;
+  color: #d4380d !important;
+  font-weight: bold;
+}
