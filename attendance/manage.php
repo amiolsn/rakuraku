@@ -25,7 +25,7 @@ try {
         'student_name' => $_GET['student_name'] ?? '',
         'grade' => $_GET['grade'] ?? '',
         'student_group' => $_GET['student_group'] ?? '',
-        'status' => $_GET['status'] ?? '',
+        'status' => $_GET['status'] ?? '1',
     ];
     $students = searchStudents($pdo, $department_id, $student_filters);
 

@@ -271,29 +271,27 @@ function searchStudents(PDO $pdo, int $department_id, array $filters = []): arra
     }
 
     // 生徒氏名が検索欄に入力されている場合だけ条件を追加
-    if (isset($_GET['student_name']) && $_GET['student_name'] !== '') {
+    if (isset($filters['student_name']) && $filters['student_name'] !== '') {
         $sql .= " AND s.student_name LIKE ?";
-        $params[] = '%' . $_GET['student_name'] . '%';
+        $params[] = '%' . $filters['student_name'] . '%';
     }
 
     // 学年が選択されている場合だけ条件を追加
-    if (isset($_GET['grade']) && $_GET['grade'] !== '') {
+    if (isset($filters['grade']) && $filters['grade'] !== '') {
         $sql .= " AND grade = ?";
-        $params[] = (int)$_GET['grade'];
+        $params[] = (int)$filters['grade'];
     }
 
     // 班が選択されている場合だけ条件を追加
-    if (isset($_GET['student_group']) && $_GET['student_group'] !== '') {
+    if (isset($filters['student_group']) && $filters['student_group'] !== '') {
         $sql .= " AND s.student_group = ?";
-        $params[] = $_GET['student_group'];
+        $params[] = $filters['student_group'];
     }
 
     // 在校状況が選択されている場合だけ条件を追加
-    if (isset($_GET['status']) && $_GET['status'] !== '') {
-        $sql .= " AND s.status= ?";
-        $params[] = $_GET['status'];
-    } else {
-        $sql .= " AND s.status= 1";
+    if ($filters['status'] !== '') {
+        $sql .= " AND s.status = ?";
+        $params[] = $filters['status'];
     }
 
     $sql .= " ORDER BY s.student_id ASC";
@@ -713,7 +711,7 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
     $fiscal_start     = "{$fiscal_year}-04-01";
 
     // カレンダーから「当月」および「年度累計」の授業日・時限数を取得
-    $cal_stmt = $pdo -> prepare("
+    $cal_stmt = $pdo->prepare("
         SELECT
             calendar_date,
             max_period
@@ -727,11 +725,11 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
         ORDER BY
             calendar_date ASC
     ");
-    $cal_stmt -> execute([
+    $cal_stmt->execute([
         ':fiscal_start' => $fiscal_start,
         ':month_end'    => $end_date,
     ]);
-    $calendar_records = $cal_stmt -> fetchAll();
+    $calendar_records = $cal_stmt->fetchAll();
 
     $monthly_days               = []; // 当月の授業日
     $month_total_periods        = 0;  // 当月の総授業時間数
@@ -753,7 +751,7 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
     // 対象生徒一覧の取得
     $students = getAttendanceStudents($pdo, $department_id, $grade);
     if (empty($students)) {
-        return[
+        return [
             'students'                  => [],
             'month_total_periods'       => $month_total_periods,
             'cumulative_total_periods'  => $cumulative_total_periods,
@@ -763,7 +761,7 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
     }
 
     // 年度開始～当月末までの出欠レコードを一括取得
-    $att_stmt = $pdo -> prepare("
+    $att_stmt = $pdo->prepare("
         SELECT
             student_id,
             attendance_date,
@@ -775,11 +773,11 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
                 BETWEEN :fiscal_start
                 AND :month_end
     ");
-    $att_stmt -> execute([
+    $att_stmt->execute([
         ':fiscal_start' => $fiscal_start,
         ':month_end'    => $end_date,
     ]);
-    $attendance_rows = $att_stmt -> fetchAll();
+    $attendance_rows = $att_stmt->fetchAll();
 
     // 出欠レコードをマッピング
     $att_map = [];
@@ -908,12 +906,12 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
     $class_avg_cumul = ($st_count > 0) ? round($total_cumulative_rates / $st_count, 1) : 0.0;
 
     return [
-            'students'                 => $summary_list,
-            'month_total_periods'      => $month_total_periods,  // 今月総授業時間
-            'cumulative_total_periods' => $cumulative_total_periods,    // 累計総授業時間
-            'class_avg_month'          => $class_avg_month,  // クラス今月平均
-            'class_avg_cumul'          => $class_avg_cumul,  // クラス累計平均
-        ];
+        'students'                 => $summary_list,
+        'month_total_periods'      => $month_total_periods,  // 今月総授業時間
+        'cumulative_total_periods' => $cumulative_total_periods,    // 累計総授業時間
+        'class_avg_month'          => $class_avg_month,  // クラス今月平均
+        'class_avg_cumul'          => $class_avg_cumul,  // クラス累計平均
+    ];
 }
 
 /**
@@ -921,13 +919,13 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
  */
 function getAbsenceLimitHours(PDO $pdo, int $department_id, int $grade): int
 {
-    $stmt = $pdo -> prepare("
+    $stmt = $pdo->prepare("
         SELECT max_absence_hours
         FROM course_requirements
         WHERE department_id = ? AND grade = ?
     ");
-    $stmt -> execute([$department_id, $grade]);
-    $limit = $stmt -> fetchColumn();
+    $stmt->execute([$department_id, $grade]);
+    $limit = $stmt->fetchColumn();
 
     // 未定義の場合はデフォルト値(280)を返す
     return ($limit !== false && $limit !== null) ? (int)$limit : 280;
