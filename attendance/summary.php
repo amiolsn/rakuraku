@@ -35,6 +35,8 @@ try {
     } elseif ($active_tab === 'monthly') {
         $target_month    = (!empty($_GET['month'])) ? $_GET['month'] : date('Y-m');
         $monthly_summary = getMonthlyAttendanceSummary($pdo, $department_id, $selected_grade, $target_month);
+    } elseif ($active_tab === 'total') {
+
     }
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
@@ -146,7 +148,7 @@ try {
                     <a href="summary.php?tab=weekly&grade=<?= $selected_grade ?>">週間集計</a>
                 </li>
                 <li class="tab-elem <?= $active_tab === 'total' ? 'is-active' : '' ?>">
-                    <a href="summary.php?tab=monthly&grade=<?= $selected_grade ?>">訓練全期間集計</a>
+                    <a href="summary.php?tab=total&grade=<?= $selected_grade ?>">訓練全期間集計</a>
                 </li>
             </ul>
 
