@@ -58,8 +58,8 @@ if (isset($_SESSION['user'])) {
                 欠席登録・届け出管理
             </a>
 
-            <a href="summary.php"
-                class="nav-elem <?= $currentPage === 'summary.php' ? 'active' : '' ?>">
+            <a href="summary-test.php"
+                class="nav-elem <?= $currentPage === 'summary-test.php' ? 'active' : '' ?>">
                 集計
             </a>
 
