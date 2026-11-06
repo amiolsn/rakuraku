@@ -3,7 +3,7 @@
 .weekly-table-wrapper {
   overflow-x: auto;
   background-color: #ffffff;
-  border: 1px solid #dee2e6;
+  /* border: 1px solid #dee2e6; */
 }
 
 .summary-table {
@@ -146,7 +146,6 @@
 
 .week-navigation .btn-today {
   background-color: #e9ecef;
-  font-weight: bold;
 }
 
 /* --- テーブル外枠および主要な区切り線の太線化 --- */
@@ -189,62 +188,94 @@
   border-right: 2.5px solid #656766 !important;
 }
 
-/* 週間ナビゲーション */
-.week-navigation {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+/* 集計検索エリア */
+.summary-filter {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin: 10px 0 20px 0;
 }
 
-.week-navigation .btn-nav {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 4px 10px;
-  background-color: #f8f9fa;
-  border: 1px solid #ced4da;
-  border-radius: 4px;
-  color: #656766;
-  font-size: 0.85rem;
-  font-weight: 500;
-  cursor: pointer;
-  line-height: 1.5;
-  transition: all 0.15s ease-in-out;
+/* フォーム */
+.summary-filter form {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    width: 100%;
 }
 
-.week-navigation .btn-nav:hover {
-  background-color: #e2e6ea;
-  border-color: #dae0e5;
-  color: #212529;
+/* 学年選択 */
+.summary-filter select {
+    min-width: 110px;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    background-color: #fff;
+    color: var(--color-primary);
+    font-size: 14px;
+    cursor: pointer;
 }
 
-.week-navigation .btn-today {
-  background-color: #e9ecef;
-  font-weight: bold;
+/* 週・月のナビゲーション */
+.week-navigation,
+.month-navigation {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 
-/* 月間集計情報サマリーバー */
+/* 日付・月選択 */
+.summary-filter input[type="date"],
+.summary-filter input[type="month"] {
+    padding: 7px 10px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    background-color: #fff;
+    color: var(--color-primary);
+    font-size: 14px;
+}
+
+/* ナビゲーションボタン */
+.summary-filter .btn-nav {
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 5px;
+    background-color: #fff;
+    color: var(--color-primary);
+    font-size: 13px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.summary-filter .btn-nav:hover {
+    background-color: #f1f3f5;
+}
+
+/* 今週・今月ボタン */
+.summary-filter .btn-today {
+    background-color: var(--color-primary);
+    color: #fff;
+    border-color: var(--color-primary);
+}
+
+.summary-filter .btn-today:hover {
+    opacity: 0.85;
+    background-color: var(--color-primary);
+}
+
 .summary-info-bar {
-  display: flex;
-  gap: 20px;
   background-color: #f1f3f5;
-  padding: 8px 16px;
-  border-radius: 4px;
-  margin-bottom: 12px;
-  font-size: 0.9rem;
-  color: #495057;
+  padding: 5px;
+  margin-bottom: 5px;
 }
 
 .summary-info-bar strong {
   color: #212529;
   font-weight: 700;
-}
-
-/* 月ナビゲーション */
-.month-navigation {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
 }
 
 /* テキスト強調 */

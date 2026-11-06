@@ -90,41 +90,6 @@ try {
         <div class="summary-header">
             <h2>出席状況</h2>
         </div>
-        <div class="summary-filter">
-
-            <form action="" method="GET">
-
-                <input type="hidden" name="tab" value="weekly">
-
-                <!-- 学年選択 -->
-                <select name="grade" onchange="this.form.submit()">
-                    <?php include 'components/_grade_options.php'; ?>
-                </select>
-
-                <!-- 週選択 -->
-                <div class="week-navigation">
-
-                    <button type="button"
-                        class="btn-nav"
-                        onclick="moveWeek(-7)">◀ 前週</button>
-
-                    <input type="date"
-                        id="target-date-input"
-                        name="date"
-                        value="<?= htmlspecialchars($target_week_date, ENT_QUOTES, 'UTF-8') ?>"
-                        onchange="this.form.submit()">
-
-                    <button type="button"
-                        class="btn-nav"
-                        onclick="moveWeek(7)">次週 ▶</button>
-
-                    <button type="button"
-                        class="btn-nav btn-today"
-                        onclick="goToday()">今週</button>
-
-                </div>
-            </form>
-        </div>
 
         <!-- タブグループ -->
         <div class="tab-h" id="tab-h">
@@ -151,6 +116,52 @@ try {
                      月間集計
                 ========================== -->
                 <div class="tabbody-elem" id="tab-monthly">
+
+                    <div class="summary-filter">
+                        <form action="" method="GET">
+
+                            <input type="hidden" name="tab" value="monthly">
+
+                            <!-- 学年選択 -->
+                            <select name="grade" onchange="this.form.submit()">
+                                <?php include 'components/_grade_options.php'; ?>
+                            </select>
+
+                            <!-- 月選択 -->
+                            <div class="month-navigation">
+
+                                <?php
+                                $prev_month = date(
+                                    'Y-m',
+                                    strtotime('-1 month', strtotime($target_month . '-01'))
+                                );
+
+                                $next_month = date(
+                                    'Y-m',
+                                    strtotime('+1 month', strtotime($target_month . '-01'))
+                                );
+
+                                $current_month = date('Y-m');
+                                ?>
+
+                                <a href="?tab=monthly&grade=<?= $selected_grade ?>&month=<?= $prev_month ?>"
+                                    class="btn-nav">◀ 前月</a>
+
+                                <input type="month"
+                                    name="month"
+                                    value="<?= htmlspecialchars($target_month, ENT_QUOTES, 'UTF-8') ?>"
+                                    onchange="this.form.submit()">
+
+                                <a href="?tab=monthly&grade=<?= $selected_grade ?>&month=<?= $next_month ?>"
+                                    class="btn-nav">翌月 ▶</a>
+
+                                <a href="?tab=monthly&grade=<?= $selected_grade ?>&month=<?= $current_month ?>"
+                                    class="btn-nav btn-today">今月</a>
+
+                            </div>
+                        </form>
+                    </div>
+
                     <div class="table-container">
                         <?php include 'components/_summary_monthly.php'; ?>
                     </div>
@@ -158,10 +169,47 @@ try {
                 </div>
 
 
+
                 <!-- =========================
                      週間集計
                 ========================== -->
                 <div class="tabbody-elem" id="tab-weekly">
+
+                    <div class="summary-filter">
+                        <form action="" method="GET">
+
+                            <input type="hidden" name="tab" value="weekly">
+
+                            <!-- 学年選択 -->
+                            <select name="grade" onchange="this.form.submit()">
+                                <?php include 'components/_grade_options.php'; ?>
+                            </select>
+
+                            <!-- 週選択 -->
+                            <div class="week-navigation">
+
+                                <button type="button"
+                                    class="btn-nav"
+                                    onclick="moveWeek(-7)">◀ 前週</button>
+
+                                <input type="date"
+                                    id="target-date-input"
+                                    name="date"
+                                    value="<?= htmlspecialchars($target_week_date, ENT_QUOTES, 'UTF-8') ?>"
+                                    onchange="this.form.submit()">
+
+                                <button type="button"
+                                    class="btn-nav"
+                                    onclick="moveWeek(7)">次週 ▶</button>
+
+                                <button type="button"
+                                    class="btn-nav btn-today"
+                                    onclick="goToday()">今週</button>
+
+                            </div>
+                        </form>
+                    </div>
+
                     <div class="table-container">
                         <?php include 'components/_summary_weekly.php'; ?>
                     </div>
@@ -169,10 +217,26 @@ try {
                 </div>
 
 
+
+
                 <!-- =========================
                      訓練全期間集計
                 ========================== -->
                 <div class="tabbody-elem" id="tab-total">
+
+                    <div class="summary-filter">
+                        <form action="" method="GET">
+
+                            <input type="hidden" name="tab" value="total">
+
+                            <!-- 学年選択 -->
+                            <select name="grade" onchange="this.form.submit()">
+                                <?php include 'components/_grade_options.php'; ?>
+                            </select>
+
+                        </form>
+                    </div>
+
                     <div class="table-container">
                         <?php include 'components/_summary_total.php'; ?>
                     </div>
@@ -181,10 +245,10 @@ try {
 
             </div>
         </div>
-    </div>
 
-    <script src="js/tab.js" defer></script>
-    <script src="js/summary-test.js" defer></script>
+
+        <script src="js/tab.js" defer></script>
+        <script src="js/summary-test.js" defer></script>
 
 </body>
 
