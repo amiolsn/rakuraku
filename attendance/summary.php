@@ -69,7 +69,7 @@ try {
                     <?php
                     // components/_grade_options.phpを利用
                     include 'components/_grade_options.php';
-?>
+                    ?>
                 </select>
 
                 <!-- 各タブ固有の操作パーツ（週カレンダーや年月プルダウン -->
@@ -131,7 +131,7 @@ try {
                         <a href="summary.php?tab=monthly&grade=<?= $selected_grade ?>&month=<?= $next_month ?>" class="btn-nav" title="翌月へ">翌月 ▶</a>
                         <a href="summary.php?tab=monthly&grade=<?= $selected_grade ?>&month=<?= $current_month ?>" class="btn-nav btn-today">今月</a>
                     </div>
-                    
+
                 <?php endif; ?>
             </form>
         </div>
@@ -161,7 +161,7 @@ try {
                     } else {
                         include 'components/_summary_monthly.php';
                     }
-?>
+                    ?>
                 </div>
             </div>
         </div>

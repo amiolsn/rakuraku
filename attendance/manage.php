@@ -82,14 +82,17 @@ try {
                 <div class="tabbody-elem" id="tab-page1">
                     <?php include 'components/_manage_students.php'; ?>
                 </div>
+
                 <div class="tabbody-elem" id="tab-page2">
 
                     <?php include 'components/_manage_teachers.php'; ?>
                 </div>
+
                 <div class="tabbody-elem" id="tab-page3">
 
                     <?php include 'components/_manage_subjects.php'; ?>
                 </div>
+
             </div>
         </div>
     </div>
