@@ -1,10 +1,10 @@
 <?php
 
-require_once 'db.php';
-require_once 'functions.php';
+require_once '../db.php';
+require_once '../functions.php';
 
 try {
-    $pdo -> beginTransaction();
+    $pdo->beginTransaction();
 
     echo "<h3>1. 2026年7月 ベースカレンダー生成（土日祝日の自動判定）</h3>";
     $count = generateBaseSchoolCalendar($pdo, '2026-07-01', '2026-07-31', 7);
@@ -18,18 +18,18 @@ try {
     setSpecialCalendarDate($pdo, '2026-07-10', true, 0, '調整日休校');
     echo "7月10日を休校日に設定完了<br>";
 
-    $pdo -> commit();
+    $pdo->commit();
     echo "<h2 style='color:green;'>カレンダーセットアップ完了</h2>";
 
     // 登録結果の確認表示
-    $stmt = $pdo -> query("
+    $stmt = $pdo->query("
         SELECT * FROM school_calendar
         WHERE calendar_date
             BETWEEN '2026-07-01'
             AND '2026-07-31'
         ORDER BY calendar_date ASC    
         ");
-    $list = $stmt -> fetchAll() ;
+    $list = $stmt->fetchAll();
 
     echo "<table border='1' cellpadding='4' style='border-collapse:collapse; text-align:center;'>";
     echo "<tr style='background:#f0f0f0;'><th>日付</th><th>曜日</th><th>休校フラグ</th><th>時限数</th><th>理由・摘要</th></tr>";
@@ -51,8 +51,8 @@ try {
     }
     echo "</table>";
 } catch (Exception $e) {
-    if ($pdo -> inTransaction()) {
-        $pdo -> rollBack();
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
     }
-    die("<h3 style='color:red;'>エラー: " .htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') ."</h3>");
+    die("<h3 style='color:red;'>エラー: " . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8') . "</h3>");
 }

@@ -154,15 +154,17 @@ try {
             <!-- タブコンテンツ領域 -->
             <div class="tabbody-h" id="tabbody-h">
                 <div class="table-container">
-                    <?php
-                    if ($active_tab === 'weekly') {
-                        include 'components/_summary_weekly.php';
-                    } elseif ($active_tab === 'total') {
-                        include 'components/_summary_total.php';
-                    } else {
-                        include 'components/_summary_monthly.php';
-                    }
-                    ?>
+                    <div>
+                        <?php
+                        if ($active_tab === 'weekly') {
+                            include 'components/_summary_weekly.php';
+                        } elseif ($active_tab === 'total') {
+                            include 'components/_summary_total.php';
+                        } else {
+                            include 'components/_summary_monthly.php';
+                        }
+                        ?>
+                    </div>
                 </div>
             </div>
         </div>

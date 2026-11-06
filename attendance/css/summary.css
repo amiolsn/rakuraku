@@ -8,20 +8,35 @@
 
 .summary-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
-  font-size: 0.85rem;
-  text-align: center;
+  color: var(--color-primary);
+  background-color: var(--colorr-bg-card);
+  font-size: 14px;
 }
 
-.summary-table th,
+/* .summary-table th,
 .summary-table td {
   border: 1px solid #333333;
   padding: 4px 2px;
-}
+} */
 
 .summary-table th {
-  background-color: #f8f9fa;
+  padding: 14px 12px;
+  background-color: #f1f3f5;
+  color: var(--color-primary);
   font-weight: 600;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.summary-table td {
+  padding: 12px;
+  border-bottom: 1px solid var(--color-border);
+  text-align: center;
+  vertical-align: middle; /* 文字を縦方向の中央に配置 */
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .day-group-header {
@@ -29,7 +44,7 @@
 }
 
 .col-num {
-  width: 65px;
+  width: 80px;
   text-align: center;
 }
 
@@ -138,40 +153,40 @@
 
 /* テーブル上端・下端の太線 */
 .summary-table thead tr:first-child th {
-  border-top: 2.5px solid #495057 !important;
+  border-top: 2.5px solid #656766 !important;
 }
 
 .summary-table tbody tr:last-child td {
-  border-bottom: 2.5px solid #495057 !important;
+  border-bottom: 2.5px solid #656766 !important;
 }
 
 /* テーブル左端・右端の太線 */
 .summary-table th:first-child,
 .summary-table td:first-child {
-  border-left: 2.5px solid #495057 !important;
+  border-left: 2.5px solid #656766 !important;
 }
 
 .summary-table th:last-child,
 .summary-table td:last-child {
-  border-right: 2.5px solid #495057 !important;
+  border-right: 2.5px solid #656766 !important;
 }
 
 /* 出席番号セルの右側ボーダー（出席番号と氏名の境目） */
 .summary-table th.col-num,
 .summary-table td.col-num {
-  border-right: 2.5px solid #495057 !important;
+  border-right: 2.5px solid #656766 !important;
 }
 
 /* 氏名セルの右側ボーダー（固定列とデータエリアの境目） */
 .summary-table th.border-col-end,
 .summary-table td.border-col-end {
-  border-right: 2.5px solid #495057 !important;
+  border-right: 2.5px solid #656766 !important;
 }
 
 /* 各日の右側ボーダー（日付ごとの境目） */
 .summary-table th.border-day-end,
 .summary-table td.border-day-end {
-  border-right: 2.5px solid #495057 !important;
+  border-right: 2.5px solid #656766 !important;
 }
 
 /* 週間ナビゲーション */
@@ -189,7 +204,7 @@
   background-color: #f8f9fa;
   border: 1px solid #ced4da;
   border-radius: 4px;
-  color: #495057;
+  color: #656766;
   font-size: 0.85rem;
   font-weight: 500;
   cursor: pointer;
