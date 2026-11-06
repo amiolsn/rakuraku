@@ -36,7 +36,6 @@ try {
         $target_month    = (!empty($_GET['month'])) ? $_GET['month'] : date('Y-m');
         $monthly_summary = getMonthlyAttendanceSummary($pdo, $department_id, $selected_grade, $target_month);
     } elseif ($active_tab === 'total') {
-
     }
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
@@ -139,21 +138,21 @@ try {
         </div>
 
         <!-- タブメニュー -->
-        <div class="tab-h">
+        <div id="tab-h" class="tab-h">
             <ul class="tab-contena">
-                <li class="tab-elem <?= $active_tab === 'monthly' ? 'is-active' : '' ?>">
+                <li class="tab-elem <?= $active_tab === 'monthly' ? 'active' : '' ?>">
                     <a href="summary.php?tab=monthly&grade=<?= $selected_grade ?>">月間集計</a>
                 </li>
-                <li class="tab-elem <?= $active_tab === 'weekly' ? 'is-active' : '' ?>">
+                <li class="tab-elem <?= $active_tab === 'weekly' ? 'active' : '' ?>">
                     <a href="summary.php?tab=weekly&grade=<?= $selected_grade ?>">週間集計</a>
                 </li>
-                <li class="tab-elem <?= $active_tab === 'total' ? 'is-active' : '' ?>">
+                <li class="tab-elem <?= $active_tab === 'total' ? 'active' : '' ?>">
                     <a href="summary.php?tab=total&grade=<?= $selected_grade ?>">訓練全期間集計</a>
                 </li>
             </ul>
 
             <!-- タブコンテンツ領域 -->
-            <div class="tabbody-h">
+            <div class="tabbody-h" id="tabbody-h">
                 <div class="table-container">
                     <?php
                     if ($active_tab === 'weekly') {
