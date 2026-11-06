@@ -91,12 +91,12 @@ $class_avg_cumul     = $monthly_summary['class_avg_cumul'];
                         <!-- 年度累計 -->
                         <td class="text-center <?= ($st['cumulative_absent_h'] > 0) ? 'text-absent' : ''?>">
                             <?= $st['cumulative_absent_h'] ?>
-                            <td class="text-center rate-cell <?= $is_low_rate_cumul ? 'alert-rate' : '' ?>">
-                                <?= number_format($st['cumulative_rate'], 1) ?>%
-                            </td>
-                            <td class="text-center remain-cell <?= $is_danger_remain ? 'alert-remain' : '' ?>">
-                                <?= $st['remaining_absent_h'] ?>
-                            </td>
+                        </td>
+                        <td class="text-center rate-cell <?= $is_low_rate_cumul ? 'alert-rate' : '' ?>">
+                            <?= number_format($st['cumulative_rate'], 1) ?>%
+                        </td>
+                        <td class="text-center remain-cell <?= $is_danger_remain ? 'alert-remain' : '' ?>">
+                            <?= $st['remaining_absent_h'] ?>
                         </td>
                     </tr>
                 <?php endforeach; ?>
