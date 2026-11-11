@@ -2,54 +2,35 @@
    新規追加ポップアップ
 ========================= */
 
-/* 背景のオーバーレイ */
+/* 新規追加ポップアップ */
 .popup-wrapper {
     display: none;
     position: fixed;
     inset: 0;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-
-    background-color: rgba(33, 37, 41, 0.55);
-   
     width: 100%;
     height: 100%;
-    padding: 24px;
-    box-sizing: border-box;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: flex-start;
 }
 
-/* ポップアップ本体 */
 .popup-inside {
     position: relative;
     width: 100%;
     max-width: 1100px;
     max-height: 90vh;
     overflow: auto;
-    background-color: var(--color-bg-card);
-    border: 1px solid var(--color-border);
-    border-radius: 12px;
-    padding: 32px 24px 24px;
-    box-shadow: 0 12px 40px rgba(33, 37, 41, 0.18);
-    box-sizing: border-box;
+    background: white;
+    margin: 10% auto;
+    padding: 32px 20px 20px;
 }
 
-/* 閉じるボタン */
 .close {
     position: absolute;
-    top: 12px;
-    right: 16px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 50%;
-    color: var(--color-text-sub);
-    font-size: 24px;
-    line-height: 1;
+    top: 0;
+    right: 5px;
     cursor: pointer;
-    transition: background-color 0.2s, color 0.2s;
 }
 
 /* =========================
@@ -118,22 +99,26 @@
 
 /* ラジオボタン */
 .add-table input[type="radio"] {
-    accent-color: var(--color-accent-text);
+    /* accent-color: var(--color-accent-text); */
     cursor: pointer;
     margin: 0 4px 0 2px;
     vertical-align: middle;
 }
 
 .add-table label {
+     display: block;
     color: var(--color-primary);
     font-size: 13px;
     white-space: nowrap;
+    margin-bottom: 6px;
 }
 
 /* 登録ボタン */
 .add-table .add-btn {
     width: 100%;
+    box-sizing: border-box;
     margin-top: 4px;
+    margin-left: 0;
     padding: 12px;
     border: none;
     border-radius: 8px;
@@ -142,15 +127,14 @@
     font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
-      box-shadow: 0 4px 14px rgba(52, 58, 64, 0.25);
-  transition: all 0.2s ease;
-
+    box-shadow: 0 4px 14px rgba(52, 58, 64, 0.25);
+    transition: all 0.2s ease;
 }
 
 .add-table .add-btn:hover {
-  background-color: #F0B5BF;
-  box-shadow: 0 6px 18px rgba(52, 58, 64, 0.35);
-  transform: translateY(-2px);
+    background-color: #F0B5BF;
+    box-shadow: 0 6px 18px rgba(52, 58, 64, 0.35);
+    transform: translateY(-2px);
 }
 
 @media (max-width: 768px) {
@@ -170,3 +154,6 @@
         overflow-x: auto;
     }
 }
+
+
+

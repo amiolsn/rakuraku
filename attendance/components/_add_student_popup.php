@@ -40,10 +40,16 @@
                             </select></td>
                         <td><input type="text" id="student_group" name="student_group"></td>
                         <!-- 在校状況ラジオボタン -->
-                        <td><label>在校</label>
-                            <input type="radio" name="status" value="1" checked>
-                            <label>退校・卒業</label>
-                            <input type="radio" name="status" value="0">
+                        <td>
+                            <label>
+                                <input type="radio" name="status" value="1" checked>
+                                在校
+                            </label>
+
+                            <label>
+                                <input type="radio" name="status" value="0">
+                                退校・卒業
+                            </label>
                         </td>
 
                         <td>
