@@ -65,6 +65,7 @@ function getJapaneseHolidays(int $year): array
     $holidays["{$year}-05-03"] = '憲法記念日';
     $holidays["{$year}-05-04"] = 'みどりの日';
     $holidays["{$year}-05-05"] = 'こどもの日';
+    $holidays["{$year}-06-23"] = '慰霊の日';
     $holidays["{$year}-08-11"] = '山の日';
     $holidays["{$year}-11-03"] = '文化の日';
     $holidays["{$year}-11-23"] = '勤労感謝の日';

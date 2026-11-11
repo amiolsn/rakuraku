@@ -95,13 +95,13 @@ $max_period = 7;
                                         $status_class = 'status_present';
                                     } elseif ($status === 2) {
                                         $status_class = 'status-absent';
-                                        $status_text  = '1';
+                                        $status_text  = '欠';
                                     } elseif ($status === 3) {
                                         $status_class = 'status-late';
-                                        $status_text  = '1';
+                                        $status_text  = '遅';
                                     } elseif ($status === 4) {
                                         $status_class = 'status-leave';
-                                        $status_text  = '1';
+                                        $status_text  = '公';
                                     }
 
                                     $is_day_end = ($p === $wd['max_period']) ? 'border-day-end' : '';
