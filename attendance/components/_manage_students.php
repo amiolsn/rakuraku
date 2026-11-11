@@ -22,7 +22,7 @@
         生徒一括登録
     </button>
     <?php include 'components/_import_popup.php'; ?>
-    <button
+    <!-- <button
         type="button"
         class="year-update-btn"
         data-type="year-update">
@@ -39,7 +39,7 @@
                 <button type="button" id="year-update-cancel">キャンセル</button>
             </div>
         </div>
-    </div>
+    </div> -->
 
 </div>
 
