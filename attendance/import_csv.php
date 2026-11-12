@@ -3,14 +3,19 @@
 require_once 'db.php';
 require_once 'auth.php';
 
+//レスポンスの形式を指定する
+//Content-Type：データの種類を指定するHTTPヘッダー
+//application/json：JSON形式であることを示す。
+//charset=UTF-8：文字コードをUTF-8に指定する。
 header('Content-Type: application/json; charset=UTF-8');
 
 try {
     // ログイン情報から学科IDを取得する
-    // 実際のセッション名・権限に合わせて調整してください
+    //?? null：値が存在しない場合は null を代入
     $departmentId = $_SESSION['user']['department_id'] ?? null;
 
-    // 管理者かどうかを判定
+    //管理者かどうかを判定
+    //usertype_id：ユーザーの権限を識別するID(2は教員個人)
     $isAdminAccount = (int)($_SESSION['user']['usertype_id'] ?? 0) === 2;
 
     if (!$isAdminAccount && !$departmentId) {
@@ -19,10 +24,12 @@ try {
         );
     }
 
-    // 登録対象を取得
+    //登録対象を取得(student, teacher, subject)
+    //フォームから送信された登録対象を取得
     $target = $_POST['target'] ?? '';
 
-    // CSVファイルを確認
+    //CSVファイルが正常に受信できたか確認
+    //UPLOAD_ERR_OK：アップロードが正常に完了したことを示す定数
     if (
         !isset($_FILES['csv_file']) ||
         $_FILES['csv_file']['error'] !== UPLOAD_ERR_OK
@@ -30,6 +37,7 @@ try {
         throw new RuntimeException('CSVファイルを受信できませんでした。');
     }
 
+    //CSVファイルの一時保存先を取得
     $tmpPath = $_FILES['csv_file']['tmp_name'];
 
 
@@ -54,6 +62,7 @@ try {
             throw new RuntimeException('登録対象が不正です。');
     }
 
+    //json_encode():PHPのデータをJSON形式の文字列に変換する関数
     echo json_encode([
         'success' => true,
         'message' => $message
@@ -69,11 +78,10 @@ try {
     //         ? '登録に失敗しました。入力内容を確認してください。'
     //         : $e->getMessage()
     // ], JSON_UNESCAPED_UNICODE);
-    http_response_code(400);
 
     // 開発中の原因調査用
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage()
-    ], JSON_UNESCAPED_UNICODE);
+    // echo json_encode([
+    //     'success' => false,
+    //     'message' => $e->getMessage()
+    // ], JSON_UNESCAPED_UNICODE);
 }
