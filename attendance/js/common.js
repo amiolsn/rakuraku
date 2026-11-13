@@ -284,21 +284,19 @@ document.addEventListener('click', (event) => {
  */
 document.addEventListener('DOMContentLoaded', function () {
 
-    /**
-     * 全角数字を半角数字に変換する
-     * @param {string} str 変換対象の文字列
-     * @return {string} 半角数字に変換した文字列
-     */
+
+    //  全角数字を半角数字に変換する
+    //  @param {string} str 変換対象の文字列
+    //  @return {string} 半角数字に変換した文字列
     function convertToHalfWidth(str) {
         return str.replace(/[０-９]/g, function (s) {
             return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
         });
     }
 
-    /**
-     * 数字入力欄の入力内容を制御する
-     * @param {Event} e inputイベント
-     */
+
+    //  数字入力欄の入力内容を制御する
+    //  @param {Event} e inputイベント
     function handleNumberInput(e) {
 
         const el = e.target;
@@ -317,7 +315,9 @@ document.addEventListener('DOMContentLoaded', function () {
             .replace(/[^0-9]/g, '');
 
         // 入力内容に変更がある場合だけ書き換える
+        //el.valueは変換前の値convertedは変換後の値
         if (el.value !== converted) {
+            //el.valueを変換後のconvertedに更新
             el.value = converted;
 
             // 書き換え前のカーソル位置を復元
@@ -330,12 +330,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // IMEによる文字変換の開始を検知
         el.addEventListener('compositionstart', function () {
-            el.dataset.composing = 'true';
+            el.dataset.composing = 'true';//trueは変換中であることを記録
         });
 
         // IMEによる文字変換の確定を検知
         el.addEventListener('compositionend', function (e) {
-            el.dataset.composing = 'false';
+            el.dataset.composing = 'false';//変換中の状態を解除
 
             // 変換確定後に入力内容を制御
             handleNumberInput(e);
