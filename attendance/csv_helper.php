@@ -1,5 +1,6 @@
 
 <?php
+// CSVのアップロード確認・見出し検証・学科IDの権限チェック・UTF-8 BOM除去を行う共通処理
 
 /**
  * アップロードされたCSVファイルを確認する
@@ -25,6 +26,12 @@ function getUploadedCsvPath(string $fieldName): string
  */
 function readCsvHeader($handle): array
 {
+    //CSVの見出しを読み込む　
+    //$handle:読み込むファイル
+    //0:行の長さの上限を指定しない
+    //,:カンマ区切り
+    //":囲み文字にダブルクォーテーションを使用
+    //'':エスケープ文字を使用しない
     $header = fgetcsv($handle, 0, ',', '"', '');
 
     if ($header === false || $header === [null]) {
@@ -34,12 +41,17 @@ function readCsvHeader($handle): array
     }
 
     // UTF-8 BOMを除去
+    //preg_replace()：正規表現を使って文字列を置換する関数
+    ///^\xEF\xBB\xBF/：文字列の先頭にあるUTF-8 BOMを指定
+    //''：空文字に置き換える
+    //$header[0]：見出しの最初の項目
     $header[0] = preg_replace(
         '/^\xEF\xBB\xBF/',
         '',
         $header[0]
     );
 
+    //見出しを返す
     return $header;
 }
 
