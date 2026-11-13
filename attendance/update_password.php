@@ -5,8 +5,10 @@ require_once 'auth.php';
 require_once 'functions.php';
 
 try {
+    //ユーザＩＤを取得してログインユーザーを特定する
     $userId = $_SESSION['user']['user_id'] ?? null;
 
+    //ユーザーIDが取得できなかったら
     if (!$userId) {
         http_response_code(401);
         echo "<script>
@@ -16,8 +18,10 @@ try {
         exit;
     }
 
+    //フォームから送信された新しいパスワードを取得する
     $password = $_POST['new-password'] ?? '';
 
+    //未入力の場合エラー？
     if (empty($password)) {
         echo "<script>
             alert('パスワードを入力してください。');
@@ -26,12 +30,14 @@ try {
         exit;
     }
 
+    //パスワードを更新するためのSQLを組み立て
     $stmtUser = $pdo->prepare('
         UPDATE users
         SET password = :password
         WHERE user_id = :user_id
     ');
 
+    //実行
     $stmtUser->execute([
         ':user_id' => $userId,
         ':password' => $password
