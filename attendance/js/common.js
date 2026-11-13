@@ -272,3 +272,78 @@ document.addEventListener('click', (event) => {
         clearSearch();
     }
 });
+
+
+/**
+ * 数字入力欄の入力制御
+ *
+ * ・全角数字を半角数字に変換する
+ * ・半角数字以外の文字を削除する
+ * ・IME（日本語入力）の変換中は処理を行わない
+ * ・入力後もカーソル位置を維持する
+ */
+document.addEventListener('DOMContentLoaded', function () {
+
+    /**
+     * 全角数字を半角数字に変換する
+     * @param {string} str 変換対象の文字列
+     * @return {string} 半角数字に変換した文字列
+     */
+    function convertToHalfWidth(str) {
+        return str.replace(/[０-９]/g, function (s) {
+            return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+        });
+    }
+
+    /**
+     * 数字入力欄の入力内容を制御する
+     * @param {Event} e inputイベント
+     */
+    function handleNumberInput(e) {
+
+        const el = e.target;
+
+        // IMEによる日本語変換中は処理を行わない
+        if (e.isComposing || el.dataset.composing === 'true') {
+            return;
+        }
+
+        // 現在のカーソル位置を取得
+        const start = el.selectionStart;
+        const end = el.selectionEnd;
+
+        // 全角数字を半角数字に変換し、数字以外の文字を削除
+        const converted = convertToHalfWidth(el.value)
+            .replace(/[^0-9]/g, '');
+
+        // 入力内容に変更がある場合だけ書き換える
+        if (el.value !== converted) {
+            el.value = converted;
+
+            // 書き換え前のカーソル位置を復元
+            el.setSelectionRange(start, end);
+        }
+    }
+
+    // 入力制限の対象となる要素にイベントを設定
+    document.querySelectorAll('[data-input-type="number"]').forEach(function (el) {
+
+        // IMEによる文字変換の開始を検知
+        el.addEventListener('compositionstart', function () {
+            el.dataset.composing = 'true';
+        });
+
+        // IMEによる文字変換の確定を検知
+        el.addEventListener('compositionend', function (e) {
+            el.dataset.composing = 'false';
+
+            // 変換確定後に入力内容を制御
+            handleNumberInput(e);
+        });
+
+        // 通常入力・コピー＆ペーストなどを検知
+        el.addEventListener('input', handleNumberInput);
+
+    });
+
+});

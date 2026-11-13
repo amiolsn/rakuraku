@@ -33,7 +33,8 @@
                 <td>
                     <div class="form-group">
                         <label for="student_id">科目番号</label>
-                        <input type="text" name="subject_id"
+                        <input type="text" name="subject_id" data-input-type="number"
+                            inputmode="numeric"
                             value="<?= htmlspecialchars($_GET['subject_id'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                 </td>
