@@ -26,7 +26,8 @@
 
                 <tbody>
                     <tr>
-                        <td><input type="text" id="student_id" name="student_id" required></td>
+                        <td><input type="text" id="student_id" name="student_id" data-input-type="number"
+                                inputmode="numeric" required></td>
                         <td><input type="text" id="student_name" name="student_name" required></td>
                         <td><span id="department_name">
                                 <?= htmlspecialchars($department_name, ENT_QUOTES, 'UTF-8') ?>

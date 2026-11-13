@@ -61,7 +61,8 @@
                 <td>
                     <div class="form-group">
                         <label for="student_id">学籍番号</label>
-                        <input type="text" name="student_id"
+                        <input type="text" name="student_id" data-input-type="number"
+                            inputmode="numeric"
                             value="<?= htmlspecialchars($_GET['student_id'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                 </td>

@@ -163,8 +163,10 @@ function searchStudents(PDO $pdo, int $department_id, array $filters = []): arra
 
     // 生徒氏名が検索欄に入力されている場合だけ条件を追加
     if (isset($filters['student_name']) && $filters['student_name'] !== '') {
-        $sql .= " AND s.student_name LIKE ?";
-        $params[] = '%' . $filters['student_name'] . '%';
+        $sql .= " AND REPLACE(REPLACE(s.student_name, ' ', ''), '　', '') LIKE ?";
+
+        $keyword = str_replace([' ', '　'], '', $filters['student_name']);
+        $params[] = '%' . $keyword . '%';
     }
 
     // 学年が選択されている場合だけ条件を追加
