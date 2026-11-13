@@ -140,17 +140,6 @@ function submitAttendance() {
       submitBtn.disabled = false;
       submitBtn.textContent = "確定して保存";
     });
-
-  // // 送信するデータ（変更分のみ）を配列にまとめる
-  // const sendData = Array.from(changedItems.values());
-
-  // console.log("対象日時:", targetDate);
-  // console.log("時限設定:", periodSetting);
-  // console.log("送信データ:", sendData);
-
-  // alert(
-  //   `【保存準備OK】\n` + `・対象日時: ${targetDate}\n` + `・対象時限: ${Array.from(affectedPeriods).join(", ")} 限\n` + `・更新件数: ${sendData.length} 件\n\n` + `変更したデータのみを抽出しました。`,
-  // );
 }
 
 // 日付切り替え関数
