@@ -21,6 +21,8 @@
   padding: 4px 2px;
 } */
 
+
+
 .summary-table th {
   padding: 14px 12px;
   background-color: #f1f3f5;
@@ -115,6 +117,39 @@
 .summary-table th.border-col-end,
 .summary-table td.border-col-end {
   border-right: 2.5px solid #495057 !important;
+}
+
+.monthly-summary-wrapper .table_box {
+     height: 530px;
+    overflow: auto;
+    border-top: 2.5px solid #656766;
+    box-sizing: border-box;
+}
+/* 月間集計テーブルのヘッダー固定 */
+.monthly-table thead th {
+    position: sticky;
+    background-color: #f1f3f5;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+/* 1段目のヘッダー */
+.monthly-table thead tr:first-child th {
+     top: 2.5px;
+    height: 44px;
+    z-index: 12;
+}
+
+/* 2段目のヘッダー */
+.monthly-table thead tr:nth-child(2) th {
+    top: 46.5px;
+    height: 44px;
+    z-index: 11;
+}
+
+/* テーブル上端の太線を削除 */
+.summary-table thead tr:first-child th {
+    border-top: none !important;
 }
 
 /* 週間ナビゲーションボタングループ */

@@ -148,7 +148,7 @@ table {
   background-color: var(--color-bg-card);
   box-shadow: 0 2px 8px rgba(52, 58, 64, 0.06);
   border-radius: 6px;
-  overflow: hidden;
+  /* overflow: hidden; */
 }
 
 th,
