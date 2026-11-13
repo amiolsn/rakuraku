@@ -94,7 +94,7 @@ try {
     $STATUS_EXCUSED = 4;
 
     // 生徒の並び順($student_index)に応じて出欠傾向を振り分ける
-    $determine_status = function (int $student_index) use ($STATUS_PRESENT, $STATUS_ABSENT, $STATUS_LATE, $STATUS_EXCUSED) {
+    $determine_status = function (int $student_index) use ($STATUS_PRESENT, $STATUS_ABSENT, $STATUS_LATE) {
         $rand = mt_rand(1, 100);
         if ($student_index === 0) {
             // パターンA: アラート対象（出席率76%, 欠席20%, 遅刻4%)
@@ -106,15 +106,12 @@ try {
             }
             return $STATUS_LATE;
         } elseif ($student_index <= 2) {
-            // パターンB: 遅刻・公欠混在(出席率約91%, 遅刻5%, 公欠3%, 欠席1%)
-            if ($rand <= 91) {
+            // パターンB: 遅刻・公欠混在(出席率約94%, 遅刻5%, 欠席1%)
+            if ($rand <= 94) {
                 return $STATUS_PRESENT;
             }
-            if ($rand <= 96) {
-                return $STATUS_LATE;
-            }
             if ($rand <= 99) {
-                return $STATUS_EXCUSED;
+                return $STATUS_LATE;
             }
             return $STATUS_ABSENT;
         } else {
@@ -154,7 +151,7 @@ try {
     $total_records = 0;
 
     // 学年ごとの生徒・授業日ループ処理
-    $insert_for_grade = function (array $students, array $days) use (&$insert_stmt, &$total_records, $subject_ids, $teacher_ids, $determine_status) {
+    $insert_for_grade = function (array $students, array $days, int $grade) use (&$insert_stmt, &$total_records, $subject_ids, $teacher_ids, $determine_status, $STATUS_EXCUSED) {
         foreach ($students as $s_idx => $student) {
             $student_id = (int)$student['student_id'];
 
@@ -162,12 +159,42 @@ try {
                 $date       = $day['calendar_date'];
                 $max_period = (int)$day['max_period'];
 
+                // 【日単位判定】連続コマの公欠ブロックを決定（nullなら公欠なし）
+                $excused_start = null;
+                $excused_end   = null;
+
+                // 2年生やパターンBの生徒は公欠の確率を高めに設定（例：6%　= 月1~2回ペース）
+                $excused_chance = ($grade === 2 || $s_idx <= 2) ? 6 : 0;
+
+                if (mt_rand(1, 100) <= $excused_chance) {
+                    $pattern = mt_rand(1, 3);
+                    if ($pattern === 1) {
+                        // 午前公欠
+                        $excused_start = 1;
+                        $excused_end   = min(4, $max_period);
+                    } elseif ($pattern === 2) {
+                        // 午後公欠
+                        $excused_start = 5;
+                        $excused_end   = $max_period;
+                    } else {
+                        // 終日公欠
+                        $excused_start = 1;
+                        $excused_end   = $max_period;
+                    }
+                }
+
+                // コマごとのデータ生成
                 for ($p = 1; $p <= $max_period; $p++) {
                     // 曜日と時限から科目・単葉教員を分散して割り当て
                     $sub_idx = ($p + (int)date('N', strtotime($date))) % count($subject_ids);
                     $tch_idx = ($p + (int)date('w', strtotime($date))) % count($teacher_ids);
 
-                    $status = $determine_status($s_idx);
+                    // 公欠範囲内の時限であれば「公欠」、それ以外は通常判定
+                    if ($excused_start !== null && $p >= $excused_start && $p <= $excused_end) {
+                        $status = $STATUS_EXCUSED;
+                    } else {
+                        $status = $determine_status($s_idx);
+                    }
 
                     $insert_stmt -> execute([
                         ':student_id'             => $student_id,
@@ -184,10 +211,10 @@ try {
     };
 
     echo "・1年生データ投入中(2026/04/01 ～ 2026/10/31) ... <br>";
-    $insert_for_grade($students_grade1, $days_grade1);
+    $insert_for_grade($students_grade1, $days_grade1, 1);
 
     echo "・2年生データ投入中(2025/04/01 ～ 2026/10/31) ... <br>";
-    $insert_for_grade($students_grade2, $days_grade2);
+    $insert_for_grade($students_grade2, $days_grade2, 2);
 
     $pdo->commit();
     echo "<p style='color: green, font-weight: bold,'>出欠データの登録完了 （合計: {$total_records} 件）</p>";
