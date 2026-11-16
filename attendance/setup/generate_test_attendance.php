@@ -5,8 +5,8 @@
  * 出欠テストデータ生成スクリプト
  * ※事前にsetup_calendar.phpでカレンダー登録が必要
  */
-require_once __DIR__ . '../db.php';
-require_once __DIR__ . '../functions.php';
+require_once __DIR__ . '/../db.php';
+require_once __DIR__ . '/../functions.php';
 
 set_time_limit(300);    // 処理タイムアウト防止
 
@@ -93,38 +93,18 @@ try {
     $STATUS_LATE    = 3;
     $STATUS_EXCUSED = 4;
 
-    // 生徒の並び順($student_index)に応じて出欠傾向を振り分ける
-    $determine_status = function (int $student_index) use ($STATUS_PRESENT, $STATUS_ABSENT, $STATUS_LATE) {
-        $rand = mt_rand(1, 100);
-        if ($student_index === 0) {
-            // パターンA: アラート対象（出席率76%, 欠席20%, 遅刻4%)
-            if ($rand <= 76) {
-                return $STATUS_PRESENT;
-            }
-            if ($rand <= 96) {
-                return $STATUS_ABSENT;
-            }
-            return $STATUS_LATE;
-        } elseif ($student_index <= 2) {
-            // パターンB: 遅刻・公欠混在(出席率約94%, 遅刻5%, 欠席1%)
-            if ($rand <= 94) {
-                return $STATUS_PRESENT;
-            }
-            if ($rand <= 99) {
-                return $STATUS_LATE;
-            }
-            return $STATUS_ABSENT;
-        } else {
-            // パターンC: 皆勤・安定(出席率 約99%);
-            if ($rand <= 98) {
-                return $STATUS_PRESENT;
-            }
-            if ($rand <= 99) {
-                return $STATUS_LATE;
-            }
-            return $STATUS_ABSENT;
+    // 学校全体の交通渋滞・バス遅延日（1限複数人遅刻）を事前に決定
+    // 約1.5％の確率（2～3か月に1回）で朝の交通渋滞が発生
+    $traffic_jad_dates = [];
+    $all_unique_dates  = array_unique(array_merge(
+        array_column($days_grade1, 'calendar_date'),
+        array_column($days_grade2, 'calendar_date')
+    ));
+    foreach ($all_unique_dates as $d) {
+        if (mt_rand(1, 1000) <= 15) {
+            $traffic_jad_dates[$d] = true;
         }
-    };
+    }
 
     // DB登録用プリペアドステイトメント(既存データがあれば上書き更新）
     $insert_stmt = $pdo -> prepare("
@@ -151,35 +131,94 @@ try {
     $total_records = 0;
 
     // 学年ごとの生徒・授業日ループ処理
-    $insert_for_grade = function (array $students, array $days, int $grade) use (&$insert_stmt, &$total_records, $subject_ids, $teacher_ids, $determine_status, $STATUS_EXCUSED) {
-        foreach ($students as $s_idx => $student) {
-            $student_id = (int)$student['student_id'];
+    $insert_for_grade = function (array $students, array $days, int $grade) use (&$insert_stmt, &$total_records, $subject_ids, $teacher_ids, $traffic_jad_dates, $STATUS_PRESENT, $STATUS_ABSENT, $STATUS_LATE, $STATUS_EXCUSED) {
+        if (empty($students)) {
+            return;
+        }
 
-            foreach ($days as $day) {
-                $date       = $day['calendar_date'];
-                $max_period = (int)$day['max_period'];
+        $all_student_ids = array_column($students, 'student_id');
 
-                // 【日単位判定】連続コマの公欠ブロックを決定（nullなら公欠なし）
+        foreach ($days as $day) {
+            $date       = $day['calendar_date'];
+            $max_period = (int)$day['max_period'];
+
+            // この日が交通渋滞日なら、クラスからランダムに2～4名を1限遅刻対象に選出
+            $jam_late_students = [];
+            if (isset($traffic_jad_dates[$date])) {
+                $pick_count = min(mt_rand(2, 4), count($all_student_ids));
+                $picked_key = (array)array_rand($all_student_ids, $pick_count);
+                foreach ($picked_key as $k) {
+                    $jam_late_students[] = (int)$all_student_ids[$k];
+                }
+            }
+
+            foreach ($students as $s_idx => $student) {
+                $student_id = (int)$student['student_id'];
+
+                // 初期化：その日の連続ブロック範囲
+                $absent_start  = null;
+                $absent_end    = null;
                 $excused_start = null;
                 $excused_end   = null;
+                $is_late_1st   = false;
 
-                // 2年生やパターンBの生徒は公欠の確率を高めに設定（例：6%　= 月1~2回ペース）
-                $excused_chance = ($grade === 2 || $s_idx <= 2) ? 6 : 0;
+                // 連続コマの公欠ブロック判定
+                $excused_permil = ($grade === 2 || $s_idx === 2) ? 15 : 0;
 
-                if (mt_rand(1, 100) <= $excused_chance) {
-                    $pattern = mt_rand(1, 3);
-                    if ($pattern === 1) {
+                if (mt_rand(1, 1000) <= $excused_permil) {
+                    $ex_pat = mt_rand(1, 4);
+                    if ($ex_pat === 1) {
                         // 午前公欠
                         $excused_start = 1;
                         $excused_end   = min(4, $max_period);
-                    } elseif ($pattern === 2) {
+                    } elseif ($ex_pat === 2) {
                         // 午後公欠
                         $excused_start = 5;
                         $excused_end   = $max_period;
+                    } elseif ($ex_pat === 3) {
+                        // 午後の一部公欠
+                        $excused_start = 5;
+                        $excused_end   = min(6, $max_period);
                     } else {
                         // 終日公欠
                         $excused_start = 1;
                         $excused_end   = $max_period;
+                    }
+                }
+
+                // 連続コマの欠席ブロック判定（公欠がない日）
+                if ($excused_start === null) {
+                    // $s_idx === 0はアラート対象の欠席多発生徒(約25%=週1~1.5日ペース）
+                    // それ以外の一般生徒は約1.5%(2~3か月に1回ペース）
+                    $absent_permil = ($s_idx === 0) ? 250 : 15;
+
+                    if (mt_rand(1, 1000) <= $absent_permil) {
+                        $ab_pat = mt_rand(1, 10);
+                        if ($ab_pat <= 5) {
+                            // 終日欠席
+                            $absent_start = 1;
+                            $absent_end   = $max_period;
+                        } elseif ($ab_pat <= 8) {
+                            // 午後欠席・早退
+                            $absent_start = 5;
+                            $absent_end   = $max_period;
+                        } else {
+                            // 午前一部欠席
+                            $absent_start = 1;
+                            $absent_end   = min(2, $max_period);
+                        }
+                    }
+                }
+
+                // 一限目の遅刻判定
+                $is_1st_blocked = ($excused_start !== null && $excused_start <= 1) || ($absent_start !== null && $absent_start <= 1);
+
+                if (!$is_1st_blocked) {
+                    if ($s_idx === 1 && mt_rand(1, 100) <= 65) {
+                        // 常習遅刻生徒：登校日の65%で1限遅刻
+                        $is_late_1st = true;
+                    } elseif (in_array($student_id, $jam_late_students, true)) {
+                        $is_late_1st = true;
                     }
                 }
 
@@ -189,11 +228,14 @@ try {
                     $sub_idx = ($p + (int)date('N', strtotime($date))) % count($subject_ids);
                     $tch_idx = ($p + (int)date('w', strtotime($date))) % count($teacher_ids);
 
-                    // 公欠範囲内の時限であれば「公欠」、それ以外は通常判定
                     if ($excused_start !== null && $p >= $excused_start && $p <= $excused_end) {
                         $status = $STATUS_EXCUSED;
+                    } elseif ($absent_start !== null && $p >= $absent_start && $p <= $absent_end) {
+                        $status = $STATUS_ABSENT;
+                    } elseif ($p === 1 && $is_late_1st) {
+                        $status = $STATUS_LATE;
                     } else {
-                        $status = $determine_status($s_idx);
+                        $status = $STATUS_PRESENT;
                     }
 
                     $insert_stmt -> execute([
@@ -201,7 +243,7 @@ try {
                         ':attendance_date'        => $date,
                         ':period'                 => $p,
                         ':subject_id'             => $subject_ids[$sub_idx],
-                        ':teacher_id'             => $subject_ids[$tch_idx],
+                        ':teacher_id'             => $teacher_ids[$tch_idx],
                         ':status_id'              => $status
                     ]);
                     $total_records++;
@@ -217,7 +259,7 @@ try {
     $insert_for_grade($students_grade2, $days_grade2, 2);
 
     $pdo->commit();
-    echo "<p style='color: green, font-weight: bold,'>出欠データの登録完了 （合計: {$total_records} 件）</p>";
+    echo "<p style='color: green, font-weight: bold;'>出欠データの登録完了 （合計: {$total_records} 件）</p>";
 
 } catch (Exception $e) {
     if ($pdo->inTransaction()) {
