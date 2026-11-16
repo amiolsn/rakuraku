@@ -13,7 +13,9 @@ passwordBtn.addEventListener('click', (event) => {
 
     console.log('表示設定:', newPasswordInput.style.display);
 
-    passwordBtn.remove();//パスワード変更ボタンを削除
+    // 元のボタンを非表示
+    passwordBtn.style.display = 'none';
+
 
     //新しいパスワード変更確定ボタンを作成
     const submitBtn = document.createElement('input');
@@ -21,8 +23,32 @@ passwordBtn.addEventListener('click', (event) => {
     submitBtn.value = '変更確定';
     submitBtn.className = 'password-submit';
 
+    const cancelBtn = document.createElement('input');
+    cancelBtn.type = 'button';
+    cancelBtn.value = 'キャンセル';
+    cancelBtn.className = 'cancel-btn';
+
     //passwordFormの最後に追加
     passwordForm.appendChild(submitBtn);
+    passwordForm.appendChild(cancelBtn);
+
+    // キャンセルボタンをクリックしたとき
+    cancelBtn.addEventListener('click', () => {
+
+        // パスワード入力欄を非表示
+        newPasswordInput.style.display = 'none';
+
+        // 入力内容をクリア
+        newPasswordInput.value = '';
+
+        // 作成したボタンを削除
+        submitBtn.remove();
+        cancelBtn.remove();
+
+        // 元のボタンを再表示
+        passwordBtn.style.display = 'block';
+    });
+
 });
 
 

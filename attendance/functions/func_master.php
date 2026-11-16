@@ -157,8 +157,8 @@ function searchStudents(PDO $pdo, int $department_id, array $filters = []): arra
 
     // 学籍番号が検索欄に入力されている場合だけ条件を追加
     if (!empty($filters['student_id'])) {
-        $sql .= " AND s.student_id = ?";
-        $params[] = (int)$filters['student_id'];
+        $sql .= " AND s.student_id LIKE ?";
+        $params[] = '%' . $filters['student_id'] . '%';
     }
 
     // 生徒氏名が検索欄に入力されている場合だけ条件を追加
@@ -213,8 +213,8 @@ function searchTeachers(PDO $pdo, int $department_id, array $filters = []): arra
 
     // 教員番号が検索欄に入力されている場合だけ条件を追加
     if (!empty($filters['teacher_id'])) {
-        $sql .= " AND t.teacher_id = ?";
-        $params[] = (int)$filters['teacher_id'];
+        $sql .= " AND t.teacher_id LIKE ?";
+        $params[] = '%' . $filters['teacher_id'] . '%';
     }
 
     // 教員氏名が検索欄に入力されている場合だけ条件を追加
@@ -250,8 +250,8 @@ function searchSubjects(PDO $pdo, int $department_id, array $filters = []): arra
 
     // 科目番号が検索欄に入力されている場合だけ条件を追加
     if (!empty($filters['subject_id'])) {
-        $sql .= " AND s.subject_id = ?";
-        $params[] = (int)$filters['subject_id'];
+        $sql .= " AND s.subject_id LIKE ?";
+        $params[] = '%' . $filters['subject_id'] . '%';
     }
 
     // 科目名が検索欄に入力されている場合だけ条件を追加
