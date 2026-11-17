@@ -19,7 +19,7 @@
         type="button"
         class="bulkAdd-btn"
         data-type="subject">
-        科目一括登録
+        CSV一括登録
     </button>
 </div>
 
@@ -72,7 +72,7 @@
                 <th class="sticky">科目番号</th>
                 <th class="sticky">科目名</th>
                 <th class="sticky">学科名</th>
-                <th class="sticky"></th>
+                <th class="sticky">操作</th>
             </tr>
         </thead>
         <tbody>
