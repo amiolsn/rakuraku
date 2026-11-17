@@ -19,7 +19,7 @@
         type="button"
         class="bulkAdd-btn"
         data-type="student">
-        生徒一括登録
+        CSV一括登録
     </button>
     <?php include 'components/_import_popup.php'; ?>
     <!-- <button
@@ -133,7 +133,7 @@
                 <th class="sticky">学年</th>
                 <th class="sticky">班</th>
                 <th class="sticky">在校状況</th>
-                <th class="sticky"></th>
+                <th class="sticky">操作</th>
             </tr>
         </thead>
         <tbody>
