@@ -37,7 +37,17 @@ try {
     $max_period    = $calendar_info['max_period'];
 
     // 生徒一覧の取得（学科名も結合して取得）
-    $grade_param = (isset($_GET['grade']) && $_GET['grade'] !== '') ? (int)$_GET['grade'] : null;
+    if (!isset($_GET['grade'])) {
+        $grade_param    = 1;
+        $selected_grade = 1;
+    } elseif ($_GET['grade'] === '') {
+        $grade_param    = null;
+        $selected_grade = '';
+    } else {
+        $grade_param    = (int)$_GET['grade'];
+        $selected_grade = $grade_param;
+    }
+
     $group_param = (isset($_GET['student_group']) && $_GET['student_group'] !== '') ? $_GET['student_group'] : null;
     $students    = getAttendanceStudents($pdo, $department_id, $grade_param, $group_param);
 
@@ -74,15 +84,12 @@ try {
             <input type="hidden" name="date" value="<?= htmlspecialchars($target_date, ENT_QUOTES, 'UTF-8') ?>">
 
             <select id="grade" name="grade" onchange="this.form.submit()">
-                <?php
-                $selected_grade = $_GET['grade'] ?? '';
-include 'components/_grade_options.php';
-?>
+                <?php include 'components/_grade_options.php'; ?>
             </select>
 
             <select id="student_group" name="student_group" onchange="this.form.submit()">
                 <?php
-$selected_group = $_GET['student_group'] ?? '';
+                    $selected_group = $_GET['student_group'] ?? '';
 include 'components/_group_options.php';
 ?>
             </select>
