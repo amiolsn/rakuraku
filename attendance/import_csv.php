@@ -79,9 +79,9 @@ try {
     //         : $e->getMessage()
     // ], JSON_UNESCAPED_UNICODE);
 
-    // 開発中の原因調査用
-    // echo json_encode([
-    //     'success' => false,
-    //     'message' => $e->getMessage()
-    // ], JSON_UNESCAPED_UNICODE);
+    //開発中の原因調査用
+    echo json_encode([
+        'success' => false,
+        'message' => $e->getMessage()
+    ], JSON_UNESCAPED_UNICODE);
 }
