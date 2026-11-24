@@ -88,7 +88,6 @@ importForm.addEventListener('submit', async e => {
         const responseText = await response.text();
 
         console.log('HTTPステータス:', response.status);
-        console.log('通信先:', response.url);
         console.log('サーバーからの応答本文:', responseText);
 
         const result = JSON.parse(responseText);
@@ -96,6 +95,7 @@ importForm.addEventListener('submit', async e => {
         if (!response.ok || !result.success) {
             throw new Error(result.message || '登録に失敗しました。');
         }
+
 
         alert(result.message || `${alertMsg}情報を登録しました。`);
 
