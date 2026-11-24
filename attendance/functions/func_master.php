@@ -268,3 +268,43 @@ function searchSubjects(PDO $pdo, int $department_id, array $filters = []): arra
 
     return $stmt->fetchAll();
 }
+
+/**
+ * 管理画面用の学科一覧・検索結果を取得する
+ *
+ * @param PDO $pdo
+ * @param array $filters 検索条件連想配列[department_id, department_name]
+ * @return array
+ */
+function searchDepartments(PDO $pdo, array $filters = []): array
+{
+    $sql = "
+SELECT
+d.department_id,
+d.user_id,
+d.department_name
+FROM department d
+WHERE 1 = 1
+";
+
+    $params = [];
+
+    // 学科番号が入力されている場合
+    if (isset($filters['department_id']) && $filters['department_id'] !== '') {
+        $sql .= " AND d.department_id = ?";
+        $params[] = (int)$filters['department_id'];
+    }
+
+    // 学科名が入力されている場合
+    if (isset($filters['department_name']) && $filters['department_name'] !== '') {
+        $sql .= " AND d.department_name LIKE ?";
+        $params[] = '%' . $filters['department_name'] . '%';
+    }
+
+    $sql .= " ORDER BY d.department_id ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}

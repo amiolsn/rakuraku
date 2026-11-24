@@ -23,7 +23,8 @@ require_once 'functions.php';
         <div class="admin-menu">
 
             <!-- 学科管理 -->
-            <a href="department_manage.php" class="admin-menu-item">
+            <a href="manage_admin.php?tab=department
+" class="admin-menu-item">
                 <svg viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="1.8"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -47,7 +48,7 @@ require_once 'functions.php';
                 <span>学校カレンダー・特殊日程管理</span>
             </a>
             <!-- 管理者管理 -->
-            <a href="admin_manage.php" class="admin-menu-item">
+            <a href="manage_admin.php?tab=admin" class="admin-menu-item">
                 <svg viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="1.8"
                     stroke-linecap="round" stroke-linejoin="round">
@@ -70,6 +71,9 @@ require_once 'functions.php';
             </a>
         </div>
     </div>
+    <script src="js/common.js" defer></script>
+    <script src="js/tab.js" defer></script>
+
 </body>
 
 </html>

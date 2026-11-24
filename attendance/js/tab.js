@@ -40,16 +40,29 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 保存されたタブを復元
-    const savedTab = localStorage.getItem(storageKey);
+    // manage_admin.php の場合
+    if (document.body.dataset.page === 'manage-admin') {
 
-    // 保存されたIDが実在するタブか確認
-    const isValidTab = Array.from(tabsH).some(function (tab) {
-        return tab.dataset.tabid === savedTab;
-    });
+        // PHP側で指定された初期タブを優先する
+        const initialTab = document.querySelector('.tab-elem.active');
 
-    // 保存値があれば復元し、なければ先頭のタブを表示
-    changeTabH(
-        isValidTab ? savedTab : tabsH[0].dataset.tabid
-    );
+        changeTabH(
+            initialTab
+                ? initialTab.dataset.tabid
+                : tabsH[0].dataset.tabid
+        );
+
+    } else {
+
+        // それ以外のページは従来どおりlocalStorageを使用
+        const savedTab = localStorage.getItem(storageKey);
+
+        const isValidTab = Array.from(tabsH).some(function (tab) {
+            return tab.dataset.tabid === savedTab;
+        });
+
+        changeTabH(
+            isValidTab ? savedTab : tabsH[0].dataset.tabid
+        );
+    }
 });
