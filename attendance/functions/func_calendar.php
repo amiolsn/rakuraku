@@ -18,6 +18,7 @@ function getCalendarInfo(PDO $pdo, string $target_date, int $department_id = 0):
     $stmt = $pdo->prepare("
         SELECT
             calendar_date,
+            department_id,
             is_holiday,
             start_period,
             end_period,
@@ -169,7 +170,7 @@ function generateBaseSchoolCalendar(PDO $pdo, string $start_date, string $end_da
         )
         ON DUPLICATE KEY UPDATE
             is_holiday = VALUES(is_holiday),
-            start_period = VALES(start_period),
+            start_period = VALUES(start_period),
             end_period = VALUES(end_period),
             max_period = VALUES(max_period),
             description = VALUES(description)

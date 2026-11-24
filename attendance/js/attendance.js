@@ -165,7 +165,7 @@ function setAllPresent(period) {
 
     // マス目の「出(value=1)」のラジオボタンを探す
     const presentRadio = document.querySelector(`input[name="att_${key}"][value="1"]`);
-    if (presentRadio) {
+    if (presentRadio && !presentRadio.disabled) {
       presentRadio.checked = true; // チェックを入れる
       markAsChanged(studentId, period); // 変更検知して色を変化させる
     }

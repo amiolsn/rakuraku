@@ -31,10 +31,14 @@ try {
     $years = getDepartmentYears($pdo, $department_id);
 
     // カレンダー情報の取得
-    $calendar_info = getCalendarInfo($pdo, $target_date);
+    $calendar_info = getCalendarInfo($pdo, $target_date, $department_id);
     $is_holiday    = $calendar_info['is_holiday'];
     $description   = $calendar_info['description'];
     $max_period    = $calendar_info['max_period'];
+    $start_period  = $calendar_info['start_period'];
+    $end_period    = $calendar_info['end_period'];
+
+    $is_partial_holiday = (!$is_holiday && ($start_period > 1 || $end_period < $max_period));
 
     // 生徒一覧の取得（学科名も結合して取得）
     if (!isset($_GET['grade'])) {
@@ -101,6 +105,11 @@ include 'components/_group_options.php';
         <div class="holiday-alert-banner">
             本日は「<?= htmlspecialchars($description, ENT_QUOTES, 'UTF-8') ?>」のため休校日です。出欠の新規入力。保存はできません。
         </div>
+    <?php elseif ($is_partial_holiday): ?>
+        <div class="holiday-alert-banner is-partial">
+            本日は「<?= htmlspecialchars($description ?: '時限変更', ENT_QUOTES, 'UTF-8') ?>のため、<strong><?= $start_period ?>限～<?= $end_period ?>限</strong>のみ授業を実施します（対象外の時限は入力不可）。
+        </div>
+        <p class="header-lead">入力または変更を行った時限の出欠のみが、右下の「確定して保存」で送信されます。</p>
     <?php else: ?>
         <p class="header-lead">入力または変更を行った時限の出欠のみが、右下の「確定して保存」で送信されます。</p>
     <?php endif; ?>
