@@ -9,41 +9,53 @@
  *
  * @param  PDO    $pdo
  * @param  string $target_date
- * @param  int    $default_max_period
+ * @param  int    $department_id
  * @return array  ['is_holiday' => bool, 'description' => string, 'max_period' => int]
  */
-function getCalendarInfo(PDO $pdo, string $target_date, int $default_max_period = 7): array
+function getCalendarInfo(PDO $pdo, string $target_date, int $department_id = 0): array
 {
     // カレンダーテーブルから対象日の情報を取得
     $stmt = $pdo->prepare("
         SELECT
             calendar_date,
             is_holiday,
+            start_period,
+            end_period,
             max_period,
             description
         FROM school_calendar
-        WHERE calendar_date = :att_date
+        WHERE calendar_date = :target_date
+            AND department_id IN (:dept_id, 0)
+        ORDER BY department_id DESC
+        LIMIT 1
     ");
-    $stmt->execute(['att_date' => $target_date]);
-    $calendar_info = $stmt->fetch();
+    $stmt->execute([
+        ':target_date' => $target_date,
+        ':dept_id'     => $department_id,
+    ]);
+    $row = $stmt -> fetch(PDO::FETCH_ASSOC);
 
-    // 休校フラグと休校理由の判定
-    $is_holiday  = false;
-    $description = '';
-    if ($calendar_info && !empty($calendar_info['is_holiday'])) {
-        $is_holiday  = true;
-        $description = $calendar_info['description'];
+    if ($row) {
+        return [
+            'calendar_date' => $row['calendar_date'],
+            'department_id' => (int)$row['department_id'],
+            'is_holiday'    => (int)$row['is_holiday'],
+            'start_period'  => (int)$row['start_period'],
+            'end_period'    => (int)$row['end_period'],
+            'max_period'    => (int)$row['max_period'],
+            'description'   => $row['description'] ?? '',
+        ];
     }
 
-    // 時限数の動的決定
-    $max_period = (!empty($calendar_info['max_period']) && $calendar_info['max_period'] > 0)
-        ? (int)$calendar_info['max_period']
-        : $default_max_period;
-
+    // カレンダー未登録のフォールバック
     return [
-        'is_holiday'  => $is_holiday,
-        'description' => $description,
-        'max_period'  => $max_period,
+        'calendar_date'     => $target_date,
+            'department_id' => 0,
+            'is_holiday'    => 0,
+            'start_period'  => 1,
+            'end_period'    => 7,
+            'max_period'    => 7,
+            'description'   => '',
     ];
 }
 
