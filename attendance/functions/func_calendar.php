@@ -134,9 +134,10 @@ function getJapaneseHolidays(int $year): array
  * @param  string $start_date         開始日 (Y-m-d)
  * @param  string $end_date           終了日 (Y-m-d)
  * @param  int    $default_max_period (初期値7)
+ * @param  int    $department_id
  * @return int    登録・更新件数
  */
-function generateBaseSchoolCalendar(PDO $pdo, string $start_date, string $end_date, int $default_max_period = 7): int
+function generateBaseSchoolCalendar(PDO $pdo, string $start_date, string $end_date, int $default_max_period = 7, int $department_id = 0): int
 {
     $start_year = (int)date('Y', strtotime($start_date));
     $end_year   = (int)date('Y', strtotime($end_date));
@@ -150,18 +151,26 @@ function generateBaseSchoolCalendar(PDO $pdo, string $start_date, string $end_da
     $stmt = $pdo->prepare("
         INSERT INTO school_calendar (
             calendar_date,
+            department_id,
             is_holiday,
+            start_period,
+            end_period,
             max_period,
             description
         )
         VALUE (
             :calendar_date,
+            :department_id,
             :is_holiday,
+            :start_period,
+            :end_period,
             :max_period,
             :description
         )
         ON DUPLICATE KEY UPDATE
             is_holiday = VALUES(is_holiday),
+            start_period = VALES(start_period),
+            end_period = VALUES(end_period),
             max_period = VALUES(max_period),
             description = VALUES(description)
     ");
@@ -179,31 +188,42 @@ function generateBaseSchoolCalendar(PDO $pdo, string $start_date, string $end_da
 
         if (isset($holidays[$date_str])) {
             // 祝日（振替休日・国民の休日を含む）
-            $is_holiday = 1;
-            $max_period = 0;
-            $desc       = $holidays[$date_str];
+            $is_holiday   = 1;
+            $start_period = 0;
+            $end_period   = 0;
+            $max_period   = 0;
+            $desc         = $holidays[$date_str];
         } elseif ($w === 0) {
             // 日曜
-            $is_holiday = 1;
-            $max_period = 0;
-            $desc       = '日曜日';
+            $is_holiday   = 1;
+            $start_period = 0;
+            $end_period   = 0;
+            $max_period   = 0;
+            $desc         = '日曜日';
         } elseif ($w === 6) {
             // 土曜
-            $is_holiday = 1;
-            $max_period = 0;
-            $desc       = '土曜日';
+            $is_holiday   = 1;
+            $start_period = 0;
+            $end_period   = 0;
+            $max_period   = 0;
+            $desc         = '土曜日';
         } else {
             // 平日授業日
-            $is_holiday = 0;
-            $max_period = $default_max_period;
-            $desc       = '';
+            $is_holiday   = 0;
+            $start_period = 1;
+            $end_period   = $default_max_period;
+            $max_period   = $default_max_period;
+            $desc         = '';
         }
 
         $stmt->execute([
-            ':calendar_date' => $date_str,
-            ':is_holiday'    => $is_holiday,
-            ':max_period'    => $max_period,
-            ':description'   => $desc,
+            ':calendar_date'   => $date_str,
+            ':department_id'   => $department_id,
+            ':is_holiday'      => $is_holiday,
+            ':start_period'    => $start_period,
+            ':end_period'      => $end_period,
+            ':max_period'      => $max_period,
+            ':description'     => $desc,
         ]);
         $count++;
     }
@@ -219,23 +239,29 @@ function generateBaseSchoolCalendar(PDO $pdo, string $start_date, string $end_da
  * @param  string $end_date       終了日 (Y-m-d)
  * @param  int    $new_max_period 新しい時限数
  * @param  string $description    概要・変更理由
+ * @param  int    $department_id
  * @return int    登録・更新件数
  */
-function updatePeriodForDateRange(PDO $pdo, string $start_date, string $end_date, int $new_max_period, string $description = ''): int
+function updatePeriodForDateRange(PDO $pdo, string $start_date, string $end_date, int $new_max_period, string $description = '', int $department_id = 0): int
 {
     $sql = "
         UPDATE school_calendar
-        SET max_period = :max_period,
+        SET start_period = 1,
+            end_period = :end_period,
+            max_period = :max_period,
             description = COALESCE(NULLIF(:desc, ''), description)
         WHERE calendar_date BETWEEN :start_date AND :end_date
+        AND department_id = :dept_id
         AND is_holiday = 0    
     ";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
+        ':end_period' => $new_max_period,
         ':max_period' => $new_max_period,
         ':desc'       => $description,
         ':start_date' => $start_date,
         ':end_date'   => $end_date,
+        ':dept_id'    => $department_id,
     ]);
 
     return $stmt->rowCount();
@@ -251,31 +277,52 @@ function updatePeriodForDateRange(PDO $pdo, string $start_date, string $end_date
  * @param  string $description 理由
  * @return bool
  */
-function setSpecialCalendarDate(PDO $pdo, string $target_date, bool $is_holiday, int $max_period, string $description): bool
+function setSpecialCalendarDate(PDO $pdo, string $target_date, bool $is_holiday, int $max_period, string $description = '', int $department_id = 0, ?int $start_period = null, ?int $end_period = null): bool
 {
+    if ($is_holiday) {
+        $start_period = 0;
+        $end_period   = 0;
+        $max_period   = 0;
+    } else {
+        $start_period = $start_period ?? 1;
+        $end_period   = $end_period ?? $max_period;
+        $max_period   = max($max_period, $end_period);
+    }
+
     $stmt = $pdo->prepare("
         INSERT INTO school_calendar (
             calendar_date,
+            department_id,
             is_holiday,
+            start_period,
+            end_period,
             max_period,
             description
         )
         VALUES (
             :calendar_date,
+            :department_id,
             :is_holiday,
+            :start_period,
+            :end_period,
             :max_period,
             :description
         )
         ON DUPLICATE KEY UPDATE
             is_holiday = VALUES(is_holiday),
+            start_period = VALUES(start_period),
+            end_period = VALUES(end_period),
             max_period = VALUES(max_period),
             description = VALUES(description)
     ");
 
     return $stmt->execute([
-        ':calendar_date' => $target_date,
-        ':is_holiday'    => $is_holiday ? 1 : 0,
-        ':max_period'    => $max_period,
-        ':description'   => $description,
+        ':calendar_date'   => $target_date,
+        ':department_id'   => $department_id,
+        ':is_holiday'      => $is_holiday ? 1 : 0,
+        ':start_period'    => $start_period,
+        ':end_period'      => $end_period,
+        ':max_period'      => $max_period,
+        ':description'     => $description,
     ]);
 }
