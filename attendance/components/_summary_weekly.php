@@ -49,14 +49,22 @@ $max_period = 7;
             <!-- 2段目ヘッダー：時限数(休校日は理由を表示) -->
             <tr>
                 <?php foreach ($week_dates as $wd): ?>
+                    <?php
+                        $colspan = ($wd['is_holiday'] || $wd['max_period'] === 0) ? 7 : $wd['max_period'];
+                    $start_p     = $wd['start_period'] ?? 1;
+                    $end_p       = $wd['end_period'] ?? $wd['max_period'];
+                    ?>
                     <?php if ($wd['is_holiday'] || $wd['max_period'] === 0): ?>
                         <th colspan="<?= $colspan ?>" class="period-th holiday-th border-day-end">
                             <?= htmlspecialchars($wd['description'] ?: '休校', ENT_QUOTES, 'UTF-8') ?>
                         </th>
                     <?php else: ?>
                         <?php for ($p = 1; $p <= $wd['max_period']; $p++): ?>
-                            <?php $is_day_end = ($p === $wd['max_period']) ? 'border-day-end' : ''; ?>
-                            <th class="period-th <?= $is_day_end ?>"><?= $p ?></th>
+                            <?php
+                                $is_day_end  = ($p === $wd['max_period']) ? 'border-day-end' : '';
+                            $is_closed_class = ($p < $start_p || $p > $end_p) ? 'holiday-th' : '';
+                            ?>
+                            <th class="period-th <?= $is_closed_class ?> <?= $is_day_end ?>"><?= $p ?></th>
                         <?php endfor; ?>
                     <?php endif; ?>
                 <?php endforeach; ?>
@@ -76,14 +84,20 @@ $max_period = 7;
                         <td class="text-center col-num"><?= $no++ ?></td>
                         <td class="name-cell border-col-end"><?= htmlspecialchars($st['student_name'], ENT_QUOTES, 'UTF-8') ?></td>
 
-                        <!-- 月～金 × 1～7限セルの展開 -->
+                        <!-- 月～金 × 1～max_period限セルの展開 -->
                         <?php foreach ($week_dates as $wd): ?>
+                            <?php
+                                $colspan = ($wd['is_holiday'] || $wd['max_period'] === 0) ? 7 : $wd['max_period'];
+                            $start_p     = $wd['start_period'] ?? 1;
+                            $end_p       = $wd['end_period'] ?? $wd['max_period'];
+                            ?>
                             <?php if ($wd['is_holiday'] || $wd['max_period'] === 0): ?>
-                                <!-- 休校日のセル -->
+                                <!-- 全日休校日のセル -->
                                 <td colspan="<?= $colspan ?>" class="cell-period holiday-cell border-day-end">-</td>
                             <?php else: ?>
                                 <!-- 授業日のコマ 1～max_period -->
                                 <?php for ($p = 1; $p <= $wd['max_period']; $p++): ?>
+                                    <!-- ここから続き -->
                                     <?php
                                     $cell_key = "{$st['student_id']}_{$wd['date']}_{$p}";
                                     $status   = $weekly_attendance[$cell_key] ?? null;
