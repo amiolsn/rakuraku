@@ -1,11 +1,84 @@
 
 <?php
 // CSVのアップロード確認・見出し検証・学科IDの権限チェック・UTF-8 BOM除去を行う共通処理
+//csv_helper.php
 
 /**
  * アップロードされたCSVファイルを確認する
  * @return string CSVの一時ファイルパス
  */
+
+
+/**
+ * CSVファイルを読み込み、UTF-8に変換した状態で返す
+ *
+ * UTF-8・UTF-8 BOM・Shift_JIS・Windows-31Jに対応
+ *
+ * @param string $tmpPath CSVファイルの一時保存先
+ * @return resource UTF-8に変換されたCSVの読み込み用ハンドル
+ */
+function openCsvAsUtf8(string $tmpPath)
+{
+    // CSVファイル全体を読み込む
+    $content = file_get_contents($tmpPath);
+
+    if ($content === false) {
+        throw new RuntimeException('CSVファイルを読み込めません。');
+    }
+
+    if ($content === '') {
+        throw new RuntimeException('CSVファイルが空です。');
+    }
+
+    // UTF-8 BOMを除去
+    if (strncmp($content, "\xEF\xBB\xBF", 3) === 0) {
+        $content = substr($content, 3);
+    }
+
+    // 文字コードを判定
+    $encoding = mb_detect_encoding(
+        $content,
+        ['UTF-8', 'SJIS-win'],
+        true
+    );
+
+    if ($encoding === false) {
+        throw new RuntimeException(
+            '対応していない文字コードです。UTF-8またはShift_JISで保存してください。'
+        );
+    }
+
+    // UTF-8以外ならUTF-8に変換
+    if ($encoding !== 'UTF-8') {
+        $content = mb_convert_encoding(
+            $content,
+            'UTF-8',
+            $encoding
+        );
+    }
+
+    // メモリ上に一時的な読み込み用ファイルを作る
+    $handle = fopen('php://temp', 'r+');
+
+    if ($handle === false) {
+        throw new RuntimeException(
+            'CSVファイルの読み込み準備に失敗しました。'
+        );
+    }
+
+    // 変換したCSVデータを書き込む
+    if (fwrite($handle, $content) === false) {
+        fclose($handle);
+        throw new RuntimeException(
+            'CSVデータの変換に失敗しました。'
+        );
+    }
+
+    // 読み込み位置を先頭に戻す
+    rewind($handle);
+
+    return $handle;
+}
 
 function getUploadedCsvPath(string $fieldName): string
 {
@@ -55,6 +128,8 @@ function readCsvHeader($handle): array
     return $header;
 }
 
+
+
 /**
  * CSVの見出しが指定した形式か確認する
  */
@@ -68,6 +143,64 @@ function validateCsvHeader(
         );
     }
 }
+
+
+/**
+ * CSVの見出しを内部項目と列番号に対応付ける
+ *
+ * @param array $header CSVから読み込んだ見出し
+ * @param array $aliases 内部項目と許可する列名の対応表
+ * @param array $requiredFields 必須項目の一覧
+ * @return array 内部項目とCSVの列番号の対応表
+ */
+function mapCsvHeader(
+    array $header,
+    array $aliases,
+    array $requiredFields
+): array {
+    // 内部項目と列番号を対応付ける配列
+    $headerMap = [];
+
+    // CSVの見出しを1つずつ確認する
+    foreach ($header as $index => $columnName) {
+
+        // 見出しの前後にある空白を除去
+        $columnName = trim($columnName);
+
+        // 対応表を確認する
+        foreach ($aliases as $field => $names) {
+
+            // 許可された列名に一致するか確認
+            if (in_array($columnName, $names, true)) {
+
+                // 同じ内部項目に対応する列が既に存在する場合
+                if (isset($headerMap[$field])) {
+                    throw new RuntimeException(
+                        "CSVに「{$field}」に対応する列が複数あります。"
+                    );
+                }
+
+                // 内部項目とCSVの列番号を対応付ける
+                $headerMap[$field] = $index;
+            }
+        }
+    }
+
+    // 必須項目がすべて存在するか確認
+    foreach ($requiredFields as $field) {
+
+        if (!isset($headerMap[$field])) {
+            throw new RuntimeException(
+                "CSVに必須列「{$field}」がありません。"
+            );
+        }
+    }
+
+    // 対応表を返す
+    return $headerMap;
+}
+
+
 /**
  * CSVの学科IDを検証する
  *
@@ -106,3 +239,9 @@ function removeUtf8Bom(string $value): string
 {
     return preg_replace('/^\xEF\xBB\xBF/', '', $value) ?? $value;
 }
+//・文字コードの判定・UTF-8への変換
+// ・BOM除去
+// ・見出しの読み込み
+// ・列名の照合
+// ・必須列の確認
+// ・列名に対応するデータの取得
