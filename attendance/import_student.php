@@ -16,37 +16,42 @@ function importStudents(
     string $tmpPath
 ): string {
 
-    //CSVを読み込む
-    //列名やデータの形式を確認
-    //データベースに登録する(usersから)
-    $handle = fopen($tmpPath, 'r');
-    if ($handle === false) {
-        throw new RuntimeException('CSVファイルを開けません。');
-    }
+    // 文字コードをUTF-8に変換してCSVを開く
+    $handle = openCsvAsUtf8($tmpPath);
 
     // 1行目の見出しを読み飛ばす
     try {
         // 1行目の見出しを読み込む
         $header = readCsvHeader($handle);
 
-        validateCsvHeader($header, [
+        // 生徒CSVの列名対応表
+        $aliases = [
+            'student_id' => ['student_id', '学籍番号'],
+            'department_id' => ['department_id', '学科ID', '学科番号'],
+            'student_name' => ['student_name', '氏名', '生徒氏名'],
+            'grade' => ['grade', '学年'],
+            'student_group' => ['student_group', 'クラス', '組'],
+            'status' => ['status', '在校状況', '在籍状況']
+        ];
+
+        // 必須項目
+        $requiredFields = [
             'student_id',
             'department_id',
             'student_name',
             'grade',
             'student_group',
             'status'
-        ]);
+        ];
+
+        // CSVの見出しと内部項目を対応付ける
+        $headerMap = mapCsvHeader(
+            $header,
+            $aliases,
+            $requiredFields
+        );
 
 
-        // 学科の修業年限を取得
-        $years = getDepartmentYears($pdo, $departmentId);
-
-        if ($years === 0) {
-            throw new RuntimeException(
-                '学科の修業年限を取得できません。'
-            );
-        }
 
         // CSV全行を読み込み、先に入力チェックする
         $students = [];
@@ -63,17 +68,13 @@ function importStudents(
                 continue;
             }
 
-            if (count($row) !== 6) {
-                throw new RuntimeException(
-                    "{$lineNumber}行目：列数が正しくありません。"
-                );
-            }
-            $studentId = trim($row[0] ?? '');
-            $department_id = trim($row[1] ?? '');
-            $studentName = trim($row[2] ?? '');
-            $grade = trim($row[3] ?? '');
-            $studentGroup = trim($row[4] ?? '');
-            $status = trim($row[5] ?? '');
+            //student_idに対応付けている別名をtrimするようにしている
+            $studentId = trim($row[$headerMap['student_id']] ?? '');
+            $department_id = trim($row[$headerMap['department_id']] ?? '');
+            $studentName = trim($row[$headerMap['student_name']] ?? '');
+            $grade = trim($row[$headerMap['grade']] ?? '');
+            $studentGroup = trim($row[$headerMap['student_group']] ?? '');
+            $status = trim($row[$headerMap['status']] ?? '');
 
             // ここで入力チェックを行う
             // 問題がなければ登録処理を行う
@@ -84,7 +85,6 @@ function importStudents(
                 $studentName === '' ||
                 !ctype_digit($grade) ||
                 (int)$grade < 1 ||
-                (int)$grade > $years ||
                 !in_array($status, ['0', '1'], true)
             ) {
                 http_response_code(400);
@@ -100,37 +100,59 @@ function importStudents(
                 );
             }
 
+
             $csvDepartmentId = $department_id;
 
+            // CSVの学科IDが数字か確認
+            if (!ctype_digit($csvDepartmentId) || (int)$csvDepartmentId <= 0) {
+                throw new RuntimeException(
+                    "{$lineNumber}行目：学科IDが正しくありません。"
+                );
+            }
+
+            // 管理者の場合はセッションの学科IDを使用しない
             if ($isAdminAccount) {
                 $sessionDepartmentId = null;
             } else {
                 $sessionDepartmentId = $departmentId;
             }
 
+            // CSVの学科IDとログイン中の学科IDを照合
+            $resolvedDepartmentId = resolveDepartmentId(
+                (int)$csvDepartmentId,
+                $sessionDepartmentId,
+                $isAdminAccount
+            );
 
-            if (
-                $rtdepartmentId = resolveDepartmentId(
-                    $csvDepartmentId,
-                    $sessionDepartmentId,
-                    $isAdminAccount
-                ) === null ||
-                !is_numeric($rtdepartmentId) ||
-                (int)$rtdepartmentId <= 0
-            ) {
-                http_response_code(400);
-                echo json_encode([
-                    'success' => false,
-                    'message' => '学科情報を取得できません。'
-                ], JSON_UNESCAPED_UNICODE);
-                exit;
+            // 確定した学科の修業年限を取得
+            $years = getDepartmentYears($pdo, $resolvedDepartmentId);
+
+            if ($years === 0) {
+                throw new RuntimeException(
+                    "{$lineNumber}行目：学科の修業年限を取得できません。"
+                );
             }
+
+            // 学年が修業年限の範囲内か確認
+            if ((int)$grade > $years) {
+                throw new RuntimeException(
+                    "{$lineNumber}行目：学年が学科の修業年限を超えています。"
+                );
+            }
+
+            // 解決した学科IDが正しいか確認
+            if ($resolvedDepartmentId <= 0) {
+                throw new RuntimeException(
+                    "{$lineNumber}行目：学科IDが正しくありません。"
+                );
+            }
+
 
             $studentIds[$studentId] = true;
 
             $students[] = [
                 'student_id' => $studentId,
-                'department_id' => $rtdepartmentId,
+                'department_id' => $resolvedDepartmentId,
                 'student_name' => $studentName,
                 'grade' => (int)$grade,
                 'student_group' => $studentGroup === ''

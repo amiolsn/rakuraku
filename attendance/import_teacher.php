@@ -16,13 +16,8 @@ function importTeachers(
     string $tmpPath
 ): string {
 
-    //CSVを読み込む
-    //列名やデータの形式を確認
-    //データベースに登録する(usersから)
-    $handle = fopen($tmpPath, 'r');
-    if ($handle === false) {
-        throw new RuntimeException('CSVファイルを開けません。');
-    }
+    // 文字コードをUTF-8に変換してCSVを開く
+    $handle = openCsvAsUtf8($tmpPath);
 
     // 1行目の見出しを読み飛ばす
     try {
@@ -33,12 +28,28 @@ function importTeachers(
             $header[0] = removeUtf8Bom($header[0]);
         }
 
-        validateCsvHeader($header, [
+        // 教員CSVの列名対応表
+        $aliases = [
+            'teacher_id' => ['teacher_id', '教員番号'],
+            'teacher_name' => ['teacher_name', '氏名', '教員氏名'],
+            'isAdmin' => ['isAdmin', 'is_admin', '管理者フラグ'],
+            'department_id' => ['department_id', '学科ID', '学科番号']
+        ];
+
+        // 必須項目
+        $requiredFields = [
             'teacher_id',
             'teacher_name',
             'isAdmin',
             'department_id'
-        ]);
+        ];
+
+        // CSVの見出しと内部項目を対応付ける
+        $headerMap = mapCsvHeader(
+            $header,
+            $aliases,
+            $requiredFields
+        );
 
         // CSV全行を読み込み、先に入力チェックする
         $teachers = [];
@@ -58,23 +69,28 @@ function importTeachers(
                 continue;
             }
 
-            if (count($row) !== 4) {
-                throw new RuntimeException(
-                    "{$lineNumber}行目：列数が正しくありません。"
-                );
-            }
-            $teacherId = trim($row[0] ?? '');
-            $teacherName = trim($row[1] ?? '');
-            $isAdmin = trim($row[2] ?? '');
-            $department_id = trim($row[3] ?? '');
+            // CSVの見出しに対応する列番号からデータを取得
+            $teacherId = trim($row[$headerMap['teacher_id']] ?? '');
+            $teacherName = trim($row[$headerMap['teacher_name']] ?? '');
+            $isAdmin = trim($row[$headerMap['isAdmin']] ?? '');
+            $department_id = trim($row[$headerMap['department_id']] ?? '');
 
+            // 管理者フラグが0または1か確認
             if (!in_array($isAdmin, ['0', '1'], true)) {
                 throw new RuntimeException(
                     "{$lineNumber}行目：管理者フラグが不正です。"
                 );
             }
 
+            // 文字列から整数に変換
             $isAdmin = (int)$isAdmin;
+
+            // 学科アカウントから管理者は作成できない
+            if (!$isAdminAccount && $isAdmin === 1) {
+                throw new RuntimeException(
+                    "{$lineNumber}行目：管理者を登録する権限がありません。"
+                );
+            }
 
 
             // ここで入力チェックを行う
@@ -93,42 +109,33 @@ function importTeachers(
 
 
 
-
-            // ※ 実際の管理者判定用セッション項目に置き換える
-            // $isAdminAccount =
-            //     (int)($_SESSION['user']['usertype_id'] ?? 0) === 2;
-
-            // 学科アカウントから管理者は作成できない
-            if (!$isAdminAccount && $isAdmin === 1) {
-
-                return count($teachers) . '管理者を登録する権限がありません。';
-            }
-
             $csvDepartmentId = $department_id;
 
-            // 学科アカウントはログイン中の学科IDを使用する
-            // 管理者は登録対象の学科IDを指定する
-            //管理者も学科もcsvから学科IDを取得学科はその後セッションと比較
-            //管理者はcsvdepartmentId,sessiondepartmentId:null, 
+            // CSVの学科IDが数字か確認
+            if (!ctype_digit($csvDepartmentId) || (int)$csvDepartmentId <= 0) {
+                throw new RuntimeException(
+                    "{$lineNumber}行目：学科IDが正しくありません。"
+                );
+            }
+
+            // 管理者の場合はセッションの学科IDを使用しない
             if ($isAdminAccount) {
                 $sessionDepartmentId = null;
             } else {
                 $sessionDepartmentId = $departmentId;
             }
 
-
-            $rtDepartmentId = resolveDepartmentId(
-                $csvDepartmentId,
+            // CSVの学科IDとログイン中の学科IDを照合
+            $resolvedDepartmentId = resolveDepartmentId(
+                (int)$csvDepartmentId,
                 $sessionDepartmentId,
                 $isAdminAccount
             );
 
-            if (
-                !is_numeric($rtDepartmentId) ||
-                (int)$rtDepartmentId <= 0
-            ) {
+            // 解決した学科IDが正しいか確認
+            if ($resolvedDepartmentId <= 0) {
                 throw new RuntimeException(
-                    '学科情報を取得できません。'
+                    "{$lineNumber}行目：学科IDが正しくありません。"
                 );
             }
 
@@ -146,7 +153,7 @@ function importTeachers(
                 'teacher_id' => $teacherId,
                 'teacher_name' => $teacherName,
                 'is_admin' => $isAdmin,
-                'department_id' =>  $rtDepartmentId
+                'department_id' => $resolvedDepartmentId
             ];
         }
 
@@ -214,8 +221,6 @@ function importTeachers(
         }
 
         $pdo->commit();
-
-        return count($teachers) . '人の教員を登録しました。';
     } catch (Throwable $e) {
         if ($pdo->inTransaction()) {
             $pdo->rollBack();

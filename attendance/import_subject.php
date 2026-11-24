@@ -18,29 +18,26 @@ function importSubjects(
     string $tmpPath
 ): string {
 
-    // if ($departmentId <= 0) {
-    //     throw new RuntimeException('学科情報を取得できません。');
-    // }
-
-    $handle = fopen($tmpPath, 'r');
-    if ($handle === false) {
-        throw new RuntimeException('CSVファイルを開けません。');
-    }
+    $handle = openCsvAsUtf8($tmpPath);
 
     try {
         // CSVの見出しを確認
         $header = readCsvHeader($handle);
 
-        if (isset($header[0])) {
-            $header[0] = removeUtf8Bom($header[0]);
-        }
 
         error_log('CSV header: ' . var_export($header, true));
 
-        validateCsvHeader($header, [
+        $aliases = [
+            'subject_name' => ['subject_name', '科目名', '科目'],
+            'department_id' => ['department_id', '学科ID', '学科番号']
+        ];
+
+        $requiredFields = [
             'subject_name',
             'department_id'
-        ]);
+        ];
+
+        $headerMap = mapCsvHeader($header, $aliases, $requiredFields);
 
         // 全行を読み込み、入力内容を先に検証する
         $subjects = [];
@@ -57,14 +54,8 @@ function importSubjects(
                 continue;
             }
 
-            if (count($row) !== 2) {
-                throw new RuntimeException(
-                    "{$lineNumber}行目：列数が正しくありません。"
-                );
-            }
-
-            $subjectName = trim($row[0] ?? '');
-            $department_id = trim($row[1] ?? '');
+            $subjectName = trim($row[$headerMap['subject_name']] ?? '');
+            $department_id = trim($row[$headerMap['department_id']] ?? '');
 
             if ($subjectName === '') {
                 throw new RuntimeException(
@@ -72,38 +63,31 @@ function importSubjects(
                 );
             }
 
-            $csvDepartmentId = $department_id;
+            $csvDepartmentId = trim($department_id);
 
+            // 学科アカウントの場合はログイン中の学科IDと照合する
+            $sessionDepartmentId = $isAdminAccount
+                ? null
+                : $departmentId;
 
-            if ($isAdminAccount) {
-                $sessionDepartmentId = null;
-            } else {
-                $sessionDepartmentId = $departmentId;
+            // CSVの学科IDを検証して取得する
+            $resolvedDepartmentId = resolveDepartmentId(
+                $csvDepartmentId,
+                $sessionDepartmentId,
+                $isAdminAccount
+            );
+
+            // 学科IDを取得できなかった場合
+            if ($resolvedDepartmentId === null) {
+                throw new RuntimeException(
+                    "{$lineNumber}行目：学科情報を取得できません。"
+                );
             }
-
-
-            if (
-                $rtdepartmentId = resolveDepartmentId(
-                    $csvDepartmentId,
-                    $sessionDepartmentId,
-                    $isAdminAccount
-                ) === null ||
-                !is_numeric($rtdepartmentId) ||
-                (int)$rtdepartmentId <= 0
-            ) {
-                http_response_code(400);
-                echo json_encode([
-                    'success' => false,
-                    'message' => '学科情報を取得できません。'
-                ], JSON_UNESCAPED_UNICODE);
-                exit;
-            }
-
 
 
             $subjects[] = [
                 'subject_name' => $subjectName,
-                'department_id' => $rtdepartmentId
+                'department_id' => $resolvedDepartmentId
             ];
         }
 
