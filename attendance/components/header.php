@@ -73,6 +73,10 @@ if (isset($_SESSION['user'])) {
                 アカウント管理
             </a>
             <?php if (!empty($_SESSION['user']['is_admin']) && $_SESSION['user']['is_admin'] === 1): ?>
+                <a href="manage_admin.php"
+                    class="nav-elem <?= $currentPage === 'manage_admin.php' ? 'active' : '' ?> admin-link">
+                    学科管理・管理者管理
+                </a>
                 <a href="administrator_menu.php"
                     class="nav-elem <?= $currentPage === 'administrator_menu.php' ? 'active' : '' ?> admin-link">
                     管理者メニュー
