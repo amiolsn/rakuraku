@@ -24,7 +24,7 @@ try {
     // 週間集計用データの取得
     if ($active_tab === 'weekly') {
         $target_week_date = $_GET['date'] ?? date('Y-m-d');
-        $week_dates       = getWeekDates($pdo, $target_week_date);
+        $week_dates       = getWeekDates($pdo, $target_week_date, $department_id);
         $date_only_list   = array_column($week_dates, 'date');
 
         // 生徒一覧の取得
@@ -70,13 +70,13 @@ try {
                     <?php
                     // components/_grade_options.phpを利用
                     include 'components/_grade_options.php';
-                    ?>
+?>
                 </select>
 
                 <!-- 各タブ固有の操作パーツ（週カレンダーや年月プルダウン -->
                 <?php if ($active_tab === 'weekly'): ?>
                     <?php
-                    $target_week_date     = (!empty($_GET['date'])) ? $_GET['date'] : date('Y-m-d');
+$target_week_date     = (!empty($_GET['date'])) ? $_GET['date'] : date('Y-m-d');
                     ?>
                     <div class="week-navigation">
                         <button type="button" class="btn-nav" onclick="moveWeek(-7)" title="前週へ">◀ 前週</button>
@@ -163,7 +163,7 @@ try {
                         } else {
                             include 'components/_summary_monthly.php';
                         }
-                        ?>
+?>
                     </div>
                 </div>
             </div>

@@ -2,9 +2,11 @@
 
 /**
  * components/_attendance_table.php
- * 
+ *
  * 呼び出し元で必要な変数:
  * @var bool  $is_holiday          休校フラグ
+ * @var int   $start_period   開始時限
+ * @var int   $end_period    修了時限
  * @var int   $max_period          最大時限数
  * @var array $existing_periods    時限ごとの科目・教員設定
  * @var array $subjects            科目マスタ配列[cite: 6]
@@ -22,20 +24,26 @@
                 <th>学籍番号</th>
                 <th>氏名</th>
                 <th>班</th>
-                <!-- 1～7限のヘッダーをループで生成 -->
+                <!-- 1～max_period限のヘッダーをループで生成 -->
                 <?php for ($p = 1; $p <= $max_period; $p++): ?>
 
                     <?php
-                    // 既存の科目。教員選択があれば初期値にする
-                    $saved_subj = $existing_periods[$p]['subject_id'] ?? '';
-                    $saved_teach = $existing_periods[$p]['teacher_id'] ?? '';
+                    // 有効な授業時間かの判定、既存の科目。教員選択があれば初期値にする
+                    $is_valid_period = (!$is_holiday && $p >= $start_period && $p <= $end_period);
+                    $saved_subj      = $existing_periods[$p]['subject_id'] ?? '';
+                    $saved_teach     = $existing_periods[$p]['teacher_id'] ?? '';
                     ?>
 
-                    <th class=" period-header">
-                        <div><?= $p ?>限</div>
+                    <th class=" period-header <?= !$is_valid_period ? 'is_closed_period' : '' ?>">
+                        <div>
+                            <?= $p ?>限
+                            <?php if (!$is_holiday && !$is_valid_period): ?>
+                                <span class="badge-closed">休校</span>
+                            <?php endif; ?>
+                        </div>
 
                         <!-- 科目選択プルダウン -->
-                        <select id="subject_<?= $p ?>" name="subject_<?= $p ?>">
+                        <select id="subject_<?= $p ?>" name="subject_<?= $p ?>" <?= !$is_valid_period ? 'disabled' : '' ?>>
                             <option value="">- 科目選択 -</option>
                             <?php foreach ($subjects as $sb): ?>
                                 <option value="<?= $sb['subject_id'] ?>" <?= $saved_subj == $sb['subject_id'] ? 'selected' : '' ?>>
@@ -45,7 +53,7 @@
                         </select>
 
                         <!-- 教員選択プルダウン -->
-                        <select id="teacher_<?= $p ?>" name="teacher_<?= $p ?>">
+                        <select id="teacher_<?= $p ?>" name="teacher_<?= $p ?>" <?= !$is_valid_period ? 'disabled' : '' ?>>
                             <option value="">- 教員選択 -</option>
                             <?php foreach ($teachers as $tc): ?>
                                 <option value="<?= $tc['teacher_id'] ?>" <?= $saved_teach == $tc['teacher_id'] ? 'selected' : '' ?>>
@@ -55,7 +63,7 @@
                         </select>
 
                         <!-- 時限ごとの一括出席ボタン -->
-                        <button type="button" class="btn-all-present" onclick="setAllPresent(<?= $p ?>)">全員出席</button>
+                        <button type="button" class="btn-all-present" onclick="setAllPresent(<?= $p ?>)" <?= !$is_valid_period ? 'disabled' : '' ?>>全員出席</button>
 
                     </th>
                 <?php endfor ?>
@@ -66,32 +74,33 @@
                 <tr>
                     <td><?= htmlspecialchars($st['student_id']) ?></td>
                     <td class="name-col"><?= htmlspecialchars($st['student_name']) ?></td>
-                    <td><?= !empty($st['student_group']) ?  htmlspecialchars($st['student_group']) : "-" ?></td>
+                    <td><?= !empty($st['student_group']) ? htmlspecialchars($st['student_group']) : "-" ?></td>
 
                     <!-- 生徒ごとに各時限のマス目を作成 -->
                     <?php for ($p = 1; $p <= $max_period; $p++): ?>
                         <?php
                         $key = "{$st['student_id']}_{$p}";
                         // 既存レコードがあればそのステータス、なければnull
-                        $curr_status = $existing_attendance[$key] ?? null;
-
+                        $curr_status     = $existing_attendance[$key] ?? null;
+                        $is_valid_period = (!$is_holiday && $p >= $start_period && $p <= $end_period);
                         ?>
                         <!-- セル自体にも目印IDを付与 -->
-                        <td id="cell_<?= $key ?>">
+                        <td id="cell_<?= $key ?>" class="<?= !$is_valid_period ? 'is-closed-period' : '' ?>">
                             <div class="radio-group">
                                 <!-- name属性を「att_学籍番号_時限」にすることでマス目ごとに独立した1つの選択肢グループになる -->
                                 <!-- クリックされたらmarkAsChanged()を呼び出す -->
                                 <label>
-                                    <input type="radio" name="att_<?= $key ?>" value="1" <?= $curr_status == 1 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">出
+                                    <input type="radio" name="att_<?= $key ?>" value="1" <?= $curr_status == 1 ? 'checked' : '' ?>
+                                    <?= !$is_valid_period ? 'disabled' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">出
                                 </label>
                                 <label>
-                                    <input type="radio" name="att_<?= $key ?>" value="2" <?= $curr_status == 2 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">欠
+                                    <input type="radio" name="att_<?= $key ?>" value="2" <?= $curr_status == 2 ? 'checked' : '' ?> <?= !$is_valid_period ? 'disabled' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">欠
                                 </label>
                                 <label>
-                                    <input type="radio" name="att_<?= $key ?>" value="3" <?= $curr_status == 3 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">遅
+                                    <input type="radio" name="att_<?= $key ?>" value="3" <?= $curr_status == 3 ? 'checked' : '' ?> <?= !$is_valid_period ? 'disabled' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">遅
                                 </label>
                                 <label>
-                                    <input type="radio" name="att_<?= $key ?>" value="4" <?= $curr_status == 4 ? 'checked' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">公
+                                    <input type="radio" name="att_<?= $key ?>" value="4" <?= $curr_status == 4 ? 'checked' : '' ?> <?= !$is_valid_period ? 'disabled' : '' ?> onchange="markAsChanged(<?= $st['student_id'] ?>, <?= $p ?>)">公
                                 </label>
                             </div>
                         </td>
