@@ -9,9 +9,10 @@
  *
  * @param  PDO    $pdo
  * @param  string $date
+ * @param  int    $department_id 学科ID(0:全科共通)
  * @return array  [ ['date' => '2026-09-07', 'month' => 9, 'day' => 7, 'week_day' => '月'], ...]
  */
-function getWeekDates(PDO $pdo, string $date): array
+function getWeekDates(PDO $pdo, string $date, int $department_id = 0): array
 {
     $timestamp = strtotime($date);
     $w         = (int)date('w', $timestamp);
@@ -30,32 +31,40 @@ function getWeekDates(PDO $pdo, string $date): array
         $date_list[]  = $d;
 
         $week_dates[$d] = [
-            'date'        => $d,
-            'month'       => (int)date('n', $current_time),
-            'day'         => (int)date('j', $current_time),
-            'week_day'    => $week_day_name[$i],
-            'max_period'  => 7,
-            'is_holiday'  => 0,
-            'description' => '',
+            'date'         => $d,
+            'month'        => (int)date('n', $current_time),
+            'day'          => (int)date('j', $current_time),
+            'week_day'     => $week_day_name[$i],
+            'start_period' => 1,
+            'end_period'   => 7,
+            'max_period'   => 7,
+            'is_holiday'   => 0,
+            'description'  => '',
         ];
     }
 
     // school_calendarから該当週のカレンダー設定を取得
+    // department_id ASC で取得することで、共通(0)の後に学科専用(>0)で上書きする
     $placeholders = implode(',', array_fill(0, count($date_list), '?'));
     $stmt         = $pdo->prepare("
-        SELECT calendar_date, is_holiday, max_period, description 
+        SELECT calendar_date, department_id, is_holiday, start_period, end_period, max_period, description 
         FROM school_calendar 
         WHERE calendar_date IN ({$placeholders})
+          AND department_id IN (?, 0)
+        ORDER BY department_id ASC
     ");
-    $stmt->execute($date_list);
-    $cal_records = $stmt->fetchAll();
+    $params = array_merge($date_list, [$department_id]);
+    $stmt->execute($params);
+    $cal_records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($cal_records as $cal) {
         $d = $cal['calendar_date'];
         if (isset($week_dates[$d])) {
-            $week_dates[$d]['max_period']  = (int)$cal['max_period'];
-            $week_dates[$d]['is_holiday']  = (int)$cal['is_holiday'];
-            $week_dates[$d]['description'] = $cal['description'] ?? '';
+            $week_dates[$d]['start_period'] = (int)$cal['start_period'];
+            $week_dates[$d]['end_period']   = (int)$cal['end_period'];
+            $week_dates[$d]['max_period']   = (int)$cal['max_period'];
+            $week_dates[$d]['is_holiday']   = (int)$cal['is_holiday'];
+            $week_dates[$d]['description']  = $cal['description'] ?? '';
         }
     }
 
@@ -104,37 +113,66 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
     $cal_stmt = $pdo->prepare("
         SELECT
             calendar_date,
+            department_id,
+            is_holiday,
+            start_period,
+            end_period,
             max_period
         FROM
             school_calendar
         WHERE
             calendar_date
-                BETWEEN :fiscal_start
-                AND :month_end
-        AND is_holiday = 0
+                BETWEEN :fiscal_start AND :month_end
+        AND department_id IN (:dept_id, 0)
         ORDER BY
-            calendar_date ASC
+            calendar_date ASC,
+            department_id ASC
     ");
     $cal_stmt->execute([
         ':fiscal_start' => $fiscal_start,
         ':month_end'    => $end_date,
+        ':dept_id'      => $department_id,
     ]);
-    $calendar_records = $cal_stmt->fetchAll();
+    $raw_calendar = $cal_stmt -> fetchAll(PDO::FETCH_ASSOC);
 
+    // 日付ごとに学科専用設定を優先して確定させる
+    $merged_calendar = [];
+    foreach ($raw_calendar as $row) {
+        $merged_calendar[$row['calendar_date']] = $row;
+    }
+
+    // 有効な授業日のみを抽出し、有効コマ数(end_period-start_period + 1)を算出
+    $calendar_records           = []; // 累計機関の有効授業日リスト
     $monthly_days               = []; // 当月の授業日
     $month_total_periods        = 0;  // 当月の総授業時間数
     $cumulative_total_periods   = 0;  // 累計の総授業時間数
 
-    foreach ($calendar_records as $cal) {
-        $c_date  = $cal['calendar_date'];
-        $periods = (int)$cal['max_period'];
+    foreach ($merged_calendar as $c_date => $cal) {
+        $is_holiday = (int)$cal['is_holiday'];
+        $start_p    = (int)$cal['start_period'];
+        $end_p      = (int)$cal['end_period'];
 
-        $cumulative_total_periods += $periods;
+        // 休校日や有効時限がない日はスキップ
+        if ($is_holiday === 1 || $start_p <= 0 || $end_p < $start_p) {
+            continue;
+        }
+
+        $valid_periods = $end_p - $start_p + 1;
+
+        $calendar_records[] = [
+            'calendar_date' => $c_date,
+            'start_period'  => $start_p,
+            'end_period'    => $end_p,
+        ];
+        $cumulative_total_periods += $valid_periods;
 
         // 当月分のみ抽出
         if ($c_date >= $start_date && $c_date <= $end_date) {
-            $monthly_days[$c_date] = $periods;
-            $month_total_periods += $periods;
+            $monthly_days[$c_date] = [
+                'start' => $start_p,
+                'end'   => $end_p,
+            ];
+            $month_total_periods += $valid_periods;
         }
     }
 
@@ -195,13 +233,16 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
         $month_present_h = 0;   // 出席時間
         $month_absent_h  = 0;    // 欠席時間
 
-        foreach ($monthly_days as $date_str => $max_p) {
+        foreach ($monthly_days as $date_str => $range) {
+            $start_p     = $range['start'];
+            $end_p       = $range['end'];
             $day_records = $st_att[$date_str] ?? [];
 
             $day_has_present   = false;
             $day_all_absent    = true;
 
-            for ($p = 1; $p <= $max_p; $p++) {
+            // 有効時限(start_period～end_period)のみを集計
+            for ($p = $start_p; $p <= $end_p; $p++) {
                 $status = $day_records[$p] ?? 1;    // 記録がなければ出席(１)とみなす
 
                 if ($status === 1) {
@@ -229,12 +270,12 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
             // 日数カウント
             if ($day_has_present) {
                 $present_days++;
-            } elseif ($day_all_absent && $max_p > 0) {
+            } elseif ($day_all_absent) {
                 $absent_days++;
             }
 
             // 早退判定
-            $last_period_status = $day_records[$max_p] ?? 1;
+            $last_period_status = $day_records[$end_p] ?? 1;
             if ($last_period_status === 2 && !$day_all_absent) {
                 $early_count++;
             }
@@ -246,10 +287,11 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
 
         foreach ($calendar_records as $cal) {
             $c_date      = $cal['calendar_date'];
-            $max_p       = (int)$cal['max_period'];
+            $start_p     = $cal['start_period'];
+            $end_p       = $cal['end_period'];
             $day_records = $st_att[$c_date] ?? [];
 
-            for ($p = 1; $p <= $max_p; $p++) {
+            for ($p = $start_p; $p <= $end_p; $p++) {
                 $status = $day_records[$p] ?? 1;
                 if ($status === 2) {
                     $cumulative_absent_h++;
