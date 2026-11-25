@@ -77,7 +77,7 @@
                 <td>
                     <div class="form-group">
                         <label for="grade">学年</label>
-                        <select id="grade" name="grade">
+                        <select id="grade" name="grade" onchange="this.form.submit()">
                             <?php
                             $selected_grade = $_GET['grade'] ?? '';
                             include 'components/_grade_options.php';
@@ -88,7 +88,7 @@
                 <td>
                     <div class="form-group">
                         <label for="student_group">班</label>
-                        <select id="student_group" name="student_group">
+                        <select id="student_group" name="student_group" onchange="this.form.submit()">
                             <?php
                             $selected_group = $_GET['student_group'] ?? '';
                             include 'components/_group_options.php';
@@ -99,7 +99,7 @@
                 <td>
                     <div class="form-group">
                         <label for="status">在校状況</label>
-                        <select id="status" name="status">
+                        <select id="status" name="status" onchange="this.form.submit()">
                             <?php
                             $selected_grade = $_GET['status'] ?? '';
                             include 'components/_status_options.php';
@@ -122,6 +122,12 @@
 
 
 </div>
+
+<?php $studentCount = count($students); ?>
+<div class="result-count">
+    検索結果：<?= $studentCount ?>件
+</div>
+
 <div class="table_box">
     <table class="management-table">
         <thead>

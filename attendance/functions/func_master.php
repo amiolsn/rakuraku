@@ -211,18 +211,17 @@ function searchTeachers(PDO $pdo, int $department_id, array $filters = []): arra
 
     $params = [$department_id];
 
-    // 教員番号が検索欄に入力されている場合だけ条件を追加
+    // 教員番号
     if (!empty($filters['teacher_id'])) {
         $sql .= " AND t.teacher_id LIKE ?";
         $params[] = '%' . $filters['teacher_id'] . '%';
     }
 
-    // 教員氏名が検索欄に入力されている場合だけ条件を追加
-    if (isset($_GET['teacher_name']) && $_GET['teacher_name'] !== '') {
+    // 教員氏名
+    if (!empty($filters['teacher_name'])) {
         $sql .= " AND t.teacher_name LIKE ?";
-        $params[] = '%' . $_GET['teacher_name'] . '%';
+        $params[] = '%' . $filters['teacher_name'] . '%';
     }
-
 
     $sql .= " ORDER BY t.teacher_id ASC";
 
@@ -307,4 +306,92 @@ WHERE 1 = 1
     $stmt->execute($params);
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// 管理者検索
+function searchAdmins(PDO $pdo, array $filters = []): array
+{
+    $sql = "
+        SELECT
+            t.teacher_id,
+            t.teacher_name,
+            u.login_id,
+            d.department_name
+        FROM teachers t
+        JOIN department d
+            ON t.department_id = d.department_id
+        JOIN users u
+            ON t.user_id = u.user_id
+        WHERE u.usertype_id = 2
+    ";
+
+    // SQLに渡すパラメータ
+    $params = [];
+
+    // 教員番号
+    if (isset($filters['teacher_id']) && $filters['teacher_id'] !== '') {
+        $sql .= " AND t.teacher_id LIKE ?";
+        $params[] = '%' . $filters['teacher_id'] . '%';
+    }
+
+    // 所属学科
+    if (isset($filters['department_name']) && $filters['department_name'] !== '') {
+        $sql .= " AND d.department_name = ?";
+        $params[] = $filters['department_name'];
+    }
+
+    // 教員氏名
+    if (isset($filters['teacher_name']) && $filters['teacher_name'] !== '') {
+        $sql .= " AND t.teacher_name LIKE ?";
+        $params[] = '%' . $filters['teacher_name'] . '%';
+    }
+
+    // ログインID
+    if (isset($filters['login_id']) && $filters['login_id'] !== '') {
+        $sql .= " AND u.login_id LIKE ?";
+        $params[] = '%' . $filters['login_id'] . '%';
+    }
+
+    $sql .= " ORDER BY t.teacher_id ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+}
+
+// 管理者に追加できる教員を検索（全学科）
+function searchTeachersForAdmin(PDO $pdo, array $filters = []): array
+{
+    $sql = "
+        SELECT
+            t.teacher_id,
+            t.teacher_name,
+            d.department_name
+        FROM teachers t
+        JOIN department d
+            ON t.department_id = d.department_id
+        WHERE t.is_admin = 0
+    ";
+
+    $params = [];
+
+    // 教員番号
+    if (!empty($filters['teacher_id'])) {
+        $sql .= " AND t.teacher_id LIKE ?";
+        $params[] = '%' . $filters['teacher_id'] . '%';
+    }
+
+    // 教員氏名
+    if (!empty($filters['teacher_name'])) {
+        $sql .= " AND t.teacher_name LIKE ?";
+        $params[] = '%' . $filters['teacher_name'] . '%';
+    }
+
+    $sql .= " ORDER BY t.teacher_id ASC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute($params);
+
+    return $stmt->fetchAll();
 }

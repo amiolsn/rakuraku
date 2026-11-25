@@ -63,6 +63,10 @@
 
 
 </div>
+<?php $subjectCount = count($subjects); ?>
+<div class="result-count">
+    検索結果：<?= $subjectCount ?>件
+</div>
 
 <div class="table_box">
     <table class="management-table">

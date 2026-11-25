@@ -79,3 +79,42 @@
     border-color: #3988cf;
     font-weight: bold;
 }
+
+
+
+.admin-add-options {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.admin-add-option {
+    flex: 1;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.admin-add-option h4 {
+    margin-bottom: 10px;
+}
+
+.admin-add-option p {
+    margin-bottom: 20px;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.admin-add-option button {
+    width: 100%;
+}
+.admin-popup-content {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+.admin-popup-content h3 {
+    margin-top: 0;
+}

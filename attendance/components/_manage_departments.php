@@ -34,6 +34,8 @@
         class="period-header select"
         id="department-search-form">
 
+        <input type="hidden" name="tab" value="department">
+
         <table class="management-table search-table" id="department-table">
             <tr>
 
@@ -50,7 +52,7 @@
                 <td>
                     <div class="form-group">
                         <label for="department_name">学科名</label>
-                        <select id="department_name" name="department_name">
+                        <select id="department_name" name="department_name" onchange="this.form.submit()">
                             <?php
                             $selected_department_name = $_GET['department_name'] ?? '';
                             include 'components/_department_options.php';
@@ -74,6 +76,11 @@
 
 
 </div>
+<?php $departmentCount = count($departments); ?>
+<div class="result-count">
+    検索結果：<?= $departmentCount ?>件
+</div>
+
 <div class="table_box">
     <table class="management-table">
         <thead>
