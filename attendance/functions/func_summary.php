@@ -100,8 +100,12 @@ function getAbsenceLimitHours(PDO $pdo, int $department_id, int $grade): int
 function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, string $target_month): array
 {
     // 対象月の開始日・終了日を抽出
-    $start_date = "{$target_month}-01";
-    $end_date   = date('Y-m-t', strtotime($start_date));
+    $start_date  = "{$target_month}-01";
+    $month_end   = date('Y-m-t', strtotime($start_date));
+    $today       = date('Y-m-d');
+
+    // 未来日を含めないように集計終了日は「月末日」と「本日」の早いほうにする
+    $end_date = ($month_end > $today) ? $today : $month_end;
 
     // 今年度の開始日(4月1日)を算出
     $target_year      = (int)date('Y', strtotime($start_date));
