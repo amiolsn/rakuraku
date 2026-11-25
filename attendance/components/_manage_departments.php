@@ -4,109 +4,61 @@
  * 必要な変数:
  * @var array $departments 
  */
+
 ?>
 
 <div class="table-actions-top">
-    <!-- 新規追加 -->
+
     <button
         type="button"
         class="add-btn"
-        data-popup-target="student-popup">
+        data-popup-target="department-popup">
         新規追加
     </button>
-    <?php include 'components/_add_student_popup.php'; ?>
+    <?php include 'components/_add_department_popup.php'; ?>
+
     <button
         type="button"
         class="bulkAdd-btn"
-        data-type="student">
+        data-type="department">
         CSV一括登録
     </button>
     <?php include 'components/_import_popup.php'; ?>
-    <!-- <button
-        type="button"
-        class="year-update-btn"
-        data-type="year-update">
-        年度更新
-    </button>
-    <div id="year-update-popup-wrapper">
-        <div id="year-update-popup-inside">
-            <div id="year-update-close">x</div>
-            <div id="message">
-                <h2>年度を更新します</h2>
-                <p>1.&nbsp;1年生を2年生に進級させます。</p>
-                <p>2.&nbsp;2年生を卒業扱いにします。</p>
-                <button type="button" id="year-update-yes">更新</button>
-                <button type="button" id="year-update-cancel">キャンセル</button>
-            </div>
-        </div>
-    </div> -->
 
 </div>
 
 <div class="table-actions-top">
     <!-- 検索フィルター -->
-    <!-- 学籍番号
-                            生徒氏名
-                            学年
-                            班
-                            在校状況 -->
+
     <form action="" method="GET"
         class="period-header select"
-        id="student-search-form">
+        id="department-search-form">
 
-        <table class="management-table search-table" id="student-table">
+        <table class="management-table search-table" id="department-table">
             <tr>
 
                 <td></td>
                 <td>
                     <div class="form-group">
-                        <label for="student_id">学籍番号</label>
-                        <input type="text" name="student_id" data-input-type="number"
+                        <label for="department_id">学科番号</label>
+                        <input type="text" name="department_id" data-input-type="number"
                             inputmode="numeric"
-                            value="<?= htmlspecialchars($_GET['student_id'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                            value="<?= htmlspecialchars($_GET['department_id'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                 </td>
+
                 <td>
                     <div class="form-group">
-                        <label for="student_name">生徒氏名</label>
-                        <input type="text" name="student_name"
-                            value="<?= htmlspecialchars($_GET['student_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
-                    </div>
-                </td>
-                <td></td>
-                <td>
-                    <div class="form-group">
-                        <label for="grade">学年</label>
-                        <select id="grade" name="grade">
+                        <label for="department_name">学科名</label>
+                        <select id="department_name" name="department_name">
                             <?php
-                            $selected_grade = $_GET['grade'] ?? '';
-                            include 'components/_grade_options.php';
+                            $selected_department_name = $_GET['department_name'] ?? '';
+                            include 'components/_department_options.php';
                             ?>
                         </select>
                     </div>
                 </td>
-                <td>
-                    <div class="form-group">
-                        <label for="student_group">班</label>
-                        <select id="student_group" name="student_group">
-                            <?php
-                            $selected_group = $_GET['student_group'] ?? '';
-                            include 'components/_group_options.php';
-                            ?>
-                        </select>
-                    </div>
-                </td>
-                <td>
-                    <div class="form-group">
-                        <label for="status">在校状況</label>
-                        <select id="status" name="status">
-                            <?php
-                            $selected_grade = $_GET['status'] ?? '';
-                            include 'components/_status_options.php';
-                            ?>
-                        </select>
-                    </div>
-                </td>
+
                 <td>
                     <div class="table-actions">
                         <button type="submit" id="search-btn" class="search-btn">検索</button>
@@ -127,40 +79,32 @@
         <thead>
             <tr>
                 <th class="sticky">No</th>
-                <th class="sticky">学籍番号</th>
-                <th class="sticky">生徒氏名</th>
+                <th class="sticky">学科番号</th>
+
                 <th class="sticky">学科名</th>
-                <th class="sticky">学年</th>
-                <th class="sticky">班</th>
-                <th class="sticky">在校状況</th>
+
                 <th class="sticky">操作</th>
             </tr>
         </thead>
         <tbody>
             <?php $i = 1; ?>
-            <?php foreach ($departments as $st): ?>
-                <tr data-student-id="<?= htmlspecialchars($st['student_id']) ?>">
+            <?php foreach ($departments as $dp): ?>
+                <tr data-department-id="<?= htmlspecialchars($dp['department_id']) ?>">
                     <td><?= $i++ ?></td>
-                    <!-- 学籍番号 -->
-                    <td><?= htmlspecialchars($st['student_id']) ?></td>
-                    <!-- 生徒氏名 -->
-                    <td class="editable" data-field="student_name"><?= htmlspecialchars($st['student_name']) ?></td>
+                    <!-- 学科番号 -->
+                    <td><?= htmlspecialchars($dp['department_id']) ?></td>
+
                     <!-- 学科名 -->
-                    <td><?= htmlspecialchars($st['department_name']) ?></td>
-                    <!-- 学年 -->
-                    <td><?= htmlspecialchars($st['grade']) ?></td>
-                    <!-- 班 -->
-                    <td class="editable" data-field="student_group"><?= !empty($st['student_group']) ?  htmlspecialchars($st['student_group']) : "-" ?></td>
-                    <!-- 在校状況 -->
-                    <td class="editable" data-field="status" data-status="<?= (int)$st['status'] ?>"><?= $st['status'] == 1 ? '在校' : '退校・卒業' ?></td>
+                    <td class="editable" data-field="department_name"><?= htmlspecialchars($dp['department_name']) ?></td>
+
                     <!-- 編集・削除ボタン -->
                     <td class="table-actions">
-                        <button class="edit-btn" onclick="toggleStudentEdit(this)">編集</button>
+                        <button class="edit-btn" onclick="toggleDepartmentEdit(this)">編集</button>
                         <button
                             type="button"
                             class="delete-btn"
-                            data-type="student"
-                            data-id="<?= htmlspecialchars($st['student_id'], ENT_QUOTES, 'UTF-8') ?>">
+                            data-type="department"
+                            data-id="<?= htmlspecialchars($dp['department_id'], ENT_QUOTES, 'UTF-8') ?>">
                             削除
                         </button>
                     </td>

@@ -60,6 +60,9 @@ async function deleteInfo(type, id) {
         //科目情報の削除処理
         recipient = 'delete_subject.php';
         alertMsg = '科目';
+    } else if (type === 'department') {
+        recipient = 'delete_department.php';
+        alertMsg = '学科';
     } else {
         alert('削除対象が正しくありません。');
         return;

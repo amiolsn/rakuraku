@@ -17,11 +17,13 @@ $activeTabId = ($activeTab === 'admin') ? 'tab-page2' : 'tab-page1';
 
 // 検索条件の取得と生徒一覧の取得
 $department_filters = [
-    'department_id' => $_GET['student_id'] ?? '',
+    'department_id' => $_GET['department_id'] ?? '',
     'user_id' => $_GET['user_id'] ?? '',
-    'department_name' => $_GET['student_name'] ?? ''
+    'department_name' => $_GET['department_name'] ?? ''
 ];
 $departments = searchDepartments($pdo, $department_filters);
+// プルダウン用（全学科）
+$allDepartments = searchDepartments($pdo);
 ?>
 
 
@@ -65,7 +67,8 @@ $departments = searchDepartments($pdo, $department_filters);
                 <!-- 学科管理 -->
                 <div class="tabbody-elem <?= $activeTabId === 'tab-page1' ? 'active' : '' ?>"
                     id="tab-page1">
-                    <?php include 'components/_manage_department.php'; ?>
+                    <?php include 'components/_manage_departments.php'; ?>
+                    <?php include 'components/_delete_popup.php'; ?>
                 </div>
 
                 <!-- 管理者管理 -->
@@ -79,8 +82,11 @@ $departments = searchDepartments($pdo, $department_filters);
     </div>
 
     <script src="js/common.js" defer></script>
+    <script src="js/manage_department.js" defer></script>
     <script src="js/tab.js" defer></script>
-
+    <script src="js/delete-popup.js" defer></script>
+    <script src="js/popup.js" defer></script>
+    <script src="js/import_popup_csv.js" defer></script>
 </body>
 
 </html>
