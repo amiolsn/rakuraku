@@ -97,32 +97,37 @@ $max_period = 7;
                             <?php else: ?>
                                 <!-- 授業日のコマ 1～max_period -->
                                 <?php for ($p = 1; $p <= $wd['max_period']; $p++): ?>
-                                    <!-- ここから続き -->
                                     <?php
-                                    $cell_key = "{$st['student_id']}_{$wd['date']}_{$p}";
-                                    $status   = $weekly_attendance[$cell_key] ?? null;
-
-                                    $status_class = '';
-                                    $status_text  = '';
-
-                                    if ($status === 1) {
-                                        $status_class = 'status_present';
-                                    } elseif ($status === 2) {
-                                        $status_class = 'status-absent';
-                                        $status_text  = '欠';
-                                    } elseif ($status === 3) {
-                                        $status_class = 'status-late';
-                                        $status_text  = '遅';
-                                    } elseif ($status === 4) {
-                                        $status_class = 'status-leave';
-                                        $status_text  = '公';
-                                    }
-
                                     $is_day_end = ($p === $wd['max_period']) ? 'border-day-end' : '';
-                                    ?>
-                                    <td class="cell-period <?= $status_class ?> <?= $is_day_end ?>">
-                                        <?= $status_text ?>
-                                    </td>
+
+                                    // 部分休校の対象外時限
+                                    if ($p < $start_p || $p > $end_p):
+                                        ?>
+                                        <td class="cell-period holiday-cell <?= $is_day_end ?>">-</td>
+                                    <?php else:
+                                        $cell_key = "{$st['student_id']}_{$wd['date']}_{$p}";
+                                        $status   = $weekly_attendance[$cell_key] ?? null;
+
+                                        $status_class = '';
+                                        $status_text  = '';
+
+                                        if ($status === 1) {
+                                            $status_class = 'status_present';
+                                        } elseif ($status === 2) {
+                                            $status_class = 'status-absent';
+                                            $status_text  = '欠';
+                                        } elseif ($status === 3) {
+                                            $status_class = 'status-late';
+                                            $status_text  = '遅';
+                                        } elseif ($status === 4) {
+                                            $status_class = 'status-leave';
+                                            $status_text  = '公';
+                                        }
+                                        ?>
+                                        <td class="cell-period <?= $status_class ?> <?= $is_day_end ?>">
+                                            <?= $status_text ?>
+                                        </td>
+                                    <?php endif; ?>
                                 <?php endfor; ?>
                             <?php endif; ?>
                         <?php endforeach; ?>
