@@ -22,16 +22,17 @@ bulkAddBtns.forEach(bulkAddBtn => {
 });
 
 // 外側・x・キャンセルを押したら閉じる
-importPopupWrapper.addEventListener('click', e => {
-    if (
-        e.target === importPopupWrapper ||
-        e.target === importClose ||
-        e.target === importCancel
-    ) {
-        importPopupWrapper.style.display = 'none';
-    }
-});
-
+if (importPopupWrapper) {
+    importPopupWrapper.addEventListener('click', e => {
+        if (
+            e.target === importPopupWrapper ||
+            e.target === importClose ||
+            e.target === importCancel
+        ) {
+            importPopupWrapper.style.display = 'none';
+        }
+    });
+}
 
 //エクスプローラー参照ボタン押したらエクスプローラーが起動して選択したファイルを入力欄に表示させて、入力欄に入力されたファイルを取り込みボタンを押したら取り込む
 
@@ -66,6 +67,8 @@ importForm.addEventListener('submit', async e => {
         alertMsg = '教員';
     } else if (importSelectedType === 'subject') {
         alertMsg = '科目';
+    } else if (importSelectedType === 'department') {
+        alertMsg = '学科';
     } else {
         alert('登録対象が不正です。');
         return;
