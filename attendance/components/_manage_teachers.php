@@ -66,6 +66,10 @@
 
 
 </div>
+<?php $teacherCount = count($teachers); ?>
+<div class="result-count">
+    検索結果：<?= $teacherCount ?>件
+</div>
 
 <div class="table_box">
     <table class="management-table">

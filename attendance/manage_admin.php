@@ -5,15 +5,19 @@ require_once 'auth.php';
 require_once 'functions.php';
 
 // 初期表示するタブを取得
-$activeTab = $_GET['tab'] ?? 'department';
+$activeTab = $_GET['tab'] ?? '';
 
-// 不正なタブ指定を防止
 if (!in_array($activeTab, ['department', 'admin'], true)) {
-    $activeTab = 'department';
+    $activeTab = '';
 }
 
-// タブIDに変換
-$activeTabId = ($activeTab === 'admin') ? 'tab-page2' : 'tab-page1';
+// URLで指定されていない場合は初期値を学科管理にする
+$initialTab = $activeTab !== '' ? $activeTab : 'department';
+
+$activeTabId = ($initialTab === 'admin')
+    ? 'tab-page2'
+    : 'tab-page1';
+
 
 // 検索条件の取得と生徒一覧の取得
 $department_filters = [
@@ -24,6 +28,24 @@ $department_filters = [
 $departments = searchDepartments($pdo, $department_filters);
 // プルダウン用（全学科）
 $allDepartments = searchDepartments($pdo);
+
+// 検索条件の取得と教員一覧の取得
+$admin_filters = [
+    'teacher_id' => $_GET['teacher_id'] ?? '',
+    'teacher_name' => $_GET['teacher_name'] ?? '',
+    'department_name' => $_GET['department_name'] ?? '',
+    'login_id' => $_GET['login_id'] ?? ''
+];
+
+$admins = searchAdmins($pdo, $admin_filters);
+
+
+$teacher_filters = [
+    'teacher_id' => $_GET['teacher_id'] ?? '',
+    'teacher_name' => $_GET['teacher_name'] ?? ''
+];
+
+$teachers = searchTeachersForAdmin($pdo, $teacher_filters);
 ?>
 
 
@@ -39,6 +61,7 @@ $allDepartments = searchDepartments($pdo);
     <link rel="stylesheet" href="css/popup.css">
     <link rel="stylesheet" href="css/delete-popup.css">
     <link rel="stylesheet" href="css/import-popup.css">
+    <link rel="stylesheet" href="css/admin-menu.css">
 </head>
 
 <body data-page="manage-admin">
@@ -83,6 +106,7 @@ $allDepartments = searchDepartments($pdo);
 
     <script src="js/common.js" defer></script>
     <script src="js/manage_department.js" defer></script>
+    <script src="js/manage_admin.js" defer></script>
     <script src="js/tab.js" defer></script>
     <script src="js/delete-popup.js" defer></script>
     <script src="js/popup.js" defer></script>

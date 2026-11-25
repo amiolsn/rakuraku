@@ -11,8 +11,10 @@
     height: 100%;
     background: rgba(0, 0, 0, 0.5);
     z-index: 9999;
+
+    /* 変更 */
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
 }
 
 .popup-inside {
@@ -22,10 +24,12 @@
     max-height: 90vh;
     overflow: auto;
     background: white;
-    margin: 10% auto;
-    padding: 32px 20px 20px;
-}
 
+    /* 変更 */
+    margin: 0;
+    padding: 32px 20px 20px;
+    box-sizing: border-box;
+}
 .close {
     position: absolute;
     top: 0;

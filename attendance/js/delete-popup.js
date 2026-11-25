@@ -63,6 +63,9 @@ async function deleteInfo(type, id) {
     } else if (type === 'department') {
         recipient = 'delete_department.php';
         alertMsg = '学科';
+    } else if (type === 'admin') {
+        recipient = 'delete_admin.php';
+        alertMsg = '教員';
     } else {
         alert('削除対象が正しくありません。');
         return;

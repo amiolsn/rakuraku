@@ -43,14 +43,33 @@ document.addEventListener('DOMContentLoaded', function () {
     // manage_admin.php の場合
     if (document.body.dataset.page === 'manage-admin') {
 
-        // PHP側で指定された初期タブを優先する
-        const initialTab = document.querySelector('.tab-elem.active');
+        // URLのパラメータを取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const urlTab = urlParams.get('tab');
 
-        changeTabH(
-            initialTab
-                ? initialTab.dataset.tabid
-                : tabsH[0].dataset.tabid
-        );
+        // URLで指定されたタブに対応するIDを取得
+        let targetTab = null;
+
+        if (urlTab === 'department') {
+            targetTab = 'tab-page1';
+        } else if (urlTab === 'admin') {
+            targetTab = 'tab-page2';
+        }
+
+        // URLに有効なタブ指定がなければlocalStorageを確認
+        if (!targetTab) {
+            const savedTab = localStorage.getItem(storageKey);
+
+            const isValidTab = Array.from(tabsH).some(function (tab) {
+                return tab.dataset.tabid === savedTab;
+            });
+
+            targetTab = isValidTab
+                ? savedTab
+                : tabsH[0].dataset.tabid;
+        }
+
+        changeTabH(targetTab);
 
     } else {
 
