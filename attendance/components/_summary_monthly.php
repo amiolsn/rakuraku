@@ -10,15 +10,18 @@ $month_total_periods = $monthly_summary['month_total_periods'] ?? 0;
 $cumul_total_periods = $monthly_summary['cumulative_total_periods'] ?? 0;
 $class_avg_month     = $monthly_summary['class_avg_month'];
 $class_avg_cumul     = $monthly_summary['class_avg_cumul'];
+$target_grade        = $monthly_summary['target_grade'] ?? $selected_grade;
+$absent_limit        = $monthly_summary['absent_limit'] ?? 280;
 ?>
 
 <div class="monthly-summary-wrapper">
     <!-- クラス全体情報のサマリーバー -->
     <div class="summary-info-bar">
         <span>今月総訓練時間数: <strong><?= $month_total_periods ?></strong>時間</span>
-        <span>累計総訓練時間数: <strong><?= $cumul_total_periods ?></strong>時間</span>
+        <span>通算総訓練時間数: <strong><?= $cumul_total_periods ?></strong>時間</span>
         <span>クラス平均出席率（今月）: <strong><?= number_format($class_avg_month, 1) ?></strong>%</span>
-        <span>クラス平均出席率（累計）: <strong><?= number_format($class_avg_cumul, 1) ?></strong>%</span>
+        <span>クラス平均出席率（通算）: <strong><?= number_format($class_avg_cumul, 1) ?></strong>%</span>
+        <span>適用基準（<?= $target_grade ?> 年次時点）: 許容上限 <strong><?= $absent_limit ?></strong>時間</span>
     </div>
 
     <div class="table_box">
@@ -59,7 +62,7 @@ $class_avg_cumul     = $monthly_summary['class_avg_cumul'];
                     <?php foreach ($students as $st): ?>
                         <?php
                         // 警告判定：出席率80％未満、残時間20h以下
-                        $is_low_rate_month = ($st['month_rate'] < 80.0);
+                        $is_low_rate_month     = ($st['month_rate'] < 80.0);
                         $is_low_rate_cumul     = ($st['cumulative_rate'] < 80.0);
                         $is_danger_remain      = ($st['remaining_absent_h'] <= 20);
                         ?>
