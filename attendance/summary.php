@@ -36,6 +36,7 @@ try {
         $target_month    = (!empty($_GET['month'])) ? $_GET['month'] : date('Y-m');
         $monthly_summary = getMonthlyAttendanceSummary($pdo, $department_id, $selected_grade, $target_month);
     } elseif ($active_tab === 'total') {
+        $total_summary = getTotalAttendanceSummary($pdo, $department_id, $selected_grade);
     }
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
