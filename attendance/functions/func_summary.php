@@ -645,3 +645,46 @@ function getTotalAttendanceSummary(PDO $pdo, int $department_id, int $grade): ar
         'students'                => $student_totals,
     ];
 }
+
+/**
+ * 生徒1名分の全期間通算・月別勤怠推移データを取得する
+ *
+ * @param  PDO        $pdo
+ * @param  int        $student_id
+ * @return array|null
+ */
+function getStudentTotalSummary(PDO $pdo, int $student_id): ?array
+{
+    $stmt = $pdo -> prepare("
+        SELECT student_id, student_name, department_id, grade
+        FROM students
+        WHERE student_id = :student_id
+    ");
+    $stmt -> execute([':student_id' => $student_id]);
+    $student = $stmt -> fetch(PDO::FETCH_ASSOC);
+
+    if (!$student) {
+        return null;
+    }
+
+    $dept_id = (int)$student['department_id'];
+    $grade   = (int)$student['grade'];
+
+    // クラス全体の集計ロジックを再利用して計算の整合性を保つ
+    $class_summary = getTotalAttendanceSummary($pdo, $dept_id, $grade);
+
+    foreach ($class_summary['student'] as $st_date) {
+        if ((int)$st_date['student_id'] === $student_id) {
+            return [
+                'student'                 => $st_date,
+                'grade'                   => $grade,
+                'department_id'           => $dept_id,
+                'absence_limit'           => $class_summary['absence_limit'],
+                'total_elapsed_periods'   => $class_summary['total_elapsed_periods'],
+                'total_scheduled_periods' => $class_summary['total_scheduled_periods'],
+            ];
+        }
+    }
+
+    return null;
+}
