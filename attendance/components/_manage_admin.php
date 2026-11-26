@@ -17,12 +17,12 @@
     </button>
     <?php include 'components/_add_admin_popup.php'; ?>
 
-    <button
+    <!-- <button
         type="button"
         class="bulkAdd-btn"
         data-type="admin">
         CSV一括登録
-    </button>
+    </button> -->
     <?php include 'components/_import_popup.php'; ?>
 
 </div>

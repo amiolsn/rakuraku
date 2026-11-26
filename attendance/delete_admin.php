@@ -1,3 +1,4 @@
+
 <?php
 // delete_admin.php 管理者権限の解除API
 header('Content-Type: application/json; charset=UTF-8');
@@ -23,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     sendResponse(false, '不正なリクエストです。', 405);
 }
 
-// JavaScriptから送られたJSONデータを受信
+// JSONデータを受信
 $data = json_decode(file_get_contents('php://input'), true);
 
 if (!is_array($data)) {
@@ -44,12 +45,16 @@ if ($teacherId === '') {
 }
 
 try {
-    // 管理者フラグを0に更新
+    // トランザクション開始
+    $pdo->beginTransaction();
+
+    // 対象の管理者情報を取得
     $sql = "
-        UPDATE teachers
-        SET is_admin = 0
+        SELECT teacher_id, user_id
+        FROM teachers
         WHERE teacher_id = :teacher_id
           AND is_admin = 1
+        FOR UPDATE
     ";
 
     $stmt = $pdo->prepare($sql);
@@ -57,22 +62,56 @@ try {
         ':teacher_id' => $teacherId
     ]);
 
-    // 管理者として登録されていない、または教員番号が存在しない場合
-    if ($stmt->rowCount() === 0) {
-        sendResponse(
-            false,
-            '対象の管理者が見つからないか、すでに管理者権限が解除されています。',
-            404
+    $admin = $stmt->fetch(PDO::FETCH_ASSOC);
+
+    if (!$admin) {
+        throw new Exception(
+            '対象の管理者が見つからないか、すでに管理者権限が解除されています。'
         );
     }
 
+    // 管理者権限を解除
+    $sql = "
+        UPDATE teachers
+        SET is_admin = 0
+        WHERE teacher_id = :teacher_id
+    ";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+        ':teacher_id' => $teacherId
+    ]);
+
+    // ユーザーアカウントを無効化
+    if ($admin['user_id'] !== null) {
+        $sql = "
+            UPDATE users
+            SET is_active = 0
+            WHERE user_id = :user_id
+        ";
+
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute([
+            ':user_id' => $admin['user_id']
+        ]);
+    }
+
+    // 更新を確定
+    $pdo->commit();
+
     sendResponse(true, '管理者権限を解除しました。');
-} catch (PDOException $e) {
+} catch (Throwable $e) {
+
+    // エラー発生時は更新を取り消す
+    if ($pdo->inTransaction()) {
+        $pdo->rollBack();
+    }
+
     error_log('管理者権限解除エラー：' . $e->getMessage());
 
     sendResponse(
         false,
-        '管理者権限の解除に失敗しました。データベースのエラーを確認してください。',
+        '管理者権限の解除に失敗しました。',
         500
     );
 }

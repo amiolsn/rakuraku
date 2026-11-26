@@ -41,8 +41,8 @@ $admins = searchAdmins($pdo, $admin_filters);
 
 
 $teacher_filters = [
-    'teacher_id' => $_GET['teacher_id'] ?? '',
-    'teacher_name' => $_GET['teacher_name'] ?? ''
+    'teacher_id' => $_GET['add_teacher_id'] ?? '',
+    'teacher_name' => $_GET['add_teacher_name'] ?? ''
 ];
 
 $teachers = searchTeachersForAdmin($pdo, $teacher_filters);
@@ -91,7 +91,7 @@ $teachers = searchTeachersForAdmin($pdo, $teacher_filters);
                 <div class="tabbody-elem <?= $activeTabId === 'tab-page1' ? 'active' : '' ?>"
                     id="tab-page1">
                     <?php include 'components/_manage_departments.php'; ?>
-                    <?php include 'components/_delete_popup.php'; ?>
+
                 </div>
 
                 <!-- 管理者管理 -->
@@ -103,6 +103,7 @@ $teachers = searchTeachersForAdmin($pdo, $teacher_filters);
             </div>
         </div>
     </div>
+    <?php include 'components/_delete_popup.php'; ?>
 
     <script src="js/common.js" defer></script>
     <script src="js/manage_department.js" defer></script>

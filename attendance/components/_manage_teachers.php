@@ -30,7 +30,21 @@
         <table class="management-table search-table">
             <tr>
 
-                <td></td>
+                <td>
+                    <div class="form-group">
+                        <label for="teacher_status">表示状態</label>
+                        <select name="teacher_status" id="teacher_status">
+                            <option value="1"
+                                <?= ($_GET['teacher_status'] ?? '1') === '1' ? 'selected' : '' ?>>
+                                有効
+                            </option>
+                            <option value="0"
+                                <?= ($_GET['teacher_status'] ?? '1') === '0' ? 'selected' : '' ?>>
+                                無効
+                            </option>
+                        </select>
+                    </div>
+                </td>
                 <td>
                     <div class="form-group">
                         <label for="teacher_id">教員番号</label>
@@ -97,13 +111,27 @@
                     <!-- 編集・削除ボタン -->
                     <td class="table-actions">
                         <button class="edit-btn" onclick="toggleTeacherEdit(this)">編集</button>
-                        <button
-                            type="button"
-                            class="delete-btn"
-                            data-type="teacher"
-                            data-id="<?= htmlspecialchars($teacher['teacher_id'], ENT_QUOTES, 'UTF-8') ?>">
-                            削除
-                        </button>
+
+                        <?php if ((int)$teacher['is_active'] === 1): ?>
+                            <!-- 有効な教員 -->
+                            <button
+                                type="button"
+                                class="delete-btn"
+                                data-type="teacher"
+                                data-id="<?= htmlspecialchars($teacher['teacher_id'], ENT_QUOTES, 'UTF-8') ?>">
+                                無効化
+                            </button>
+                        <?php else: ?>
+                            <!-- 変更：無効な教員には再有効化ボタンを表示 -->
+                            <button
+                                type="button"
+                                class="restore-btn"
+                                data-type="teacher"
+                                data-id="<?= htmlspecialchars($teacher['teacher_id'], ENT_QUOTES, 'UTF-8') ?>"
+                                onclick="restoreTeacher(this.dataset.id)"> <!-- 変更 -->
+                                再有効化
+                            </button>
+                        <?php endif; ?>
                     </td>
 
                 </tr>
