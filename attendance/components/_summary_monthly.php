@@ -17,11 +17,15 @@ $absent_limit        = $monthly_summary['absent_limit'] ?? 280;
 <div class="monthly-summary-wrapper">
     <!-- クラス全体情報のサマリーバー -->
     <div class="summary-info-bar">
-        <span>今月総訓練時間数: <strong><?= $month_total_periods ?></strong>時間</span>
-        <span>通算総訓練時間数: <strong><?= $cumul_total_periods ?></strong>時間</span>
-        <span>クラス平均出席率（今月）: <strong><?= number_format($class_avg_month, 1) ?></strong>%</span>
-        <span>クラス平均出席率（通算）: <strong><?= number_format($class_avg_cumul, 1) ?></strong>%</span>
-        <span>適用基準（<?= $target_grade ?> 年次時点）: 許容上限 <strong><?= $absent_limit ?></strong>時間</span>
+        <?php if ($target_grade < 1): ?>
+            <span>指定された年月は<strong>入校前の期間</strong>です。</span>
+        <?php else: ?>
+            <span>今月総訓練時間数: <strong><?= $month_total_periods ?></strong>時間</span>
+            <span>通算総訓練時間数: <strong><?= $cumul_total_periods ?></strong>時間</span>
+            <span>クラス平均出席率（今月）: <strong><?= number_format($class_avg_month, 1) ?></strong>%</span>
+            <span>クラス平均出席率（通算）: <strong><?= number_format($class_avg_cumul, 1) ?></strong>%</span>
+            <span>適用基準（<?= $target_grade ?> 年次時点）: 許容上限 <strong><?= $absent_limit ?></strong>時間</span>
+        <?php endif; ?>
     </div>
 
     <div class="table_box">
@@ -55,7 +59,9 @@ $absent_limit        = $monthly_summary['absent_limit'] ?? 280;
             <tbody>
                 <?php if (empty($students)): ?>
                     <tr>
-                        <td colspan="12" class="text-center py-4">対象の生徒データが存在しません。</td>
+                        <td colspan="12" class="text-center py-4">
+                            <?= ($target_grade < 1) ? '入校前の期間のため、集計データはありません。' : '対象の生徒データが存在しません。' ?>
+                        </td>
                     </tr>
                 <?php else: ?>
                     <?php $no = 1; ?>

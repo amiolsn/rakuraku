@@ -132,7 +132,7 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
             'month_total_periods'      => 0,
             'cumulative_total_periods' => 0,
             'class_avg_month'          => 0.0,
-            'class_avg_comul'          => 0.0,
+            'class_avg_cumul'          => 0.0,
             'target_grade'             => $target_grade,
             'absence_limit'            => 0,
         ];
@@ -383,7 +383,7 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
 }
 
 /**
- * 訓練全期間修家データを取得する（クラス通算一覧 + 個人別集計推移）
+ * 訓練全期間集計データを取得する（クラス通算一覧 + 個人別集計推移）
  *
  * @param  PDO   $pdo
  * @param  int   $department_id
@@ -443,8 +443,8 @@ function getTotalAttendanceSummary(PDO $pdo, int $department_id, int $grade): ar
         WHERE attendance_date BETWEEN :start_date AND :today
     ");
     $att_stmt -> execute([
-        'start_date' => $training_start,
-        ':today'     => $today,
+        ':start_date' => $training_start,
+        ':today'      => $today,
     ]);
     $attendance_rows = $att_stmt -> fetchAll(PDO::FETCH_ASSOC);
 
@@ -460,10 +460,10 @@ function getTotalAttendanceSummary(PDO $pdo, int $department_id, int $grade): ar
 
     // 今年度4月～3月の12か月分を初期化
     for ($m_offset = 0; $m_offset < 12; $m_offset++) {
-        $m_ts                  = strtotime("+{$m_offset} months", strtotime("{$current_fy}-04-01"));
-        $ym                    = date('Y-m', $m_ts);
-        $m_num                 = (int)date('n', $m_ts);
-        $current_fy_month[$ym] = [
+        $m_ts                   = strtotime("+{$m_offset} months", strtotime("{$current_fy}-04-01"));
+        $ym                     = date('Y-m', $m_ts);
+        $m_num                  = (int)date('n', $m_ts);
+        $current_fy_months[$ym] = [
             'ym'          => $ym,
             'label'       => "{$m_num}月",
             'scheduled_h' => 0,
@@ -504,6 +504,17 @@ function getTotalAttendanceSummary(PDO $pdo, int $department_id, int $grade): ar
                     'end'   => $end_p,
                 ];
             }
+        } elseif (isset($current_fy_months[$ym])) {
+            // 今年度の各月（4月～3月）
+            $current_fy_months[$ym]['scheduled_h'] += $valid_p;
+            if ($is_past) {
+                $current_fy_months[$ym]['elapsed_h'] += $valid_p;
+                $current_fy_months[$ym]['days'][] = [
+                    'date'  => $c_date,
+                    'start' => $start_p,
+                    'end'   => $end_p,
+                ];
+            }
         }
     }
 
@@ -513,7 +524,7 @@ function getTotalAttendanceSummary(PDO $pdo, int $department_id, int $grade): ar
     $danger_count    = 0;
 
     foreach ($students as $st) {
-        $st_id  = (int)$st['students_id'];
+        $st_id  = (int)$st['student_id'];
         $st_att = $att_map[$st_id] ?? [];
 
         // 過去学年の集計
@@ -522,7 +533,7 @@ function getTotalAttendanceSummary(PDO $pdo, int $department_id, int $grade): ar
         foreach ($prev_years_days as $d_info) {
             $day_rec = $st_att[$d_info['date']] ?? [];
             for ($p = $d_info['start']; $p <= $d_info['end']; $p++) {
-                $status = $da_rec[$p] ?? 1;
+                $status = $day_rec[$p] ?? 1;
                 if ($status === 2) {
                     $prev_absent_h++;
                 } else {
@@ -582,10 +593,10 @@ function getTotalAttendanceSummary(PDO $pdo, int $department_id, int $grade): ar
         $total_present_h = $prev_present_h + $curr_fy_present_h;
         $total_absent_h  = $prev_absent_h + $curr_fy_absent_h;
         $total_rate      = ($total_elapsed_periods > 0)
-            ? round(($total_present_h / $total_elapsed_periods) * 100)
+            ? round(($total_present_h / $total_elapsed_periods) * 100, 1)
             : 100.0;
         $curr_fy_rate = ($curr_fy_elapsed_h > 0)
-            ? round(($curr_fy_present_h / $curr_fy_elapsed_h) * 100)
+            ? round(($curr_fy_present_h / $curr_fy_elapsed_h) * 100, 1)
             : 100.0;
         $remaining_absent_h = max(0, $absence_limit - $total_absent_h);
 
@@ -606,7 +617,7 @@ function getTotalAttendanceSummary(PDO $pdo, int $department_id, int $grade): ar
             'curr_elapsed_h' => $curr_fy_elapsed_h,
             'curr_present_h' => $curr_fy_present_h,
             'curr_absent_h'  => $curr_fy_absent_h,
-            'curr_Rate'      => $curr_fy_rate,
+            'curr_rate'      => $curr_fy_rate,
             // 全期間通算
             'total_present_h'    => $total_present_h,
             'total_absent_h'     => $total_absent_h,
