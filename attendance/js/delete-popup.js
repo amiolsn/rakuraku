@@ -34,6 +34,9 @@ deletePopupWrapper.addEventListener('click', e => {
 
 //確認画面の削除ボタン
 document.getElementById('delete-yes').addEventListener('click', () => {
+    console.log('削除確認ボタンがクリックされました');
+    console.log('選択された種類:', deleteSelectedType);
+    console.log('選択されたID:', deleteSelectedId);
     deleteInfo(deleteSelectedType, deleteSelectedId);
 });
 
@@ -111,5 +114,44 @@ async function deleteInfo(type, id) {
 
 
 
+//変更：教員の再有効化処理
+async function restoreTeacher(teacherId) {
 
+    if (!teacherId) {
+        alert('教員IDを取得できませんでした。');
+        return;
+    }
 
+    // 再有効化の確認
+    if (!confirm('この教員を再有効化しますか？')) {
+        return;
+    }
+
+    try {
+        // PHPに教員IDを送信
+        const response = await fetch('restore_teacher.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: teacherId
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || '再有効化に失敗しました。');
+        }
+
+        alert('教員を再有効化しました。');
+
+        // 一覧を再読み込み
+        location.reload();
+
+    } catch (error) {
+        console.error(error);
+        alert(error.message || '通信エラーが発生しました。');
+    }
+}

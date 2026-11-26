@@ -31,6 +31,7 @@ try {
 
     // 検索条件の取得と教員一覧の取得
     $teacher_filters = [
+        'teacher_status' => $_GET['teacher_status'] ?? '1',
         'teacher_id' => $_GET['teacher_id'] ?? '',
         'teacher_name' => $_GET['teacher_name'] ?? ''
     ];

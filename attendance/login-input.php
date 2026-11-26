@@ -25,7 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ON users.user_id = teachers.user_id
      LEFT JOIN students
         ON users.user_id = students.user_id
-     WHERE users.login_id = ? AND users.password = ?
+     WHERE users.login_id = ? 
+     AND users.password = ? 
+     AND users.is_active = 1
      ');
 
     $sql->execute([
@@ -84,7 +86,9 @@ require_once 'db.php';
 
 <body>
     <?php require_once 'components/header.php'; ?>
+    <p>カラム追加のSQLは　setup/ALTER_TABLE.sql　です</p>
     <div id="wrapper">
+
         <div id="today">
             <span>
                 <?= date('Y/m/d') ?>
@@ -93,6 +97,7 @@ require_once 'db.php';
 
 
         </div>
+
         <main>
             <div id="title-flex">
                 <h1>ログイン</h1>

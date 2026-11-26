@@ -202,14 +202,19 @@ function searchTeachers(PDO $pdo, int $department_id, array $filters = []): arra
         SELECT
             t.teacher_id,
             t.teacher_name,
+             t.is_active,
             d.department_name
         FROM teachers t
         JOIN department d
             ON t.department_id = d.department_id
         WHERE d.department_id = ?
+        AND t.is_active = ?
     ";
 
-    $params = [$department_id];
+    $params = [
+        $department_id,
+        $filters['teacher_status'] ?? '1'  //変更：初期値は有効
+    ];
 
     // 教員番号
     if (!empty($filters['teacher_id'])) {
@@ -243,6 +248,7 @@ function searchSubjects(PDO $pdo, int $department_id, array $filters = []): arra
         JOIN department d
             ON s.department_id = d.department_id
         WHERE d.department_id = ?
+        AND s.is_active = 1
     ";
 
     $params = [$department_id];
@@ -323,6 +329,7 @@ function searchAdmins(PDO $pdo, array $filters = []): array
         JOIN users u
             ON t.user_id = u.user_id
         WHERE u.usertype_id = 2
+        AND is_admin = 1
     ";
 
     // SQLに渡すパラメータ
