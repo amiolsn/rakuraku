@@ -6,20 +6,20 @@
  * @var int   $selected_grade
  */
 
-$students                = $total_summary['students'] ?? [];
-$absent_limit            = $total_summary['absent_limit'] ?? 280;
-$total_elapsed_periods   = $total_summary['total_elapsed_periods'] ?? 0;
-$total_scheduled_periods = $total_summary['total_scheduled_periods'] ?? 1400;
-$class_avg_total         = $total_summary['class_avg_total'] ?? 0.0;
-$danger_count            = $total_summary['danger_count'] ?? 0;
-$has_prev_year           = ($selected_grade >= 2);
+$students                 = $total_summary['students'] ?? [];
+$absence_limit            = $total_summary['absence_limit'] ?? 280;
+$total_elapsed_periods    = $total_summary['total_elapsed_periods'] ?? 0;
+$total_scheduled_periods  = $total_summary['total_scheduled_periods'] ?? 1400;
+$class_avg_total          = $total_summary['class_avg_total'] ?? 0.0;
+$danger_count             = $total_summary['danger_count'] ?? 0;
+$has_prev_year            = ($selected_grade >= 2);
 ?>
 
 <div class="total-summary-wrapper">
     <!-- クラス全体サマリーバー -->
     <div class="summary-info-bar">
         <span>消化済み総訓練時間: <strong><?= number_format($total_elapsed_periods) ?></strong> / <?= number_format($total_scheduled_periods) ?>時間</span>
-        <span>修了要件(欠席上限): <strong><?= $absent_limit ?></strong>時間(出席率80％以上)</span>
+        <span>修了要件(欠席上限): <strong><?= $absence_limit ?></strong>時間(出席率80％以上)</span>
         <span>クラス平均通算出席率: <strong><?= number_format($class_avg_total, 1) ?></strong>%</span>
         <span>要注意生徒数: <strong class="<?= $danger_count > 0 ? 'text-absent' : '' ?>"><?= $danger_count ?></strong>名</span>
     </div>

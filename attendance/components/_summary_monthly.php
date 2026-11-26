@@ -5,13 +5,13 @@
  * @var int   $selected_grade
  */
 
-$students            = $monthly_summary['students'] ?? [];
-$month_total_periods = $monthly_summary['month_total_periods'] ?? 0;
-$cumul_total_periods = $monthly_summary['cumulative_total_periods'] ?? 0;
-$class_avg_month     = $monthly_summary['class_avg_month'];
-$class_avg_cumul     = $monthly_summary['class_avg_cumul'];
-$target_grade        = $monthly_summary['target_grade'] ?? $selected_grade;
-$absent_limit        = $monthly_summary['absent_limit'] ?? 280;
+$students             = $monthly_summary['students'] ?? [];
+$month_total_periods  = $monthly_summary['month_total_periods'] ?? 0;
+$cumul_total_periods  = $monthly_summary['cumulative_total_periods'] ?? 0;
+$class_avg_month      = $monthly_summary['class_avg_month'];
+$class_avg_cumul      = $monthly_summary['class_avg_cumul'];
+$target_grade         = $monthly_summary['target_grade'] ?? $selected_grade;
+$absence_limit        = $monthly_summary['absence_limit'] ?? 280;
 ?>
 
 <div class="monthly-summary-wrapper">
@@ -24,7 +24,7 @@ $absent_limit        = $monthly_summary['absent_limit'] ?? 280;
             <span>通算総訓練時間数: <strong><?= $cumul_total_periods ?></strong>時間</span>
             <span>クラス平均出席率（今月）: <strong><?= number_format($class_avg_month, 1) ?></strong>%</span>
             <span>クラス平均出席率（通算）: <strong><?= number_format($class_avg_cumul, 1) ?></strong>%</span>
-            <span>適用基準（<?= $target_grade ?> 年次時点）: 許容上限 <strong><?= $absent_limit ?></strong>時間</span>
+            <span>適用基準（<?= $target_grade ?> 年次時点）: 許容上限 <strong><?= $absence_limit ?></strong>時間</span>
         <?php endif; ?>
     </div>
 

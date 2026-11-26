@@ -212,13 +212,13 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
     $students = getAttendanceStudents($pdo, $department_id, $grade);
     if (empty($students)) {
         return [
-            'students'                  => [],
-            'month_total_periods'       => $month_total_periods,
-            'cumulative_total_periods'  => $cumulative_total_periods,
-            'class_avg_month'           => 0.0,
-            'class_avg_cumul'           => 0.0,
-            'target_grade'              => $target_grade,
-            'absent_limit'              => getAbsenceLimitHours($pdo, $department_id, $target_grade),
+            'students'                   => [],
+            'month_total_periods'        => $month_total_periods,
+            'cumulative_total_periods'   => $cumulative_total_periods,
+            'class_avg_month'            => 0.0,
+            'class_avg_cumul'            => 0.0,
+            'target_grade'               => $target_grade,
+            'absence_limit'              => getAbsenceLimitHours($pdo, $department_id, $target_grade),
         ];
     }
 
@@ -372,13 +372,13 @@ function getMonthlyAttendanceSummary(PDO $pdo, int $department_id, int $grade, s
     $class_avg_cumul = ($st_count > 0) ? round($total_cumulative_rates / $st_count, 1) : 0.0;
 
     return [
-        'students'                 => $summary_list,
-        'month_total_periods'      => $month_total_periods,  // 今月総授業時間
-        'cumulative_total_periods' => $cumulative_total_periods,    // 累計総授業時間
-        'class_avg_month'          => $class_avg_month,  // クラス今月平均
-        'class_avg_cumul'          => $class_avg_cumul,  // クラス累計平均
-        'target_grade'             => $target_grade,
-        'absent_limit'             => $absence_limit,
+        'students'                  => $summary_list,
+        'month_total_periods'       => $month_total_periods,  // 今月総授業時間
+        'cumulative_total_periods'  => $cumulative_total_periods,    // 累計総授業時間
+        'class_avg_month'           => $class_avg_month,  // クラス今月平均
+        'class_avg_cumul'           => $class_avg_cumul,  // クラス累計平均
+        'target_grade'              => $target_grade,
+        'absence_limit'             => $absence_limit,
     ];
 }
 
@@ -634,15 +634,15 @@ function getTotalAttendanceSummary(PDO $pdo, int $department_id, int $grade): ar
     $class_avg_total = ($st_count > 0) ? round($sum_total_rates / $st_count, 1) : 0.0;
 
     return [
-        'grade'                   => $grade,
-        'enrollment_fy'           => $enrollment_fy,
-        'current_fy'              => $current_fy,
-        'absent_limit'            => $absence_limit,
-        'total_elapsed_periods'   => $total_elapsed_periods,
-        'total_scheduled_periods' => $total_scheduled_periods,
-        'class_avg_total'         => $class_avg_total,
-        'danger_count'            => $danger_count,
-        'students'                => $student_totals,
+        'grade'                    => $grade,
+        'enrollment_fy'            => $enrollment_fy,
+        'current_fy'               => $current_fy,
+        'absence_limit'            => $absence_limit,
+        'total_elapsed_periods'    => $total_elapsed_periods,
+        'total_scheduled_periods'  => $total_scheduled_periods,
+        'class_avg_total'          => $class_avg_total,
+        'danger_count'             => $danger_count,
+        'students'                 => $student_totals,
     ];
 }
 
