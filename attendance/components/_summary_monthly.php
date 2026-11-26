@@ -5,20 +5,27 @@
  * @var int   $selected_grade
  */
 
-$students            = $monthly_summary['students'] ?? [];
-$month_total_periods = $monthly_summary['month_total_periods'] ?? 0;
-$cumul_total_periods = $monthly_summary['cumulative_total_periods'] ?? 0;
-$class_avg_month     = $monthly_summary['class_avg_month'];
-$class_avg_cumul     = $monthly_summary['class_avg_cumul'];
+$students             = $monthly_summary['students'] ?? [];
+$month_total_periods  = $monthly_summary['month_total_periods'] ?? 0;
+$cumul_total_periods  = $monthly_summary['cumulative_total_periods'] ?? 0;
+$class_avg_month      = $monthly_summary['class_avg_month'];
+$class_avg_cumul      = $monthly_summary['class_avg_cumul'];
+$target_grade         = $monthly_summary['target_grade'] ?? $selected_grade;
+$absence_limit        = $monthly_summary['absence_limit'] ?? 280;
 ?>
 
 <div class="monthly-summary-wrapper">
     <!-- クラス全体情報のサマリーバー -->
     <div class="summary-info-bar">
-        <span>今月総訓練時間数: <strong><?= $month_total_periods ?></strong>時間</span>
-        <span>累計総訓練時間数: <strong><?= $cumul_total_periods ?></strong>時間</span>
-        <span>クラス平均出席率（今月）: <strong><?= number_format($class_avg_month, 1) ?></strong>%</span>
-        <span>クラス平均出席率（累計）: <strong><?= number_format($class_avg_cumul, 1) ?></strong>%</span>
+        <?php if ($target_grade < 1): ?>
+            <span>指定された年月は<strong>入校前の期間</strong>です。</span>
+        <?php else: ?>
+            <span>今月総訓練時間数: <strong><?= $month_total_periods ?></strong>時間</span>
+            <span>通算総訓練時間数: <strong><?= $cumul_total_periods ?></strong>時間</span>
+            <span>クラス平均出席率（今月）: <strong><?= number_format($class_avg_month, 1) ?></strong>%</span>
+            <span>クラス平均出席率（通算）: <strong><?= number_format($class_avg_cumul, 1) ?></strong>%</span>
+            <span>適用基準（<?= $target_grade ?> 年次時点）: 許容上限 <strong><?= $absence_limit ?></strong>時間</span>
+        <?php endif; ?>
     </div>
 
     <div class="table_box">
@@ -30,7 +37,7 @@ $class_avg_cumul     = $monthly_summary['class_avg_cumul'];
                     <th colspan="2" class="border-day-end">日数</th>
                     <th colspan="2" class="border-day-end">回数</th>
                     <th colspan="3" class="border-day-end">今月時間数</th>
-                    <th colspan="3">年度累計（4月～当月）</th>
+                    <th colspan="3">年度累計（入校～当月）</th>
                 </tr>
                 <tr>
                     <!-- 日数 -->
@@ -45,21 +52,23 @@ $class_avg_cumul     = $monthly_summary['class_avg_cumul'];
                     <th class="border-day-end">出席率</th>
                     <!-- 年度累計 -->
                     <th>欠席(h)</th>
-                    <th>累計出席率</th>
+                    <th>通算出席率</th>
                     <th>残猶予時間</th>
                 </tr>
             </thead>
             <tbody>
                 <?php if (empty($students)): ?>
                     <tr>
-                        <td colspan="12" class="text-center py-4">対象の生徒データが存在しません。</td>
+                        <td colspan="12" class="text-center py-4">
+                            <?= ($target_grade < 1) ? '入校前の期間のため、集計データはありません。' : '対象の生徒データが存在しません。' ?>
+                        </td>
                     </tr>
                 <?php else: ?>
                     <?php $no = 1; ?>
                     <?php foreach ($students as $st): ?>
                         <?php
                         // 警告判定：出席率80％未満、残時間20h以下
-                        $is_low_rate_month = ($st['month_rate'] < 80.0);
+                        $is_low_rate_month     = ($st['month_rate'] < 80.0);
                         $is_low_rate_cumul     = ($st['cumulative_rate'] < 80.0);
                         $is_danger_remain      = ($st['remaining_absent_h'] <= 20);
                         ?>
