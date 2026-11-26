@@ -33,7 +33,7 @@ $absent_limit        = $monthly_summary['absent_limit'] ?? 280;
                     <th colspan="2" class="border-day-end">日数</th>
                     <th colspan="2" class="border-day-end">回数</th>
                     <th colspan="3" class="border-day-end">今月時間数</th>
-                    <th colspan="3">年度累計（4月～当月）</th>
+                    <th colspan="3">年度累計（入校～当月）</th>
                 </tr>
                 <tr>
                     <!-- 日数 -->
@@ -48,7 +48,7 @@ $absent_limit        = $monthly_summary['absent_limit'] ?? 280;
                     <th class="border-day-end">出席率</th>
                     <!-- 年度累計 -->
                     <th>欠席(h)</th>
-                    <th>累計出席率</th>
+                    <th>通算出席率</th>
                     <th>残猶予時間</th>
                 </tr>
             </thead>
