@@ -140,7 +140,7 @@ $has_prev_year           = ($selected_grade >= 2);
                                                 <th>出席時間</th>
                                                 <th>欠席時間</th>
                                                 <th>出席率</th>
-                                                <th>欠席時間(累積)</th>
+                                                <th>残猶予時間</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -151,7 +151,9 @@ $has_prev_year           = ($selected_grade >= 2);
                                                     <td class="text-center"><?= $st['prev_present_h'] ?></td>
                                                     <td class="text-center"><?= $st['prev_absent_h'] ?></td>
                                                     <td class="text-center"><?= number_format($st['prev_rate'], 1) ?>%</td>
-                                                    <td class="text-center"><?= $st['prev_absent_h'] ?></td>
+                                                    <td class="text-center <?= $st['prev_remaining_absent_h'] <= 20 ? 'text-absent' : '' ?>">
+                                                        <?= $st['prev_remaining_absent_h'] ?>
+                                                    </td>
                                                 </tr>
                                             <?php endif; ?>
 
@@ -162,8 +164,8 @@ $has_prev_year           = ($selected_grade >= 2);
                                                     <td class="text-center"><?= $mb['present_h'] ?></td>
                                                     <td class="text-center <?= $mb['absent_h'] > 0 ? 'text-absent' : '' ?>"><?= $mb['absent_h'] ?></td>
                                                     <td class="text-center"><?= number_format($mb['rate'], 1) ?>%</td>
-                                                    <td class="text-center <?= $mb['cumulative_absent_h'] > ($absent_limit - 20) ? 'text-absent' : '' ?>">
-                                                        <strong><?= $mb['cumulative_absent_h'] ?></strong>
+                                                    <td class="text-center <?= $mb['remaining_absent_h'] <= 20 ? 'text-absent' : '' ?>">
+                                                        <strong><?= $mb['remaining_absent_h'] ?></strong>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>

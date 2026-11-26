@@ -586,6 +586,7 @@ function getTotalAttendanceSummary(PDO $pdo, int $department_id, int $grade): ar
                 'absent_h'            => $m_absent,
                 'rate'                => $m_rate,
                 'cumulative_absent_h' => $running_absent_h, // 1年次からの累積欠席時間
+                'remaining_absent_h'  => max(0, $absence_limit - $running_absent_h),
             ];
         }
 
@@ -609,10 +610,11 @@ function getTotalAttendanceSummary(PDO $pdo, int $department_id, int $grade): ar
             'student_id'   => $st_id,
             'student_name' => $st['student_name'],
             // 過去学年実績
-            'prev_scheduled_h' => $prev_years_scheduled,
-            'prev_present_h'   => $prev_present_h,
-            'prev_absent_h'    => $prev_absent_h,
-            'prev_rate'        => $prev_rate,
+            'prev_scheduled_h'        => $prev_years_scheduled,
+            'prev_present_h'          => $prev_present_h,
+            'prev_absent_h'           => $prev_absent_h,
+            'prev_rate'               => $prev_rate,
+            'prev_remaining_absent_h' => max(0, $absence_limit - $prev_absent_h),
             // 今年度実績
             'curr_elapsed_h' => $curr_fy_elapsed_h,
             'curr_present_h' => $curr_fy_present_h,
