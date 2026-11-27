@@ -5,19 +5,57 @@ require_once 'auth.php';
 require_once 'functions.php';
 
 try {
-    $department_id = (int)$_SESSION['user']['department_id'];
+    // ログインユーザーの権限を取得 //変更11/27
+    $is_admin = (int)$_SESSION['user']['is_admin'] === 1;
 
-    // // 科目一覧の取得
-    // $subjects = getSubjectsByDepartment($pdo, $department_id);
-    // // 教員一覧の取得
-    // $teachers = getTeachersByDepartment($pdo, $department_id);
+    // ログインユーザーの所属学科ID
+    $user_department_id = (int)$_SESSION['user']['department_id']; //追加11/27
 
-    // 修業年限の取得
-    $years = getDepartmentYears($pdo, $department_id);
-    // 班一覧の取得（重複なし）
-    $groups = getStudentGroup($pdo, $department_id);
-    // ログイン中教員の学科名を取得
-    $department_name = getDepartmentName($pdo, $department_id);
+    // 管理者はGETで選択した学科ID、未指定なら全学科 //追加11/27
+    $selected_department_id = null;
+
+    //もし管理者かつ学科を選択しているなら　//追加11/27
+    if ($is_admin && isset($_GET['department_id']) && $_GET['department_id'] !== '') {
+        //selected_department_id(選択した学科ID)に選択した学科のIDを代入
+        $selected_department_id = (int)$_GET['department_id'];
+    } elseif (!$is_admin) {
+        //管理者でなければユーザーの学科IDを使用
+        $selected_department_id = $user_department_id;
+    }
+
+    // 学科一覧を取得 //追加11/27
+    $stmt = $pdo->query("
+        SELECT department_id, department_name
+        FROM department
+        ORDER BY department_id ASC
+    ");
+    $departments = $stmt->fetchAll();
+
+    // 管理者が選択した学科IDが実在するか確認　//追加11/27
+    if ($is_admin && $selected_department_id !== null) {
+        $department_ids = array_column($departments, 'department_id');
+
+        if (!in_array($selected_department_id, array_map('intval', $department_ids), true)) {
+            $selected_department_id = null;
+        }
+    }
+
+    // 検索関数に渡す学科ID //変更11/27
+    $department_id = $selected_department_id;
+
+    //もしdepartment_idがnullなら（管理者で全学科を表示）
+    if ($department_id !== null) { //追加11/27
+        // 修業年限の取得
+        $years = getDepartmentYears($pdo, $department_id);
+        // 班一覧の取得（重複なし）
+        $groups = getStudentGroup($pdo, $department_id);
+        // ログイン中教員の学科名を取得
+        $department_name = getDepartmentName($pdo, $department_id);
+    } else { //追加11/27
+        $years = 0;
+        $groups = [];
+        $department_name = '全学科';
+    }
 
     // 検索条件の取得と生徒一覧の取得
     $student_filters = [

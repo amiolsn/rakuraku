@@ -11,7 +11,7 @@
  */
 
 // 指定学科の科目一覧を取得する
-function getSubjectsByDepartment(PDO $pdo, int $department_id): array
+function getSubjectsByDepartment(PDO $pdo, ?int $department_id): array
 {
     $stmt = $pdo->prepare("
         SELECT subject_id, subject_name, department_name
@@ -26,7 +26,7 @@ function getSubjectsByDepartment(PDO $pdo, int $department_id): array
 }
 
 // 教員一覧を取得
-function getTeachersByDepartment(PDO $pdo, int $department_id): array
+function getTeachersByDepartment(PDO $pdo, ?int $department_id): array
 {
     $stmt = $pdo->prepare("
         SELECT teacher_id, teacher_name, department_name
@@ -41,7 +41,7 @@ function getTeachersByDepartment(PDO $pdo, int $department_id): array
 }
 
 // 修業年数の取得
-function getDepartmentYears(PDO $pdo, int $department_id): int
+function getDepartmentYears(PDO $pdo, ?int $department_id): int
 {
     $stmt = $pdo->prepare("
         SELECT MAX(grade) AS term
@@ -54,7 +54,7 @@ function getDepartmentYears(PDO $pdo, int $department_id): int
 }
 
 // 班一覧の取得
-function getStudentGroup(PDO $pdo, int $department_id): array
+function getStudentGroup(PDO $pdo, ?int $department_id): array
 {
     $stmt = $pdo->prepare("
         SELECT DISTINCT student_group
@@ -70,7 +70,7 @@ function getStudentGroup(PDO $pdo, int $department_id): array
 }
 
 // 学科IDから学科名を取得
-function getDepartmentName(PDO $pdo, int $department_id): string
+function getDepartmentName(PDO $pdo, ?int $department_id): string
 {
     $stmt = $pdo->prepare("
         SELECT department_name
@@ -91,7 +91,7 @@ function getDepartmentName(PDO $pdo, int $department_id): string
  * @return array
  */
 // 生徒一覧の取得
-function getAttendanceStudents(PDO $pdo, int $department_id, ?int $grade = null, ?string $group = null): array
+function getAttendanceStudents(PDO $pdo, ?int $department_id, ?int $grade = null, ?string $group = null): array
 {
     $sql = "
         SELECT
@@ -137,7 +137,7 @@ function getAttendanceStudents(PDO $pdo, int $department_id, ?int $grade = null,
  * @param  array $filters       検索条件連想配列[student_id, student_name, grade, student_group, status]
  * @return array
  */
-function searchStudents(PDO $pdo, int $department_id, array $filters = []): array
+function searchStudents(PDO $pdo, ?int $department_id, array $filters = []): array
 {
     $sql = "
         SELECT
@@ -150,10 +150,15 @@ function searchStudents(PDO $pdo, int $department_id, array $filters = []): arra
         FROM students s
         JOIN department d
             ON s.department_id = d.department_id
-        WHERE d.department_id = ?
-    ";
+        WHERE 1=1    "; //変更11/27
 
-    $params = [$department_id];
+    $params = []; //変更11/27
+
+    // 学科IDが指定されている場合だけ学科を絞り込む //追加11/27
+    if ($department_id !== null) {
+        $sql .= " AND d.department_id = ?";
+        $params[] = $department_id;
+    }
 
     // 学籍番号が検索欄に入力されている場合だけ条件を追加
     if (!empty($filters['student_id'])) {
@@ -171,7 +176,7 @@ function searchStudents(PDO $pdo, int $department_id, array $filters = []): arra
 
     // 学年が選択されている場合だけ条件を追加
     if (isset($filters['grade']) && $filters['grade'] !== '') {
-        $sql .= " AND grade = ?";
+        $sql .= " AND s.grade = ?";
         $params[] = (int)$filters['grade'];
     }
 
@@ -196,7 +201,7 @@ function searchStudents(PDO $pdo, int $department_id, array $filters = []): arra
 }
 
 // 教員検索
-function searchTeachers(PDO $pdo, int $department_id, array $filters = []): array
+function searchTeachers(PDO $pdo, ?int $department_id, array $filters = []): array
 {
     $sql = "
         SELECT
@@ -207,14 +212,20 @@ function searchTeachers(PDO $pdo, int $department_id, array $filters = []): arra
         FROM teachers t
         JOIN department d
             ON t.department_id = d.department_id
-        WHERE d.department_id = ?
+        WHERE 1 = 1
         AND t.is_active = ?
     ";
 
     $params = [
-        $department_id,
-        $filters['teacher_status'] ?? '1'  //変更：初期値は有効
+        $filters['teacher_status'] ?? '1'  //変更11/27
     ];
+
+
+    // 学科IDが指定されている場合だけ学科を絞り込む //追加11/27
+    if ($department_id !== null) {
+        $sql .= " AND d.department_id = ?";
+        $params[] = $department_id;
+    }
 
     // 教員番号
     if (!empty($filters['teacher_id'])) {
@@ -237,7 +248,7 @@ function searchTeachers(PDO $pdo, int $department_id, array $filters = []): arra
 }
 
 // 科目検索
-function searchSubjects(PDO $pdo, int $department_id, array $filters = []): array
+function searchSubjects(PDO $pdo, ?int $department_id, array $filters = []): array
 {
     $sql = "
         SELECT
@@ -248,14 +259,19 @@ function searchSubjects(PDO $pdo, int $department_id, array $filters = []): arra
         FROM subjects s
         JOIN department d
             ON s.department_id = d.department_id
-        WHERE d.department_id = ?
+        WHERE 1 = 1
         AND s.is_active = ? -- 状態を検索条件にする
     ";
 
     $params = [
-        $department_id,
-        $filters['subject_status'] ?? '1' // 変更
+        $filters['subject_status'] ?? '1' // 変更11/27
     ];
+
+    // 学科IDが指定されている場合だけ学科を絞り込む //追加11/27
+    if ($department_id !== null) {
+        $sql .= " AND d.department_id = ?";
+        $params[] = $department_id;
+    }
 
     // 科目番号が検索欄に入力されている場合だけ条件を追加
     if (!empty($filters['subject_id'])) {
