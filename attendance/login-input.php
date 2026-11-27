@@ -86,7 +86,6 @@ require_once 'db.php';
 
 <body>
     <?php require_once 'components/header.php'; ?>
-    <p>カラム追加のSQLは　setup/ALTER_TABLE.sql　です</p>
     <div id="wrapper">
 
         <div id="today">
