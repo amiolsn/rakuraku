@@ -158,17 +158,31 @@
                     <!-- 班 -->
                     <td class="editable" data-field="student_group"><?= !empty($st['student_group']) ?  htmlspecialchars($st['student_group']) : "-" ?></td>
                     <!-- 在校状況 -->
-                    <td class="editable" data-field="status" data-status="<?= (int)$st['status'] ?>"><?= $st['status'] == 1 ? '在校' : '退校・卒業' ?></td>
-                    <!-- 編集・削除ボタン -->
+                    <td data-field="status" data-status="<?= (int)$st['status'] ?>"><?= $st['status'] == 1 ? '在校' : '退校・卒業' ?></td>
+                    <!-- 編集・退校・再在校ボタン -->
                     <td class="table-actions">
                         <button class="edit-btn" onclick="toggleStudentEdit(this)">編集</button>
-                        <button
-                            type="button"
-                            class="delete-btn"
-                            data-type="student"
-                            data-id="<?= htmlspecialchars($st['student_id'], ENT_QUOTES, 'UTF-8') ?>">
-                            削除
-                        </button>
+
+                        <?php if ((int)$st['status'] === 1): ?>
+                            <!-- 在校生の場合 -->
+                            <button
+                                type="button"
+                                class="delete-btn"
+                                data-type="student"
+                                data-id="<?= htmlspecialchars($st['student_id'], ENT_QUOTES, 'UTF-8') ?>">
+                                退校
+                            </button>
+                        <?php else: ?>
+                            <!-- 退校・卒業生の場合 -->
+                            <button
+                                type="button"
+                                class="restore-btn"
+                                data-type="student"
+                                data-id="<?= htmlspecialchars($st['student_id'], ENT_QUOTES, 'UTF-8') ?>"
+                                onclick="restoreStudent(this.dataset.id)">
+                                再在校
+                            </button>
+                        <?php endif; ?>
                     </td>
 
                 </tr>

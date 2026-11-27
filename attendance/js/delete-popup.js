@@ -41,12 +41,12 @@ document.getElementById('delete-yes').addEventListener('click', () => {
 });
 
 async function deleteInfo(type, id) {
-    alert('削除ボタンが押されました！');
+    alert('無効化ボタンが押されました！');
     let recipient = '';
     let alertMsg = '';
 
     if (type === 'student') {
-        alert('生徒削除ボタンが押されました！');
+        // alert('生徒無効化ボタンが押されました！');
         console.log('生徒を削除：', id);
         //生徒情報の削除処理
         recipient = 'delete_student.php';
@@ -189,6 +189,48 @@ async function restoreSubject(subjectId) {
         }
 
         alert('科目を再有効化しました。');
+
+        // 一覧を再読み込み
+        location.reload();
+
+    } catch (error) {
+        console.error(error);
+        alert(error.message || '通信エラーが発生しました。');
+    }
+}
+
+//変更：生徒の再有効化処理
+async function restoreStudent(studentId) {
+
+    if (!studentId) {
+        alert('生徒IDを取得できませんでした。');
+        return;
+    }
+
+    // 再有効化の確認
+    if (!confirm('この生徒を在校に戻しますか？？')) {
+        return;
+    }
+
+    try {
+        // PHPに生徒番号を送信
+        const response = await fetch('restore_student.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: studentId
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || '再在校化に失敗しました。');
+        }
+
+        alert('生徒を在校に戻しました。');
 
         // 一覧を再読み込み
         location.reload();

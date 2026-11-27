@@ -1,6 +1,6 @@
 
 <?php
-// restore_teacher.php 教員再有効化API
+// restore_subject.php 科目再有効化API
 header('Content-Type: application/json; charset=UTF-8');
 
 require_once 'db.php';
