@@ -38,10 +38,14 @@ try {
     $teachers = searchTeachers($pdo, $department_id, $teacher_filters);
 
     // 検索条件の取得と科目一覧の取得
+    //変更：科目検索条件
     $subject_filters = [
+        'subject_status' => $_GET['subject_status'] ?? '1',
         'subject_id' => $_GET['subject_id'] ?? '',
         'subject_name' => $_GET['subject_name'] ?? ''
     ];
+
+    //変更：科目一覧取得
     $subjects = searchSubjects($pdo, $department_id, $subject_filters);
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));

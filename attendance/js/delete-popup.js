@@ -155,3 +155,46 @@ async function restoreTeacher(teacherId) {
         alert(error.message || '通信エラーが発生しました。');
     }
 }
+
+
+//変更：科目の再有効化処理
+async function restoreSubject(subjectId) {
+
+    if (!subjectId) {
+        alert('科目番号を取得できませんでした。');
+        return;
+    }
+
+    // 再有効化の確認
+    if (!confirm('この科目を再有効化しますか？')) {
+        return;
+    }
+
+    try {
+        // PHPに科目番号を送信
+        const response = await fetch('restore_subject.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                id: subjectId
+            })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok || !data.success) {
+            throw new Error(data.message || '再有効化に失敗しました。');
+        }
+
+        alert('科目を再有効化しました。');
+
+        // 一覧を再読み込み
+        location.reload();
+
+    } catch (error) {
+        console.error(error);
+        alert(error.message || '通信エラーが発生しました。');
+    }
+}
