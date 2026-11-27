@@ -29,7 +29,21 @@
         <table class="management-table search-table">
             <tr>
 
-                <td></td>
+                <td>
+                    <div class="form-group">
+                        <label for="subject_status">表示状態</label> <!-- 変更 -->
+                        <select name="subject_status" id="subject_status" onchange="this.form.submit()"> <!-- 変更 -->
+                            <option value="1"
+                                <?= ($_GET['subject_status'] ?? '1') === '1' ? 'selected' : '' ?>> <!-- 変更 -->
+                                有効
+                            </option>
+                            <option value="0"
+                                <?= ($_GET['subject_status'] ?? '1') === '0' ? 'selected' : '' ?>> <!-- 変更 -->
+                                無効
+                            </option>
+                        </select>
+                    </div>
+                </td>
                 <td>
                     <div class="form-group">
                         <label for="student_id">科目番号</label>
@@ -93,13 +107,19 @@
                     <!-- 編集・削除ボタン -->
                     <td class="table-actions">
                         <button class="edit-btn" onclick="toggleSubjectEdit(this)">編集</button>
-                        <button
-                            type="button"
-                            class="delete-btn"
-                            data-type="subject"
-                            data-id="<?= htmlspecialchars($subject['subject_id'], ENT_QUOTES, 'UTF-8') ?>">
-                            削除
-                        </button>
+                        <?php if ((int)$subject['is_active'] === 1): ?>
+                            <!-- 有効な科目 -->
+                            <button type="button" class="delete-btn" data-type="subject"
+                                data-id="<?= htmlspecialchars($subject['subject_id'], ENT_QUOTES, 'UTF-8') ?>">無効化</button>
+                        <?php else: ?>
+                            <!-- 変更：無効な科目には最有効化ボタンを配置 -->
+                            <button
+                                type="button"
+                                class="restore-btn"
+                                data-type="subject"
+                                data-id="<?= htmlspecialchars($subject['subject_id'], ENT_QUOTES, 'UTF-8') ?>"
+                                onclick="restoreSubject(this.dataset.id)">再有効化</button>
+                        <?php endif; ?>
                     </td>
 
                 </tr>

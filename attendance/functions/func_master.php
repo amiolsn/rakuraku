@@ -34,6 +34,7 @@ function getTeachersByDepartment(PDO $pdo, int $department_id): array
         JOIN department d 
             ON t.department_id = d.department_id
         WHERE d.department_id = ?
+        AND t.is_active = 1
         ORDER BY teacher_id ASC
     ");
     $stmt->execute([$department_id]);
@@ -243,15 +244,19 @@ function searchSubjects(PDO $pdo, int $department_id, array $filters = []): arra
         SELECT
             s.subject_id,
             s.subject_name,
+            s.is_active, -- 変更：有効状態を取得
             d.department_name
         FROM subjects s
         JOIN department d
             ON s.department_id = d.department_id
         WHERE d.department_id = ?
-        AND s.is_active = 1
+        AND s.is_active = ? -- 変更：状態を検索条件にする
     ";
 
-    $params = [$department_id];
+    $params = [
+        $department_id,
+        $filters['subject_status'] ?? '1' // 変更
+    ];
 
     // 科目番号が検索欄に入力されている場合だけ条件を追加
     if (!empty($filters['subject_id'])) {
@@ -260,11 +265,10 @@ function searchSubjects(PDO $pdo, int $department_id, array $filters = []): arra
     }
 
     // 科目名が検索欄に入力されている場合だけ条件を追加
-    if (isset($_GET['subject_name']) && $_GET['subject_name'] !== '') {
+    if (!empty($filters['subject_name'])) { // 変更
         $sql .= " AND s.subject_name LIKE ?";
-        $params[] = '%' . $_GET['subject_name'] . '%';
+        $params[] = '%' . $filters['subject_name'] . '%';
     }
-
 
     $sql .= " ORDER BY s.subject_id ASC";
 
