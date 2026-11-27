@@ -62,6 +62,8 @@ try {
 } catch (PDOException $e) {
     die('データ取得エラー: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8'));
 }
+//変更：学科ID確認用
+var_dump($_SESSION['user']['department_id']);
 
 ?>
 
@@ -93,9 +95,9 @@ try {
 
             <select id="student_group" name="student_group" onchange="this.form.submit()">
                 <?php
-                    $selected_group = $_GET['student_group'] ?? '';
-include 'components/_group_options.php';
-?>
+                $selected_group = $_GET['student_group'] ?? '';
+                include 'components/_group_options.php';
+                ?>
             </select>
         </form>
     </div>

@@ -34,6 +34,7 @@ function getTeachersByDepartment(PDO $pdo, int $department_id): array
         JOIN department d 
             ON t.department_id = d.department_id
         WHERE d.department_id = ?
+        AND t.is_active = 1
         ORDER BY teacher_id ASC
     ");
     $stmt->execute([$department_id]);

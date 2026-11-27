@@ -33,7 +33,7 @@
                 <td>
                     <div class="form-group">
                         <label for="teacher_status">表示状態</label>
-                        <select name="teacher_status" id="teacher_status">
+                        <select name="teacher_status" id="teacher_status" onchange="this.form.submit()">
                             <option value="1"
                                 <?= ($_GET['teacher_status'] ?? '1') === '1' ? 'selected' : '' ?>>
                                 有効
