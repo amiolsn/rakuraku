@@ -3,6 +3,9 @@
 /**
  * 必要な変数:
  * @var array $admins
+ * @var bool $is_admin
+ * @var array $department_options
+ * @var bool $has_admin_search
  */
 
 ?>
@@ -56,17 +59,19 @@
                     </div>
                 </td>
 
-                <td>
-                    <div class="form-group">
-                        <label for="department_name">学科名</label>
-                        <select id="department_name" name="department_name" onchange="this.form.submit()">
-                            <?php
-                            $selected_department_name = $_GET['department_name'] ?? '';
-                            include 'components/_department_options.php';
-                            ?>
-                        </select>
-                    </div>
-                </td>
+                <?php if ($is_admin): ?> <!--変更11/27-->
+                    <td>
+                        <div class="form-group">
+                            <label for="department_id">所属学科</label>
+                            <select id="department_id" name="department_id" onchange="this.form.submit()">
+                                <?php
+                                $allDepartments = $department_options; //変更11/27
+                                include 'components/_department_options.php';
+                                ?>
+                            </select>
+                        </div>
+                    </td>
+                <?php endif; ?>
 
                 <td>
                     <div class="form-group">
@@ -96,47 +101,53 @@
     検索結果：<?= $adminCount ?>件
 </div>
 <div class="table_box">
-    <table class="management-table">
-        <thead>
-            <tr>
-                <th class="sticky">No</th>
-                <th class="sticky">教員番号</th>
-                <th class="sticky">氏名</th>
-                <th class="sticky">所属学科</th>
-                <th class="sticky">ログインID</th>
-                <th class="sticky">操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php $i = 1; ?>
 
-            <?php foreach ($admins as $ad): ?>
-                <tr data-department-id="<?= htmlspecialchars($ad['teacher_id']) ?>">
-                    <td><?= $i++ ?></td>
-                    <!-- 教員番号 -->
-                    <td><?= htmlspecialchars($ad['teacher_id']) ?></td>
-                    <!-- 氏名 -->
-                    <td><?= htmlspecialchars($ad['teacher_name']) ?></td>
+    <?php if ($adminCount === 0): ?>
+        <p>該当する管理者は存在しません。</p>
 
-                    <!-- 学科名 -->
-                    <td class="editable" data-field="department_name"><?= htmlspecialchars($ad['department_name']) ?></td>
-
-                    <td><?= htmlspecialchars($ad['login_id']) ?></td>
-
-                    <!-- 編集・削除ボタン -->
-                    <td class="table-actions">
-                        <button class="edit-btn" onclick="toggleAdminEdit(this)">編集</button>
-                        <button
-                            type="button"
-                            class="delete-btn"
-                            data-type="admin"
-                            data-id="<?= htmlspecialchars($ad['teacher_id'], ENT_QUOTES, 'UTF-8') ?>">
-                            削除
-                        </button>
-                    </td>
-
+    <?php else: ?>
+        <table class="management-table">
+            <thead>
+                <tr>
+                    <th class="sticky">No</th>
+                    <th class="sticky">教員番号</th>
+                    <th class="sticky">氏名</th>
+                    <th class="sticky">所属学科</th>
+                    <th class="sticky">ログインID</th>
+                    <th class="sticky">操作</th>
                 </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php $i = 1; ?>
+
+                <?php foreach ($admins as $ad): ?>
+                    <tr data-department-id="<?= htmlspecialchars($department_id ?? '') ?>">
+                        <td><?= $i++ ?></td>
+                        <!-- 教員番号 -->
+                        <td><?= htmlspecialchars($ad['teacher_id']) ?></td>
+                        <!-- 氏名 -->
+                        <td><?= htmlspecialchars($ad['teacher_name']) ?></td>
+
+                        <!-- 学科名 -->
+                        <td class="editable" data-field="department_name"><?= htmlspecialchars($ad['department_name']) ?></td>
+
+                        <td><?= htmlspecialchars($ad['login_id']) ?></td>
+
+                        <!-- 編集・削除ボタン -->
+                        <td class="table-actions">
+                            <button class="edit-btn" onclick="toggleAdminEdit(this)">編集</button>
+                            <button
+                                type="button"
+                                class="delete-btn"
+                                data-type="admin"
+                                data-id="<?= htmlspecialchars($ad['teacher_id'], ENT_QUOTES, 'UTF-8') ?>">
+                                削除
+                            </button>
+                        </td>
+
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
 </div>

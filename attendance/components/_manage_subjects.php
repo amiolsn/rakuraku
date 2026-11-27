@@ -99,47 +99,54 @@
 </div>
 
 <div class="table_box">
-    <table class="management-table">
-        <thead>
-            <tr>
-                <th class="sticky">No</th>
-                <th class="sticky">科目番号</th>
-                <th class="sticky">科目名</th>
-                <th class="sticky">学科名</th>
-                <th class="sticky">操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php $i = 1; ?>
-            <?php foreach ($subjects as $subject): ?>
-                <tr data-subject-id="<?= htmlspecialchars($subject['subject_id']) ?>">
-                    <td><?= $i++ ?></td>
-                    <!-- 学籍番号 -->
-                    <td><?= htmlspecialchars($subject['subject_id']) ?></td>
-                    <!-- 生徒氏名 -->
-                    <td class="editable" data-field="subject_name"><?= htmlspecialchars($subject['subject_name']) ?></td>
-                    <!-- 学科名 -->
-                    <td><?= htmlspecialchars($subject['department_name']) ?></td>
-                    <!-- 編集・削除ボタン -->
-                    <td class="table-actions">
-                        <button class="edit-btn" onclick="toggleSubjectEdit(this)">編集</button>
-                        <?php if ((int)$subject['is_active'] === 1): ?>
-                            <!-- 有効な科目 -->
-                            <button type="button" class="delete-btn" data-type="subject"
-                                data-id="<?= htmlspecialchars($subject['subject_id'], ENT_QUOTES, 'UTF-8') ?>">無効化</button>
-                        <?php else: ?>
-                            <!-- 変更：無効な科目には最有効化ボタンを配置 -->
-                            <button
-                                type="button"
-                                class="restore-btn"
-                                data-type="subject"
-                                data-id="<?= htmlspecialchars($subject['subject_id'], ENT_QUOTES, 'UTF-8') ?>"
-                                onclick="restoreSubject(this.dataset.id)">再有効化</button>
-                        <?php endif; ?>
-                    </td>
 
+    <?php if ($subjectCount === 0): ?>
+        <p>該当する科目は存在しません。</p>
+
+    <?php else: ?>
+
+        <table class="management-table">
+            <thead>
+                <tr>
+                    <th class="sticky">No</th>
+                    <th class="sticky">科目番号</th>
+                    <th class="sticky">科目名</th>
+                    <th class="sticky">学科名</th>
+                    <th class="sticky">操作</th>
                 </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php $i = 1; ?>
+                <?php foreach ($subjects as $subject): ?>
+                    <tr data-subject-id="<?= htmlspecialchars($subject['subject_id']) ?>">
+                        <td><?= $i++ ?></td>
+                        <!-- 学籍番号 -->
+                        <td><?= htmlspecialchars($subject['subject_id']) ?></td>
+                        <!-- 生徒氏名 -->
+                        <td class="editable" data-field="subject_name"><?= htmlspecialchars($subject['subject_name']) ?></td>
+                        <!-- 学科名 -->
+                        <td><?= htmlspecialchars($subject['department_name']) ?></td>
+                        <!-- 編集・削除ボタン -->
+                        <td class="table-actions">
+                            <button class="edit-btn" onclick="toggleSubjectEdit(this)">編集</button>
+                            <?php if ((int)$subject['is_active'] === 1): ?>
+                                <!-- 有効な科目 -->
+                                <button type="button" class="delete-btn" data-type="subject"
+                                    data-id="<?= htmlspecialchars($subject['subject_id'], ENT_QUOTES, 'UTF-8') ?>">無効化</button>
+                            <?php else: ?>
+                                <!-- 変更：無効な科目には最有効化ボタンを配置 -->
+                                <button
+                                    type="button"
+                                    class="restore-btn"
+                                    data-type="subject"
+                                    data-id="<?= htmlspecialchars($subject['subject_id'], ENT_QUOTES, 'UTF-8') ?>"
+                                    onclick="restoreSubject(this.dataset.id)">再有効化</button>
+                            <?php endif; ?>
+                        </td>
+
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
 </div>

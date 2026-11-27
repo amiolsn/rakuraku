@@ -102,56 +102,62 @@
 </div>
 
 <div class="table_box">
-    <table class="management-table">
-        <thead>
-            <tr>
-                <th class="sticky">No</th>
-                <th class="sticky">教員番号</th>
-                <th class="sticky">教員氏名</th>
-                <th class="sticky">学科名</th>
-                <th class="sticky"></th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php $i = 1; ?>
-            <?php foreach ($teachers as $teacher): ?>
-                <tr data-teacher-id="<?= htmlspecialchars($teacher['teacher_id']) ?>">
-                    <td><?= $i++ ?></td>
-                    <!-- 学籍番号 -->
-                    <td><?= htmlspecialchars($teacher['teacher_id']) ?></td>
-                    <!-- 生徒氏名 -->
-                    <td class="editable" data-field="teacher_name"><?= htmlspecialchars($teacher['teacher_name']) ?></td>
-                    <!-- 学科名 -->
-                    <td><?= htmlspecialchars($teacher['department_name']) ?></td>
 
-                    <!-- 編集・削除ボタン -->
-                    <td class="table-actions">
-                        <button class="edit-btn" onclick="toggleTeacherEdit(this)">編集</button>
+    <?php if ($teacherCount === 0): ?>
+        <p>該当する教員は存在しません。</p>
 
-                        <?php if ((int)$teacher['is_active'] === 1): ?>
-                            <!-- 有効な教員 -->
-                            <button
-                                type="button"
-                                class="delete-btn"
-                                data-type="teacher"
-                                data-id="<?= htmlspecialchars($teacher['teacher_id'], ENT_QUOTES, 'UTF-8') ?>">
-                                無効化
-                            </button>
-                        <?php else: ?>
-                            <!-- 変更：無効な教員には再有効化ボタンを表示 -->
-                            <button
-                                type="button"
-                                class="restore-btn"
-                                data-type="teacher"
-                                data-id="<?= htmlspecialchars($teacher['teacher_id'], ENT_QUOTES, 'UTF-8') ?>"
-                                onclick="restoreTeacher(this.dataset.id)"> <!-- 変更 -->
-                                再有効化
-                            </button>
-                        <?php endif; ?>
-                    </td>
-
+    <?php else: ?>
+        <table class="management-table">
+            <thead>
+                <tr>
+                    <th class="sticky">No</th>
+                    <th class="sticky">教員番号</th>
+                    <th class="sticky">教員氏名</th>
+                    <th class="sticky">学科名</th>
+                    <th class="sticky"></th>
                 </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php $i = 1; ?>
+                <?php foreach ($teachers as $teacher): ?>
+                    <tr data-teacher-id="<?= htmlspecialchars($teacher['teacher_id']) ?>">
+                        <td><?= $i++ ?></td>
+                        <!-- 学籍番号 -->
+                        <td><?= htmlspecialchars($teacher['teacher_id']) ?></td>
+                        <!-- 生徒氏名 -->
+                        <td class="editable" data-field="teacher_name"><?= htmlspecialchars($teacher['teacher_name']) ?></td>
+                        <!-- 学科名 -->
+                        <td><?= htmlspecialchars($teacher['department_name']) ?></td>
+
+                        <!-- 編集・削除ボタン -->
+                        <td class="table-actions">
+                            <button class="edit-btn" onclick="toggleTeacherEdit(this)">編集</button>
+
+                            <?php if ((int)$teacher['is_active'] === 1): ?>
+                                <!-- 有効な教員 -->
+                                <button
+                                    type="button"
+                                    class="delete-btn"
+                                    data-type="teacher"
+                                    data-id="<?= htmlspecialchars($teacher['teacher_id'], ENT_QUOTES, 'UTF-8') ?>">
+                                    無効化
+                                </button>
+                            <?php else: ?>
+                                <!-- 変更：無効な教員には再有効化ボタンを表示 -->
+                                <button
+                                    type="button"
+                                    class="restore-btn"
+                                    data-type="teacher"
+                                    data-id="<?= htmlspecialchars($teacher['teacher_id'], ENT_QUOTES, 'UTF-8') ?>"
+                                    onclick="restoreTeacher(this.dataset.id)"> <!-- 変更 -->
+                                    再有効化
+                                </button>
+                            <?php endif; ?>
+                        </td>
+
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
 </div>

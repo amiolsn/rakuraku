@@ -233,10 +233,12 @@ function searchTeachers(PDO $pdo, ?int $department_id, array $filters = []): arr
         $params[] = '%' . $filters['teacher_id'] . '%';
     }
 
-    // 教員氏名
-    if (!empty($filters['teacher_name'])) {
-        $sql .= " AND t.teacher_name LIKE ?";
-        $params[] = '%' . $filters['teacher_name'] . '%';
+    // 教員氏名（半角・全角スペースを除去して検索） //変更11/27
+    if (isset($filters['teacher_name']) && $filters['teacher_name'] !== '') {
+        $sql .= " AND REPLACE(REPLACE(t.teacher_name, ' ', ''), '　', '') LIKE ?"; //変更11/27
+
+        $keyword = str_replace([' ', '　'], '', $filters['teacher_name']); //変更11/27
+        $params[] = '%' . $keyword . '%'; //変更11/27
     }
 
     $sql .= " ORDER BY t.teacher_id ASC";
@@ -280,9 +282,11 @@ function searchSubjects(PDO $pdo, ?int $department_id, array $filters = []): arr
     }
 
     // 科目名が検索欄に入力されている場合だけ条件を追加
-    if (!empty($filters['subject_name'])) { // 変更
-        $sql .= " AND s.subject_name LIKE ?";
-        $params[] = '%' . $filters['subject_name'] . '%';
+    if (isset($filters['subject_name']) && $filters['subject_name'] !== '') {
+        $sql .= " AND REPLACE(REPLACE(s.subject_name, ' ', ''), '　', '') LIKE ?"; //変更11/27
+
+        $keyword = str_replace([' ', '　'], '', $filters['subject_name']); //変更11/27
+        $params[] = '%' . $keyword . '%'; //変更11/27
     }
 
     $sql .= " ORDER BY s.subject_id ASC";
@@ -293,36 +297,44 @@ function searchSubjects(PDO $pdo, ?int $department_id, array $filters = []): arr
     return $stmt->fetchAll();
 }
 
+
 /**
  * 管理画面用の学科一覧・検索結果を取得する
  *
  * @param PDO $pdo
- * @param array $filters 検索条件連想配列[department_id, department_name]
+ * @param int|null $department_id 絞り込み用の学科ID
+ * @param array $filters 検索条件連想配列
  * @return array
  */
-function searchDepartments(PDO $pdo, array $filters = []): array
+function searchDepartments(PDO $pdo, ?int $department_id, array $filters = []): array
 {
     $sql = "
-SELECT
-d.department_id,
-d.user_id,
-d.department_name
-FROM department d
-WHERE 1 = 1
-";
+        SELECT
+            d.department_id,
+            d.user_id,
+            d.department_name
+        FROM department d
+        WHERE 1 = 1
+    ";
 
     $params = [];
 
-    // 学科番号が入力されている場合
-    if (isset($filters['department_id']) && $filters['department_id'] !== '') {
+    // 学科IDによる絞り込み
+    if ($department_id !== null) {
         $sql .= " AND d.department_id = ?";
-        $params[] = (int)$filters['department_id'];
+        $params[] = $department_id;
     }
 
-    // 学科名が入力されている場合
-    if (isset($filters['department_name']) && $filters['department_name'] !== '') {
-        $sql .= " AND d.department_name LIKE ?";
-        $params[] = '%' . $filters['department_name'] . '%';
+    // 学科番号による部分一致検索 //変更11/27
+    if (isset($filters['department_number']) && $filters['department_number'] !== '') {
+        $sql .= " AND CAST(d.department_id AS CHAR) LIKE ?"; //変更11/27
+        $params[] = '%' . $filters['department_number'] . '%'; //変更11/27
+    }
+
+    // 学科名による絞り込み（学科ID）
+    if (isset($filters['department_id']) && $filters['department_id'] !== '') { //変更11/27
+        $sql .= " AND d.department_id = ?"; //変更11/27
+        $params[] = (int)$filters['department_id']; //変更11/27
     }
 
     $sql .= " ORDER BY d.department_id ASC";
@@ -332,9 +344,8 @@ WHERE 1 = 1
 
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
-
 // 管理者検索
-function searchAdmins(PDO $pdo, array $filters = []): array
+function searchAdmins(PDO $pdo, ?int $department_id, array $filters = []): array
 {
     $sql = "
         SELECT
@@ -360,10 +371,10 @@ function searchAdmins(PDO $pdo, array $filters = []): array
         $params[] = '%' . $filters['teacher_id'] . '%';
     }
 
-    // 所属学科
-    if (isset($filters['department_name']) && $filters['department_name'] !== '') {
-        $sql .= " AND d.department_name = ?";
-        $params[] = $filters['department_name'];
+    // 所属学科//変更11/27
+    if ($department_id !== null) {
+        $sql .= " AND d.department_id = ?";
+        $params[] = $department_id;
     }
 
     // 教員氏名

@@ -2,7 +2,8 @@
 
 /**
  * 必要な変数:
- * @var array $departments 
+ * @var array $department_results 
+ * @var array $department_options
  */
 
 ?>
@@ -51,10 +52,15 @@
 
                 <td>
                     <div class="form-group">
-                        <label for="department_name">学科名</label>
-                        <select id="department_name" name="department_name" onchange="this.form.submit()">
+                        <label for="department_filter_id">学科名</label> <!--変更-->
+                        <select id="department_filter_id" name="department_filter_id" onchange="this.form.submit()"> <!--変更-->
                             <?php
-                            $selected_department_name = $_GET['department_name'] ?? '';
+                            //変更：GETで選択された学科IDを取得
+                            $selected_department_id = (isset($_GET['department_filter_id']) && $_GET['department_filter_id'] !== '')
+                                ? (int)$_GET['department_filter_id']
+                                : null;
+
+                            $allDepartments = $department_options;
                             include 'components/_department_options.php';
                             ?>
                         </select>
@@ -76,48 +82,54 @@
 
 
 </div>
-<?php $departmentCount = count($departments); ?>
+<?php $departmentCount = count($department_results); ?>
 <div class="result-count">
     検索結果：<?= $departmentCount ?>件
 </div>
 
 <div class="table_box">
-    <table class="management-table">
-        <thead>
-            <tr>
-                <th class="sticky">No</th>
-                <th class="sticky">学科番号</th>
 
-                <th class="sticky">学科名</th>
+    <?php if ($departmentCount === 0): ?>
+        <p>該当する学科は存在しません。</p>
 
-                <th class="sticky">操作</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php $i = 1; ?>
-            <?php foreach ($departments as $dp): ?>
-                <tr data-department-id="<?= htmlspecialchars($dp['department_id']) ?>">
-                    <td><?= $i++ ?></td>
-                    <!-- 学科番号 -->
-                    <td><?= htmlspecialchars($dp['department_id']) ?></td>
+    <?php else: ?>
+        <table class="management-table">
+            <thead>
+                <tr>
+                    <th class="sticky">No</th>
+                    <th class="sticky">学科番号</th>
 
-                    <!-- 学科名 -->
-                    <td class="editable" data-field="department_name"><?= htmlspecialchars($dp['department_name']) ?></td>
+                    <th class="sticky">学科名</th>
 
-                    <!-- 編集・削除ボタン -->
-                    <td class="table-actions">
-                        <button class="edit-btn" onclick="toggleDepartmentEdit(this)">編集</button>
-                        <button
-                            type="button"
-                            class="delete-btn"
-                            data-type="department"
-                            data-id="<?= htmlspecialchars($dp['department_id'], ENT_QUOTES, 'UTF-8') ?>">
-                            削除
-                        </button>
-                    </td>
-
+                    <th class="sticky">操作</th>
                 </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                <?php $i = 1; ?>
+                <?php foreach ($department_results as $dp): ?>
+                    <tr data-department-id="<?= htmlspecialchars($dp['department_id']) ?>">
+                        <td><?= $i++ ?></td>
+                        <!-- 学科番号 -->
+                        <td><?= htmlspecialchars($dp['department_id']) ?></td>
+
+                        <!-- 学科名 -->
+                        <td class="editable" data-field="department_name"><?= htmlspecialchars($dp['department_name']) ?></td>
+
+                        <!-- 編集・削除ボタン -->
+                        <td class="table-actions">
+                            <button class="edit-btn" onclick="toggleDepartmentEdit(this)">編集</button>
+                            <button
+                                type="button"
+                                class="delete-btn"
+                                data-type="department"
+                                data-id="<?= htmlspecialchars($dp['department_id'], ENT_QUOTES, 'UTF-8') ?>">
+                                削除
+                            </button>
+                        </td>
+
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    <?php endif; ?>
 </div>
