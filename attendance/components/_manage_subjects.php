@@ -3,6 +3,8 @@
 /**
  * 必要な変数:
  * @var array $subjects 
+ * @var bool $is_admin
+ * @var array $departments
  */
 ?>
 
@@ -59,7 +61,21 @@
                             value="<?= htmlspecialchars($_GET['subject_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                 </td>
-                <td></td>
+                <?php if ($is_admin): ?>
+                    <td>
+                        <div class="form-group">
+                            <label for="department_id">学科</label>
+                            <select id="department_id" name="department_id" onchange="this.form.submit()">
+                                <?php
+                                $allDepartments = $departments;
+                                include 'components/_department_options.php';
+                                ?>
+                            </select>
+                        </div>
+                    </td>
+                <?php else: ?>
+                    <td></td>
+                <?php endif; ?>
 
                 <td>
                     <div class="table-actions">

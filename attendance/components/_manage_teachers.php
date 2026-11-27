@@ -3,6 +3,8 @@
 /**
  * 必要な変数:
  * @var array $teachers 
+ * @var bool $is_admin
+ * @var array $departments
  */
 ?>
 
@@ -50,7 +52,7 @@
                         <label for="teacher_id">教員番号</label>
                         <input type="text" id="teacher_id" name="teacher_id" data-input-type="number"
                             inputmode="numeric"
-                            value="<?= htmlspecialchars($_GET['teacher_id'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
+                            value="<?= htmlspecialchars($_GET['teacher_id'] ?? '', ENT_QUOTES, 'UTF-8') ?>" placeholder="半角数字で入力してください">
                     </div>
                 </td>
 
@@ -61,7 +63,21 @@
                             value="<?= htmlspecialchars($_GET['teacher_name'] ?? '', ENT_QUOTES, 'UTF-8') ?>">
                     </div>
                 </td>
-                <td></td>
+                <?php if ($is_admin): ?>
+                    <td>
+                        <div class="form-group">
+                            <label for="department_id">学科</label>
+                            <select id="department_id" name="department_id" onchange="this.form.submit()">
+                                <?php
+                                $allDepartments = $departments;
+                                include 'components/_department_options.php';
+                                ?>
+                            </select>
+                        </div>
+                    </td>
+                <?php else: ?>
+                    <td></td>
+                <?php endif; ?>
 
                 </td>
                 <td>
